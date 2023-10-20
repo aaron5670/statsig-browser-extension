@@ -1,0 +1,41 @@
+name: "Build the extension"
+on:
+  pull_request:
+    # Only the following types are handled by the action, but one can default to all as well
+    types: [opened, reopened, synchronize]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Cache pnpm modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-
+
+      - uses: pnpm/action-setup@v2.2.4
+        with:
+          version: latest
+          run_install: true
+
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3.6.0
+        with:
+          node-version: 18.x
+          cache: "pnpm"
+
+      - name: Build the extension
+        run: pnpm build --zip
+
+      - name: Archive the extension production build as ZIP
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ github.sha }}-prod-build
+          path: build/chrome-mv3-prod.zip
+          retention-days: 30
