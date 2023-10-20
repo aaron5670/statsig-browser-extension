@@ -1,31 +1,55 @@
 {
   "name": "statsig-browser-extension",
-  "displayName": "Statsig browser extension",
-  "version": "0.0.1",
+  "displayName": "Statsig Features and Experimentation",
+  "version": "1.0.1",
   "description": "A browser extension for the feature management and experimentation platform Statsig.",
   "author": "(Aaron van den Berg <a.vdberg98@gmail.com>)",
+  "homepage": "https://aaronvandenberg.nl/",
   "scripts": {
     "dev": "plasmo dev",
+    "lint": "eslint --ext .ts,.tsx,.js,.jsx src/**/* --fix",
     "build": "plasmo build",
     "test": "plasmo test"
   },
   "dependencies": {
-    "plasmo": "0.82.1",
+    "@nextui-org/react": "^2.1.13",
+    "@uidotdev/usehooks": "^2.4.0",
+    "framer-motion": "^10.16.4",
+    "immer": "^10.0.3",
+    "plasmo": "0.83.0",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "react-modal-sheet": "^2.2.0",
+    "react-svg": "^16.1.29",
+    "react-tooltip": "^5.21.5",
+    "zustand": "^4.4.3"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "4.1.0",
+    "@tanstack/eslint-plugin-query": "^4.36.1",
     "@types/chrome": "0.0.243",
     "@types/node": "20.5.0",
     "@types/react": "18.2.20",
     "@types/react-dom": "18.2.7",
+    "@typescript-eslint/eslint-plugin": "^5.60.1",
+    "@typescript-eslint/parser": "^5.60.1",
+    "autoprefixer": "^10.4.15",
+    "eslint": "^8.43.0",
+    "eslint-plugin-perfectionist": "^1.4.0",
+    "eslint-plugin-react": "^7.32.2",
+    "postcss": "^8.4.28",
     "prettier": "3.0.2",
-    "typescript": "5.1.6"
+    "tailwindcss": "^3.3.3",
+    "typescript": "5.0.4"
   },
   "manifest": {
     "host_permissions": [
+      "http://*/*",
       "https://*/*"
+    ],
+    "permissions": [
+      "contextMenus",
+      "scripting"
     ]
   }
 }

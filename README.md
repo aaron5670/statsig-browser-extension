@@ -1,6 +1,36 @@
-This is a [Plasmo extension](https://docs.plasmo.com/) project bootstrapped with [`plasmo init`](https://www.npmjs.com/package/plasmo).
+# Statsig Experimentation - Chrome Extension
 
-## Getting Started
+With this extension you can test Statsig experiments by injecting custom values
+into the LocalStorage of the current page.
+
+Build with [Plasmo](https://docs.plasmo.com/).
+
+## Installation
+
+### Option 1: Chrome Web Store installation
+
+1. Install the Chromium
+   extension [here](https://chrome.google.com/webstore/detail/toggle-experiment/bfcajgcjbnmpblmomjphdaiodkfjjcdn).
+
+### Option 2: Manual build and installation
+
+1. Clone this repository locally.
+2. Install the dependencies with ``pnpm install``.
+3. Create a build with ``pnpm build``.
+4. Go in your (Chrome) browser to **chrome://extensions/**, enable **enable Developer Mode** and click on **Load
+   unpacked**.
+5. Upload the **chrome-mv3-prod** folder you just build.
+6. Enjoy! 🙂🧪
+
+### Search for experiments
+
+If you want to use this extension, you need a Statsig Console API Key.
+You can create this in the [Statsig console](https://console.statsig.com/api_keys) under **Console API Keys**.
+
+
+---
+
+## Development
 
 First, run the development server:
 
@@ -10,9 +40,8 @@ pnpm dev
 npm run dev
 ```
 
-Open your browser and load the appropriate development build. For example, if you are developing for the chrome browser, using manifest v3, use: `build/chrome-mv3-dev`.
-
-You can start editing the popup by modifying `popup.tsx`. It should auto-update as you make changes. To add an options page, simply add a `options.tsx` file to the root of the project, with a react component default exported. Likewise to add a content page, add a `content.ts` file to the root of the project, importing some module and do some logic, then reload the extension on your browser.
+Open your browser and load the appropriate development build. For example, if you are developing for the Chrome browser,
+using manifest v3, use: `build/chrome-mv3-dev`.
 
 For further guidance, [visit our Documentation](https://docs.plasmo.com/)
 
@@ -28,6 +57,19 @@ npm run build
 
 This should create a production bundle for your extension, ready to be zipped and published to the stores.
 
-## Submit to the webstores
+### Load the Extension for Chrome (Chromium)
 
-The easiest way to deploy your Plasmo extension is to use the built-in [bpp](https://bpp.browser.market) GitHub action. Prior to using this action however, make sure to build your extension and upload the first version to the store to establish the basic credentials. Then, simply follow [this setup instruction](https://docs.plasmo.com/framework/workflows/submit) and you should be on your way for automated submission!
+We plan to automate this in the future, but for the time being, these are the steps you need to take to load your
+extension in Chrome.
+
+Head over to `chrome://extensions` and enable Developer Mode.
+
+![](https://docs.plasmo.com/screenshots/developer_mode.png)
+
+Click on "Load Unpacked" and navigate to your extension's `build/chrome-mv3-dev` (or `build/chrome-mv3-prod`) directory.
+
+To see your popup, click on the puzzle piece icon on the Chrome toolbar, and click on your extension.
+
+**Pro-tip:** pin your extension to the Chrome toolbar for easy access by clicking the pin button.
+
+![](https://docs.plasmo.com/screenshots/popup_example.png)
