@@ -10,7 +10,7 @@ Build with [Plasmo](https://docs.plasmo.com/).
 ### Option 1: Chrome Web Store installation
 
 1. Install the Chromium
-   extension [here](https://chrome.google.com/webstore/detail/toggle-experiment/bfcajgcjbnmpblmomjphdaiodkfjjcdn).
+   extension [here](https://chrome.google.com/webstore/detail/statsig-features-and-expe/doialjibpidkdpdneplcnmkbdojpagdd/).
 
 ### Option 2: Manual build and installation
 
