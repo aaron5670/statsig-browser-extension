@@ -10,6 +10,13 @@ on:
     # Only the following types are handled by the action, but one can default to all as well
     types: [opened, reopened, synchronize]
 
+permissions:
+  # write permission is required to create a GitHub release
+  contents: write
+  # write permission is required for autolabeler
+  # otherwise, read permission is required at least
+  pull-requests: write
+
 jobs:
   update_release_draft:
     runs-on: ubuntu-latest
