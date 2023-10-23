@@ -1,8 +1,9 @@
 import {Button, Spinner} from "@nextui-org/react";
 import {useLocalStorage} from "@uidotdev/usehooks";
 import {ExperimentOverrides, type Override} from "~components/ExperimentOverrides";
+import {ExternalLinkIcon} from "~components/icons/ExternalLinkIcon";
 import {useStore} from "~store/useStore";
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import Sheet from 'react-modal-sheet';
 
 const ExperimentSheet = () => {
@@ -13,9 +14,9 @@ const ExperimentSheet = () => {
     setExperimentModalOpen
   } = useStore((state) => state);
   const [apiKey] = useLocalStorage("statsig-console-api-key");
-  const [isLoading, setIsLoading] = React.useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>(null);
   const [experimentOverrides, setExperimentOverrides] = React.useState<Override[]>([]);
-  const [error, setError] = React.useState<string>(null);
 
   useEffect(() => {
     const getExperimentOverrides = async () => {
@@ -55,12 +56,27 @@ const ExperimentSheet = () => {
       onClose={handleCloseSheet}
       snapPoints={[250]}
     >
-      <Sheet.Container className={'p-5'}>
+      <Sheet.Container className={'py-3 px-4'}>
         <Sheet.Header>
-          <h1 className={'text-2xl font-bold'}>Experiment</h1>
-          <p className="text-sm text-gray-700">
-            Here you can view and enable the overrides for experiment <b>{currentExperimentId}</b>.
-          </p>
+          <div className="flex justify-between">
+            <div className="max-w-[525px]">
+              <h1 className={'text-2xl font-bold'}>Experiment</h1>
+              <p className="text-sm text-gray-700">
+                Here you can view and enable the overrides for experiment: <b>{currentExperimentId}</b>.
+              </p>
+            </div>
+            <Button
+              as="a"
+              color="primary"
+              endContent={<ExternalLinkIcon color={'white'}/>}
+              href={`https://console.statsig.com/experiments/${currentExperimentId}`}
+              size="sm"
+              target="_blank"
+              variant="solid"
+            >
+              Open Statsig
+            </Button>
+          </div>
         </Sheet.Header>
         <Sheet.Content>
           <Sheet.Scroller className="flex flex-col justify-between" draggableAt="both">
@@ -75,7 +91,7 @@ const ExperimentSheet = () => {
                   <>
                     <ExperimentOverrides overrides={experimentOverrides}/>
                     <div className="flex justify-end space-x-2">
-                      <Button color="danger" onPress={handleCloseSheet} variant="bordered">
+                      <Button color="danger" onPress={handleCloseSheet} size="sm" variant="bordered">
                         Close
                       </Button>
                     </div>
