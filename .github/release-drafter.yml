@@ -33,7 +33,7 @@ version-resolver:
       - 'docs'
       - 'dependencies'
       - 'improvement'
-      - 'depenencies'
+      - 'dependencies'
 
 exclude-labels:
   - 'skip-changelog'
