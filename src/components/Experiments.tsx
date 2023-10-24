@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
+import {useLocalStorage} from "@uidotdev/usehooks";
 import {ExternalLinkIcon} from "~components/icons/ExternalLinkIcon";
 import BottomContent from "~components/table/BottomContent";
 import TopContent from "~components/table/TopContent";
@@ -33,8 +34,6 @@ const statusColorMap: Record<string, ChipProps["color"]> = {
   setup: "warning",
 };
 
-const INITIAL_VISIBLE_COLUMNS = ["name", "status", "actions"];
-
 type Experiment = {
   createdTime: number;
   creatorName: string;
@@ -49,9 +48,9 @@ type Experiment = {
 }
 
 export default function Experiments() {
+  const [visibleColumns, setVisibleColumns] = useLocalStorage("table-visible-columns", ["name", "status", "actions"]);
   const {experiments, isLoading, setCurrentExperimentId, setExperimentModalOpen} = useStore((state) => state);
   const [filterValue, setFilterValue] = useState("");
-  const [visibleColumns, setVisibleColumns] = useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
   const [statusFilter, setStatusFilter] = useState<Selection>("all");
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
@@ -63,8 +62,6 @@ export default function Experiments() {
   const hasSearchFilter = Boolean(filterValue);
 
   const headerColumns = useMemo(() => {
-    if (visibleColumns === "all") return columns;
-
     return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
   }, [visibleColumns]);
 
@@ -125,6 +122,30 @@ export default function Experiments() {
           >
             {cellValue}
           </Chip>
+        );
+      case 'allocation':
+        return (
+          <p className="capitalize border-none gap-1 text-default-600"
+             onClick={() => setCurrentExperiment(experiment.id)}>{cellValue}%</p>
+        );
+      case "tags":
+        return (
+          <div className="flex flex-wrap gap-1">
+            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+            {/* @ts-ignore*/}
+            {cellValue.map((tag: string) => (
+              <Chip
+                className="capitalize"
+                color="warning"
+                key={tag}
+                onClick={() => setCurrentExperiment(experiment.id)}
+                size="sm"
+                variant="dot"
+              >
+                {tag}
+              </Chip>
+            ))}
+          </div>
         );
       case "actions":
         return (
