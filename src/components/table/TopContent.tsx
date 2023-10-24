@@ -77,10 +77,12 @@ const TopContent = ({
               </Button>
             </DropdownTrigger>
             <DropdownMenu
+              onSelectionChange={(item) => {
+                setVisibleColumns(Array.from(item))
+              }}
               aria-label="Table Columns"
               closeOnSelect={false}
               disallowEmptySelection
-              onSelectionChange={setVisibleColumns}
               selectedKeys={visibleColumns}
               selectionMode="multiple"
             >
