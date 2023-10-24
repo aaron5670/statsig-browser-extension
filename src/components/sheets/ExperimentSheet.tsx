@@ -19,8 +19,6 @@ const ExperimentSheet = () => {
   const {error, isLoading: isLoadingOverrides, overrides} = useOverrides(currentExperimentId);
   const {experiment, isLoading: isLoadingExperiment} = useExperiment(currentExperimentId);
 
-  console.log(experiment)
-
   const handleCloseSheet = () => {
     setExperimentModalOpen(false);
   }
