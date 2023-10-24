@@ -23,7 +23,7 @@ export const ExperimentOverrides = ({overrides}: Props) => {
   if (!overrides.length) {
     return (
       <div className="flex flex-col items-center justify-center gap-2">
-        <p className="text-sm text-gray-700 text-center mt-5 mb-1">
+        <p className="text-sm text-gray-700 text-center mb-1">
           <span className="font-semibold">No overrides found.</span><br/>
           <i>You can create overrides for this experiment in the Statsig Console.</i>
         </p>
@@ -51,9 +51,12 @@ export const ExperimentOverrides = ({overrides}: Props) => {
 
   return (
     <div>
-      <h3 className="text-lg font-bold mt-5">Experiment overrides</h3>
+      <h3 className="text-lg font-bold">Experiment overrides</h3>
+      <p className="text-sm text-gray-700">
+        Here you can view and inject an override to your local storage.
+      </p>
       <div className="flex flex-wrap gap-2 mt-2">
-        {overrides?.map((override) => (
+        {overrides.map((override) => (
           <Fragment key={override.ids[0]}>
             <Button
               color={override.groupID === 'Control' ? 'default' : 'success'}
