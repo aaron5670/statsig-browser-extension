@@ -1,31 +1,37 @@
 import {Button, ScrollShadow, Spinner} from "@nextui-org/react";
-import {ExperimentOverrides} from "~components/ExperimentOverrides";
 import {HypothesisSection} from "~components/HypothesisSection";
+import {ExperimentOverrides} from "~components/experiment/ExperimentOverrides";
 import {ExternalLinkIcon} from "~components/icons/ExternalLinkIcon";
-import {useExperiment} from "~hooks/useExperiments";
+import {useExperiment} from "~hooks/useExperiment";
 import {useOverrides} from "~hooks/useOverrides";
 import {useStore} from "~store/useStore";
 import React from 'react';
-import {AiOutlineClose} from "react-icons/ai";
+import {AiOutlineSetting} from "react-icons/ai";
 import Sheet from 'react-modal-sheet';
 import {Tooltip} from "react-tooltip";
 
 const ExperimentSheet = () => {
   const {
     currentExperimentId,
-    isExperimentModalOpen,
-    setExperimentModalOpen
+    isExperimentSheetOpen,
+    setExperimentSheetOpen,
+    setManageExperimentModalOpen
   } = useStore((state) => state);
   const {error, isLoading: isLoadingOverrides, overrides} = useOverrides(currentExperimentId);
   const {experiment, isLoading: isLoadingExperiment} = useExperiment(currentExperimentId);
 
   const handleCloseSheet = () => {
-    setExperimentModalOpen(false);
-  }
+    setExperimentSheetOpen(false);
+  };
+
+  const handleOpenExperimentSettings = () => {
+    setExperimentSheetOpen(false);
+    setManageExperimentModalOpen(true);
+  };
 
   return (
     <Sheet
-      isOpen={isExperimentModalOpen}
+      isOpen={isExperimentSheetOpen}
       onClose={handleCloseSheet}
       snapPoints={[250]}
     >
@@ -38,7 +44,7 @@ const ExperimentSheet = () => {
               ) : (
                 <>
                   <h1
-                    className="text-xl font-bold truncate cursor-pointer"
+                    className="text-xl font-bold cursor-pointer"
                     data-tooltip-id="copy-key-tooltip"
                     onClick={() => navigator.clipboard.writeText(currentExperimentId)}
                   >
@@ -64,10 +70,16 @@ const ExperimentSheet = () => {
                 target="_blank"
                 variant="solid"
               >
-                Open Statsig
+                Statsig
               </Button>
-              <Button color="danger" isIconOnly onPress={handleCloseSheet} size="sm" variant="ghost">
-                <AiOutlineClose/>
+              <Button
+                color="warning"
+                endContent={<AiOutlineSetting size={18}/>}
+                onPress={handleOpenExperimentSettings}
+                size="sm"
+                variant="solid"
+              >
+                Settings
               </Button>
             </div>
           </div>
@@ -94,7 +106,7 @@ const ExperimentSheet = () => {
       </Sheet.Container>
       <Sheet.Backdrop onTap={handleCloseSheet}/>
     </Sheet>
-  )
-}
+  );
+};
 
-export default ExperimentSheet
+export default ExperimentSheet;

@@ -15,6 +15,7 @@ const TopContent = ({
                       hasSearchFilter,
                       onRowsPerPageChange,
                       onSearchChange,
+                      rowsPerPage,
                       setFilterValue,
                       setStatusFilter,
                       setVisibleColumns,
@@ -51,7 +52,7 @@ const TopContent = ({
             </DropdownTrigger>
             <DropdownMenu
               onSelectionChange={(item) => {
-                setStatusFilter(item)
+                setStatusFilter(item);
               }}
               aria-label="Table Columns"
               closeOnSelect={false}
@@ -78,7 +79,7 @@ const TopContent = ({
             </DropdownTrigger>
             <DropdownMenu
               onSelectionChange={(item) => {
-                setVisibleColumns(Array.from(item))
+                setVisibleColumns(Array.from(item));
               }}
               aria-label="Table Columns"
               closeOnSelect={false}
@@ -112,6 +113,7 @@ const TopContent = ({
           <select
             className="bg-transparent outline-none text-default-400 text-small"
             onChange={onRowsPerPageChange}
+            value={rowsPerPage}
           >
             <option value="5">5</option>
             <option value="10">10</option>
@@ -127,6 +129,7 @@ const TopContent = ({
   visibleColumns,
   onSearchChange,
   onRowsPerPageChange,
+  rowsPerPage,
   experiments.length,
   hasSearchFilter,
 ]);

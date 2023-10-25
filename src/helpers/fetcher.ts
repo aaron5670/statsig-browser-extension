@@ -5,5 +5,5 @@ export const fetcher = (url: string) => {
     headers: {
       'STATSIG-API-KEY': apiKey.replaceAll('"', ''),
     }
-  }).then((res) => res.json())
+  }).then((res) => res.json());
 };

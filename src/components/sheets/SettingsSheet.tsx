@@ -1,24 +1,25 @@
-import {Button, Input} from "@nextui-org/react";
+import {Button, Input, Radio, RadioGroup} from "@nextui-org/react";
 import {useLocalStorage} from "@uidotdev/usehooks";
 import {useStore} from "~store/useStore";
 import React from 'react';
 import Sheet from 'react-modal-sheet';
 
 const SettingsSheet = () => {
-  const {isSettingsModalOpen, setSettingsModalOpen} = useStore((state) => state);
+  const {isSettingsSheetOpen, setSettingsSheetOpen} = useStore((state) => state);
   const [localStorageValue, setLocalStorageKey] = useLocalStorage("statsig-local-storage-key", null);
+  const [typeApiKey, setTypeApiKey] = useLocalStorage("statsig-type-api-key", 'read-key');
   const [value, setValue] = React.useState(localStorageValue);
 
   const handleSave = () => {
     setLocalStorageKey(value);
-    setSettingsModalOpen(false);
-  }
+    setSettingsSheetOpen(false);
+  };
 
   return (
     <Sheet
-      isOpen={isSettingsModalOpen}
-      onClose={() => setSettingsModalOpen(false)}
-      snapPoints={[250]}
+      isOpen={isSettingsSheetOpen}
+      onClose={() => setSettingsSheetOpen(false)}
+      snapPoints={[290]}
     >
       <Sheet.Container className={'p-5'}>
         <Sheet.Header>
@@ -27,19 +28,33 @@ const SettingsSheet = () => {
             Here you can set your local storage key that will be used on the website to identify the user.
           </p>
         </Sheet.Header>
-        <Sheet.Content className="flex flex-col justify-between mt-7" disableDrag>
+        <Sheet.Content className="flex flex-col justify-between gap-2 mt-6" disableDrag>
           <Input
             description="For example: 'FEATURE_MANAGEMENT_USER_ID'"
             label="Local storage key"
             onChange={(event => setValue(event.target.value))}
             placeholder="Enter a local storage key"
+            size="sm"
             type="text"
             value={value}
             variant="flat"
           />
 
+          <RadioGroup
+            className="mt-3"
+            description="NOTE: Write functionality is still in development!"
+            label="What type of Statsig Console key are you using?"
+            onValueChange={setTypeApiKey}
+            orientation="horizontal"
+            size="sm"
+            value={typeApiKey}
+          >
+            <Radio value="read-key">Read-only</Radio>
+            <Radio value="write-key">Read and write</Radio>
+          </RadioGroup>
+
           <div className="flex justify-end space-x-2">
-            <Button color="danger" onPress={() => setSettingsModalOpen(false)} variant="light">
+            <Button color="danger" onPress={() => setSettingsSheetOpen(false)} variant="light">
               Close
             </Button>
             <Button color="primary" onPress={handleSave}>
@@ -48,9 +63,9 @@ const SettingsSheet = () => {
           </div>
         </Sheet.Content>
       </Sheet.Container>
-      <Sheet.Backdrop onTap={() => setSettingsModalOpen(false)}/>
+      <Sheet.Backdrop onTap={() => setSettingsSheetOpen(false)}/>
     </Sheet>
-  )
-}
+  );
+};
 
-export default SettingsSheet
+export default SettingsSheet;
