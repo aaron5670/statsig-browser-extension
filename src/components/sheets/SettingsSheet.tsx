@@ -19,7 +19,7 @@ const SettingsSheet = () => {
     <Sheet
       isOpen={isSettingsSheetOpen}
       onClose={() => setSettingsSheetOpen(false)}
-      snapPoints={[290]}
+      snapPoints={[315]}
     >
       <Sheet.Container className={'p-5'}>
         <Sheet.Header>
