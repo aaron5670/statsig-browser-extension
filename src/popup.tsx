@@ -35,7 +35,7 @@ function IndexPopup() {
   return (
     <NextUIProvider>
       <SWRConfig>
-        <div className="w-[700px] min-h-[355px]">
+        <div className="w-[700px] min-h-[410px]">
           <Navbar>
             <NavbarBrand>
               <img alt="Statsig logo" src={statsigLogo} width={125}/>
