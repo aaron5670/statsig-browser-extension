@@ -1,3 +1,4 @@
+import type {Experiment} from "~types/statsig";
 import type {ChangeEvent, Key} from "react";
 
 import {
@@ -20,8 +21,9 @@ import {
 } from "@nextui-org/react";
 import {useLocalStorage} from "@uidotdev/usehooks";
 import {ExternalLinkIcon} from "~components/icons/ExternalLinkIcon";
-import BottomContent from "~components/table/BottomContent";
-import TopContent from "~components/table/TopContent";
+import BottomContent from "~components/tables/BottomContent";
+import TopContent from "~components/tables/TopContent";
+import {useExperiments} from "~hooks/useExperiments";
 import {useStore} from "~store/useStore";
 import React, {useCallback, useMemo, useState} from "react";
 
@@ -34,25 +36,13 @@ const statusColorMap: Record<string, ChipProps["color"]> = {
   setup: "warning",
 };
 
-type Experiment = {
-  createdTime: number;
-  creatorName: string;
-  description: string;
-  endTime: number;
-  hypothesis: string;
-  id: string;
-  name: string;
-  startTime: number;
-  status: string;
-  tags: string[];
-}
-
 export default function Experiments() {
+  const {experiments, isLoading} = useExperiments();
   const [visibleColumns, setVisibleColumns] = useLocalStorage("table-visible-columns", ["name", "status", "actions"]);
-  const {experiments, isLoading, setCurrentExperimentId, setExperimentModalOpen} = useStore((state) => state);
+  const [rowsPerPage, setRowsPerPage] = useLocalStorage("table-rows-per-page", 5);
+  const {setCurrentExperimentId, setExperimentSheetOpen} = useStore((state) => state);
   const [filterValue, setFilterValue] = useState("");
   const [statusFilter, setStatusFilter] = useState<Selection>("all");
-  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
     column: "status",
     direction: "ascending",
@@ -66,16 +56,16 @@ export default function Experiments() {
   }, [visibleColumns]);
 
   const filteredItems = useMemo(() => {
-    let filteredExperiments: Experiment[] = [...experiments];
+    let filteredExperiments = [...experiments];
 
     if (hasSearchFilter) {
-      filteredExperiments = filteredExperiments.filter((user) =>
-        user.name.toLowerCase().includes(filterValue.toLowerCase()),
+      filteredExperiments = filteredExperiments.filter((experiment) =>
+        experiment.name.toLowerCase().includes(filterValue.toLowerCase()),
       );
     }
     if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
-      filteredExperiments = filteredExperiments.filter((user) =>
-        Array.from(statusFilter).includes(user.status),
+      filteredExperiments = filteredExperiments.filter((experiment) =>
+        Array.from(statusFilter).includes(experiment.status),
       );
     }
     return filteredExperiments;
@@ -90,7 +80,7 @@ export default function Experiments() {
 
   const setCurrentExperiment = (experimentId: string) => {
     setCurrentExperimentId(experimentId);
-    setExperimentModalOpen(true);
+    setExperimentSheetOpen(true);
   };
 
   const sortedItems = () => {
@@ -125,8 +115,12 @@ export default function Experiments() {
         );
       case 'allocation':
         return (
-          <p className="capitalize border-none gap-1 text-default-600"
-             onClick={() => setCurrentExperiment(experiment.id)}>{cellValue}%</p>
+          <p
+            className="capitalize border-none gap-1 text-default-600"
+             onClick={() => setCurrentExperiment(experiment.id)}
+          >
+            {cellValue}%
+          </p>
         );
       case "tags":
         return (
@@ -212,6 +206,7 @@ export default function Experiments() {
         hasSearchFilter={hasSearchFilter}
         onRowsPerPageChange={onRowsPerPageChange}
         onSearchChange={onSearchChange}
+        rowsPerPage={rowsPerPage}
         setFilterValue={setFilterValue}
         setStatusFilter={setStatusFilter}
         setVisibleColumns={setVisibleColumns}

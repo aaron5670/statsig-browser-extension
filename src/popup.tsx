@@ -5,59 +5,37 @@ import {useLocalStorage} from "@uidotdev/usehooks";
 import Experiments from "~components/Experiments";
 import {SettingsIcon} from "~components/icons/SettingsIcon";
 import LoginModal from "~components/modals/LoginModal";
+import {ManageExperimentModal} from "~components/modals/ManageExperimentModal";
 import ExperimentSheet from "~components/sheets/ExperimentSheet";
 import SettingsSheet from "~components/sheets/SettingsSheet";
 import {useStore} from "~store/useStore";
-import statsigLogo from "data-base64:./statsig-logo.svg"
+import statsigLogo from "data-base64:./statsig-logo.svg";
 import React, {useEffect} from "react";
-import {SWRConfig} from "swr";
+import {SWRConfig, mutate} from "swr";
 
 import './main.css';
 
 function IndexPopup() {
-  const {setAuthModalOpen, setExperiments, setLoading, setSettingsModalOpen} = useStore((state) => state)
+  const {setAuthModalOpen, setSettingsSheetOpen} = useStore((state) => state);
   const [apiKey, setApiKey]: [string, any] = useLocalStorage("statsig-console-api-key");
 
   useEffect(() => {
-    setLoading(true);
-    const getExperiments = async () => {
-      const response = await fetch("https://statsigapi.net/console/v1/experiments", {
-        headers: {
-          'STATSIG-API-KEY': apiKey,
-        }
-      });
-
-      const data = await response.json();
-      if (data?.status) {
-        setApiKey("");
-        setAuthModalOpen(true);
-      }
-
-      if (data?.data) {
-        setExperiments(data.data);
-      }
-    }
-
     // if there is no api key, open the auth modal
     if (!apiKey || apiKey === "") {
       setAuthModalOpen(true);
-    } else {
-      setTimeout(() => {
-        getExperiments();
-      }, 300);
     }
   }, []);
 
   const handleLogout = () => {
     setApiKey("");
     setAuthModalOpen(true);
-    setExperiments([]);
-  }
+    return mutate("https://statsigapi.net/console/v1/experiments", []);
+  };
 
   return (
     <NextUIProvider>
       <SWRConfig>
-        <div className="w-[700px] min-h-[455px]">
+        <div className="w-[700px] min-h-[355px]">
           <Navbar>
             <NavbarBrand>
               <img alt="Statsig logo" src={statsigLogo} width={125}/>
@@ -70,7 +48,7 @@ function IndexPopup() {
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu aria-label="Static Actions">
-                  <DropdownItem key="Settings" onClick={() => setSettingsModalOpen(true)}>
+                  <DropdownItem key="Settings" onClick={() => setSettingsSheetOpen(true)}>
                     Settings
                   </DropdownItem>
                   <DropdownItem className="text-danger" color="danger" key="delete" onClick={handleLogout}>
@@ -84,13 +62,14 @@ function IndexPopup() {
           <div className="container mx-auto">
             <SettingsSheet/>
             <ExperimentSheet/>
+            <ManageExperimentModal/>
             <LoginModal/>
             <Experiments/>
           </div>
         </div>
       </SWRConfig>
     </NextUIProvider>
-  )
+  );
 }
 
-export default IndexPopup
+export default IndexPopup;

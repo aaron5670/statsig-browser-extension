@@ -7,17 +7,19 @@
         "eslint:recommended",
         "plugin:@typescript-eslint/recommended",
         "plugin:react/recommended",
-        "plugin:perfectionist/recommended-natural",
-        "plugin:@tanstack/eslint-plugin-query/recommended"
+        "plugin:perfectionist/recommended-natural"
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "ecmaVersion": "latest",
-        "sourceType": "module"
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "jsx": true
+        }
     },
     "plugins": [
-        "perfectionist",
-        "@tanstack/query"
+        "react",
+        "perfectionist"
     ],
     "rules": {
         "perfectionist/sort-objects": [
@@ -26,6 +28,12 @@
                 "type": "natural",
                 "order": "asc"
             }
-        ]
+        ],
+        "semi": [2, "always"]
+    },
+    "settings": {
+        "react": {
+            "version": "detect"
+        }
     }
 }

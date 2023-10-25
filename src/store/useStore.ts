@@ -1,31 +1,27 @@
-import { create } from 'zustand'
+import { create } from 'zustand';
 
 interface FieldState {
   currentExperimentId: string;
-  experiments: [];
   isAuthModalOpen: boolean;
-  isExperimentModalOpen: boolean;
-  isLoading: boolean;
-  isSettingsModalOpen: boolean;
+  isExperimentSheetOpen: boolean;
+  isManageExperimentModalOpen: boolean;
+  isSettingsSheetOpen: boolean;
   setAuthModalOpen: (isAuthModalOpen: boolean) => void;
   setCurrentExperimentId: (currentExperimentId: string) => void;
-  setExperimentModalOpen: (isExperimentModalOpen: boolean) => void;
-  setExperiments: (experiments: []) => void;
-  setLoading: (isLoaded: boolean) => void;
-  setSettingsModalOpen: (isSettingsModalOpen: boolean) => void;
+  setExperimentSheetOpen: (isExperimentModalOpen: boolean) => void;
+  setManageExperimentModalOpen: (isManageExperimentModalOpen: boolean) => void;
+  setSettingsSheetOpen: (isSettingsModalOpen: boolean) => void;
 }
 
 export const useStore = create<FieldState>((set) => ({
   currentExperimentId: null,
-  experiments: [],
   isAuthModalOpen: false,
-  isExperimentModalOpen: false,
-  isLoading: true,
-  isSettingsModalOpen: false,
+  isExperimentSheetOpen: false,
+  isManageExperimentModalOpen: false,
+  isSettingsSheetOpen: false,
   setAuthModalOpen: (isAuthModalOpen) => set(() => ({ isAuthModalOpen })),
   setCurrentExperimentId: (currentExperimentId) => set(() => ({ currentExperimentId })),
-  setExperimentModalOpen: (isExperimentModalOpen) => set(() => ({ isExperimentModalOpen })),
-  setExperiments: (experiments) => set(() => ({ experiments })),
-  setLoading: (isLoaded) => set(() => ({ isLoading: isLoaded })),
-  setSettingsModalOpen: (isSettingsModalOpen) => set(() => ({ isSettingsModalOpen })),
-}))
+  setExperimentSheetOpen: (isExperimentModalOpen) => set(() => ({ isExperimentSheetOpen: isExperimentModalOpen })),
+  setManageExperimentModalOpen: (isManageExperimentModalOpen) => set(() => ({ isManageExperimentModalOpen })),
+  setSettingsSheetOpen: (isSettingsModalOpen) => set(() => ({ isSettingsSheetOpen: isSettingsModalOpen })),
+}));

@@ -1,6 +1,6 @@
 import {Button} from "@nextui-org/react";
 import {useLocalStorage} from "@uidotdev/usehooks";
-import {ExternalLinkIcon} from "~components/icons/ExternalLinkIcon";
+import {NoOverridesSection} from "~components/experiment/NoOverridesSection";
 import {updateLocalStorageValue} from "~handlers/localStorageHandlers";
 import {useStore} from "~store/useStore";
 import React, {Fragment} from "react";
@@ -21,26 +21,7 @@ export const ExperimentOverrides = ({overrides}: Props) => {
   const [localStorageValue] = useLocalStorage("statsig-local-storage-key");
 
   if (!overrides.length) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-2">
-        <p className="text-sm text-gray-700 text-center mb-1">
-          <span className="font-semibold">No overrides found.</span><br/>
-          <i>You can create overrides for this experiment in the Statsig Console.</i>
-        </p>
-
-        <Button
-          as="a"
-          color="primary"
-          endContent={<ExternalLinkIcon color={'white'}/>}
-          href={`https://console.statsig.com/experiments/${currentExperimentId}/setup`}
-          size="sm"
-          target="_blank"
-          variant="solid"
-        >
-          Manage overrides
-        </Button>
-      </div>
-    )
+    return <NoOverridesSection experimentationId={currentExperimentId}/>;
   }
 
   const saveToLocalStorage = (value: string) => {
@@ -79,4 +60,4 @@ export const ExperimentOverrides = ({overrides}: Props) => {
       </div>
     </div>
   );
-}
+};
