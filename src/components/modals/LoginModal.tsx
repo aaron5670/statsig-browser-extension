@@ -10,10 +10,11 @@ import {
 } from "@nextui-org/react";
 import {useLocalStorage} from "@uidotdev/usehooks";
 import {useStore} from "~store/useStore";
-import React from "react";
+import React, {useState} from "react";
 
 const LoginModal = () => {
-  const [errorMessage, setErrorMessage] = React.useState<string>(null);
+  const [errorMessage, setErrorMessage] = useState<string>(null);
+  const [isLoading, setLoading] = useState(false);
   const {isAuthModalOpen, setAuthModalOpen, setExperiments, setSettingsModalOpen} = useStore((state) => state)
   const [apiKey, setApiKey] = useLocalStorage("statsig-console-api-key", "");
 
@@ -25,23 +26,30 @@ const LoginModal = () => {
   });
 
   const handleLogin = async () => {
-    const response = await fetch("https://statsigapi.net/console/v1/experiments", {
-      headers: {
-        'STATSIG-API-KEY': apiKey,
+    try {
+      setLoading(true);
+      const response = await fetch("https://statsigapi.net/console/v1/experiments", {
+        headers: {
+          'STATSIG-API-KEY': apiKey,
+        }
+      });
+
+      const data = await response.json();
+      if (data?.status === 401) {
+        setErrorMessage("Invalid Statsig Console API Key, please try again with a valid key.");
+      } else if (data?.status) {
+        setErrorMessage("An unknown error occurred, please try again.");
       }
-    });
 
-    const data = await response.json();
-    if (data?.status === 401) {
-      setErrorMessage("Invalid Statsig Console API Key, please try again with a valid key.");
-    } else if (data?.status) {
+      setLoading(false);
+      if (data?.data) {
+        setExperiments(data.data);
+        setAuthModalOpen(false);
+        setSettingsModalOpen(true);
+      }
+    } catch (e) {
+      setLoading(false);
       setErrorMessage("An unknown error occurred, please try again.");
-    }
-
-    if (data?.data) {
-      setExperiments(data.data);
-      setAuthModalOpen(false);
-      setSettingsModalOpen(true);
     }
   }
 
@@ -73,7 +81,7 @@ const LoginModal = () => {
             value={apiKey}
             variant="flat"
           />
-          <Button color="primary" onClick={handleLogin} style={{height: 56}}>
+          <Button color="primary" isLoading={isLoading} onClick={handleLogin} style={{height: 56}}>
             Login
           </Button>
         </ModalFooter>
