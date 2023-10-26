@@ -1,20 +1,17 @@
 import {
-  Button,
   Modal,
   ModalBody,
   ModalContent,
   Tab, Tabs,
   useDisclosure
 } from "@nextui-org/react";
-import GroupsTable from "~components/tables/GroupsTable";
-import OverridesTable from "~components/tables/OverridesTable";
-import {useExperiment} from "~hooks/useExperiment";
+import {GroupsSection} from "~components/modals/manage-experiment/GroupsSection";
+import {OverridesSection} from "~components/modals/manage-experiment/OverridesSection";
 import {useStore} from "~store/useStore";
 import React, {useState} from "react";
 
 export const ManageExperimentModal = () => {
   const {currentExperimentId, isManageExperimentModalOpen, setExperimentSheetOpen, setManageExperimentModalOpen} = useStore((state) => state);
-  const {experiment} = useExperiment(currentExperimentId);
   const [selected, setSelected] = useState("login");
 
   const {isOpen, onOpenChange} = useDisclosure({
@@ -52,20 +49,10 @@ export const ManageExperimentModal = () => {
             selectedKey={selected}
           >
             <Tab key="groups" title="Groups">
-              <div className="flex flex-col justify-between gap-4">
-                <GroupsTable groups={experiment?.groups}/>
-                <Button color="primary" fullWidth onPress={handleCloseModal} size="md">
-                  Close modal
-                </Button>
-              </div>
+              <GroupsSection/>
             </Tab>
             <Tab key="overrides" title="Overrides">
-              <div className="flex flex-col justify-between gap-4">
-                <OverridesTable/>
-                <Button color="primary" fullWidth onPress={handleCloseModal} size="md">
-                  Close modal
-                </Button>
-              </div>
+              <OverridesSection/>
             </Tab>
           </Tabs>
         </ModalBody>

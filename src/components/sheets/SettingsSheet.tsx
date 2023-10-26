@@ -19,7 +19,7 @@ const SettingsSheet = () => {
     <Sheet
       isOpen={isSettingsSheetOpen}
       onClose={() => setSettingsSheetOpen(false)}
-      snapPoints={[315]}
+      snapPoints={[295]}
     >
       <Sheet.Container className={'p-5'}>
         <Sheet.Header>
@@ -42,7 +42,6 @@ const SettingsSheet = () => {
 
           <RadioGroup
             className="mt-3"
-            description="NOTE: Write functionality is still in development!"
             label="What type of Statsig Console key are you using?"
             onValueChange={setTypeApiKey}
             orientation="horizontal"

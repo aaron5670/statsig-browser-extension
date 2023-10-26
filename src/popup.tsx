@@ -1,13 +1,14 @@
+import {Dropdown, DropdownItem, DropdownMenu, DropdownTrigger} from "@nextui-org/react";
 import {NextUIProvider} from "@nextui-org/react";
 import {Button, Navbar, NavbarBrand, NavbarItem} from "@nextui-org/react";
-import {Dropdown, DropdownItem, DropdownMenu, DropdownTrigger} from "@nextui-org/react";
 import {useLocalStorage} from "@uidotdev/usehooks";
 import Experiments from "~components/Experiments";
 import {SettingsIcon} from "~components/icons/SettingsIcon";
 import LoginModal from "~components/modals/LoginModal";
-import {ManageExperimentModal} from "~components/modals/ManageExperimentModal";
+import {ManageExperimentModal} from "~components/modals/manage-experiment/ManageExperimentModal";
 import ExperimentSheet from "~components/sheets/ExperimentSheet";
 import SettingsSheet from "~components/sheets/SettingsSheet";
+import {fetcher} from "~helpers/fetcher";
 import {useStore} from "~store/useStore";
 import statsigLogo from "data-base64:./statsig-logo.svg";
 import React, {useEffect} from "react";
@@ -34,7 +35,7 @@ function IndexPopup() {
 
   return (
     <NextUIProvider>
-      <SWRConfig>
+      <SWRConfig value={{fetcher}}>
         <div className="w-[700px] min-h-[410px]">
           <Navbar>
             <NavbarBrand>

@@ -3,23 +3,23 @@ import type {Key} from "react";
 
 import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip} from "@nextui-org/react";
 import {useLocalStorage} from "@uidotdev/usehooks";
+import {deleteOverride} from "~handlers/deleteOverride";
 import {useOverrides} from "~hooks/useOverrides";
 import {useStore} from "~store/useStore";
 import React, {useCallback} from "react";
+import useSWRMutation from "swr/mutation";
 
 import {DeleteIcon} from "../icons/DeleteIcon";
-import {EditIcon} from "../icons/EditIcon";
 
-/**
- * TODO: Add edit and delete functionality
- */
 export default function OverridesTable() {
-  const {currentExperimentId} = useStore((state) => state);
-  const {overrides} = useOverrides(currentExperimentId);
   const [typeApiKey] = useLocalStorage("statsig-type-api-key", 'read-key');
+  const currentExperimentId = useStore((state) => state.currentExperimentId);
+  const {overrides} = useOverrides(currentExperimentId);
+
+  const {trigger} = useSWRMutation(`/experiments/${currentExperimentId}/overrides`, deleteOverride);
 
   const columns = [
-    {name: "ID", uid: "ids"},
+    {name: "IDs", uid: "ids"},
     {name: "OVERRIDE", uid: "groupID"},
     {name: "ENVIRONMENT", uid: "environment"},
     ...(typeApiKey === 'read-key' ? [] : [{name: "ACTIONS", uid: "actions"}])
@@ -27,37 +27,47 @@ export default function OverridesTable() {
 
   const renderCell = useCallback((override: Override, columnKey: Key) => {
     const cellValue = override[columnKey as keyof Override];
-
     switch (columnKey) {
-      case "actions":
-        if (typeApiKey === 'read-key') return null;
+      case 'ids':
         return (
-          <div className="relative flex items-center gap-2">
-            <Tooltip
-              closeDelay={0}
-              // content="Edit override"
-              content="Comming soon"
-            >
-              <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                <EditIcon/>
-              </span>
-            </Tooltip>
-            <Tooltip
-              color="danger"
-              // content="Delete group"
-              content="Comming soon"
-            >
-              <span className="text-lg text-danger cursor-pointer active:opacity-50">
-                <DeleteIcon/>
-              </span>
-            </Tooltip>
-          </div>
+          <p className="capitalize border-none gap-1 text-default-600">
+            {typeof cellValue === 'string' ? cellValue : cellValue.join(', ')}
+          </p>
         );
       case 'environment':
         return (
           <p className="capitalize border-none gap-1 text-default-600">
-            {cellValue === null ? "All environments" : cellValue}
+            {!cellValue ? "All environments" : cellValue}
           </p>
+        );
+      case "actions":
+        if (typeApiKey === 'read-key') return null;
+        return (
+          <div className="flex items-center">
+            <Tooltip color="danger" content="Delete override">
+              <p
+                onClick={() => trigger({experimentId: currentExperimentId, override}, {
+                  optimisticData: current => {
+                    const userIDOverrides = current?.data?.userIDOverrides || [];
+
+                    return {
+                      ...current,
+                      data: {
+                        ...current?.data,
+                        userIDOverrides: [
+                          // eslint-disable-next-line no-unsafe-optional-chaining
+                          ...userIDOverrides?.filter((item: Override) => item.ids !== override.ids)
+                        ]
+                      }
+                    };
+                  },
+                })}
+                className="text-lg text-danger cursor-pointer active:opacity-50"
+              >
+                <DeleteIcon/>
+              </p>
+            </Tooltip>
+          </div>
         );
       default:
         return cellValue;
@@ -65,7 +75,7 @@ export default function OverridesTable() {
   }, []);
 
   return (
-    <Table aria-label="Groups table" classNames={{th: [""]}}>
+    <Table aria-label="Groups table" classNames={{emptyWrapper: 'h-full pt-2'}}>
       <TableHeader columns={columns}>
         {(column) => (
           <TableColumn align={column.uid === "actions" ? "center" : "start"} key={column.uid}>
@@ -73,7 +83,7 @@ export default function OverridesTable() {
           </TableColumn>
         )}
       </TableHeader>
-      <TableBody items={overrides}>
+      <TableBody emptyContent={<p>No overrides found...</p>} items={overrides}>
         {(item) => (
           <TableRow key={item.ids[0]}>
             {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
