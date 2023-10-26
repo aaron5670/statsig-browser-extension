@@ -1,37 +1,59 @@
 import type {Group} from "~types/statsig";
 
-import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from "@nextui-org/react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
+  Tooltip
+} from "@nextui-org/react";
+import {EditIcon} from "@nextui-org/shared-icons";
+import {useLocalStorage} from "@uidotdev/usehooks";
+import {useExperiment} from "~hooks/useExperiment";
+import {useStore} from "~store/useStore";
 import React, {type Key, useCallback} from "react";
 
-const columns = [
-  {name: "NAME", uid: "name"},
-  {name: "SIZE", uid: "size"},
-  // {name: "ACTIONS", uid: "actions"},
-];
+interface Props {
+  changeView: () => void;
+  setCurrentGroup: (group?: Group) => void;
+}
 
-/**
- * TODO: Add edit and delete functionality
- */
-export default function GroupsTable({groups}: { groups: Group[] }) {
+export default function GroupsTable({changeView, setCurrentGroup}: Props) {
+  const [typeApiKey] = useLocalStorage("statsig-type-api-key", 'read-key');
+  const {currentExperimentId} = useStore((state) => state);
+  const {experiment} = useExperiment(currentExperimentId);
+  const {groups} = experiment;
+
+  const columns = [
+    {name: "NAME", uid: "name"},
+    {name: "SIZE", uid: "size"},
+    ...(typeApiKey === 'read-key' ? [] : [{name: "ACTIONS", uid: "actions"}])
+  ];
+
+  const updateGroup = (group: Group) => {
+    setCurrentGroup(group);
+    changeView();
+  };
+
   const renderCell = useCallback((group: Group, columnKey: Key) => {
     const cellValue = group[columnKey as keyof Group];
 
     switch (columnKey) {
-      // case "actions":
-      //   return (
-      //     <div className="relative flex items-center gap-2">
-      //       <Tooltip content="Edit group">
-      //         <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-      //           <EditIcon />
-      //         </span>
-      //       </Tooltip>
-      //       <Tooltip color="danger" content="Delete group">
-      //         <span className="text-lg text-danger cursor-pointer active:opacity-50">
-      //           <DeleteIcon />
-      //         </span>
-      //       </Tooltip>
-      //     </div>
-      //   );
+      case "actions":
+        return (
+          <div className="flex items-center">
+            <Tooltip content="Edit group">
+              <div
+                className="text-lg text-default-400 cursor-pointer active:opacity-50"
+                onClick={() => updateGroup(group)}
+              >
+                <EditIcon />
+              </div>
+            </Tooltip>
+          </div>
+        );
       case 'size':
         return (
           <p className="capitalize border-none gap-1 text-default-600">

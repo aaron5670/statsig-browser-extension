@@ -15,5 +15,10 @@ export interface Experiment {
 export interface Group {
   id: string;
   name: string;
+  parameterValues: ParameterValue;
   size: number;
+}
+
+interface ParameterValue {
+  [key: string]: boolean | number | string;
 }

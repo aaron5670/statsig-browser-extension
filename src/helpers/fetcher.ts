@@ -1,9 +1,12 @@
-export const fetcher = (url: string) => {
-  const apiKey = localStorage.getItem('statsig-console-api-key');
+import axios from 'axios';
 
-  return fetch(url, {
-    headers: {
-      'STATSIG-API-KEY': apiKey.replaceAll('"', ''),
-    }
-  }).then((res) => res.json());
-};
+const apiKey = localStorage.getItem('statsig-console-api-key');
+
+export const api = axios.create({
+  baseURL: 'https://statsigapi.net/console/v1',
+  headers: {
+    'STATSIG-API-KEY': apiKey?.replaceAll('"', ''),
+  }
+});
+
+export const fetcher = (url: string) => api.get(url).then((res) => res.data);

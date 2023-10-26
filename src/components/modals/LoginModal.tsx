@@ -9,10 +9,9 @@ import {
   useDisclosure
 } from "@nextui-org/react";
 import {useLocalStorage} from "@uidotdev/usehooks";
-import {handleInitialLogin} from "~handlers/handleInitialLogin";
+import {initialLogin} from "~handlers/initialLogin";
 import {useStore} from "~store/useStore";
 import React, {useEffect, useState} from "react";
-import {mutate} from "swr";
 import useSWRMutation from "swr/mutation";
 
 const LoginModal = () => {
@@ -26,18 +25,22 @@ const LoginModal = () => {
     error,
     isMutating,
     trigger
-  } = useSWRMutation('https://statsigapi.net/console/v1/experiments', handleInitialLogin);
+  } = useSWRMutation('/experiments', initialLogin);
 
   useEffect(() => {
     const handleLogin = async () => {
-      if (error || data?.error) {
-        setErrorMessage(error || data?.error);
+      if (error) {
+        setErrorMessage(error.message);
+        return;
+      }
+
+      if (data?.error) {
+        setErrorMessage(data.error);
         return;
       }
 
       if (data.success) {
         setApiKey(value);
-        await mutate("https://statsigapi.net/console/v1/experiments", data.data);
       }
 
       setAuthModalOpen(false);
