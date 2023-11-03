@@ -1,9 +1,11 @@
+import type {Dispatch, SetStateAction} from "react";
+
 import {Button} from "@nextui-org/react";
 import {useLocalStorage} from "@uidotdev/usehooks";
 import {NoOverridesSection} from "~components/experiment/NoOverridesSection";
-import {updateLocalStorageValue} from "~handlers/localStorageHandlers";
+import {getCurrentLocalStorageValue, updateLocalStorageValue} from "~handlers/localStorageHandlers";
 import {useStore} from "~store/useStore";
-import React, {Fragment} from "react";
+import React, {Fragment, useEffect} from "react";
 import {Tooltip} from "react-tooltip";
 
 export type Override = {
@@ -17,16 +19,26 @@ interface Props {
 }
 
 export const ExperimentOverrides = ({overrides}: Props) => {
-  const { currentExperimentId } = useStore((state) => state);
-  const [localStorageValue] = useLocalStorage("statsig-local-storage-key");
+  const { currentExperimentId, currentLocalStorageValue, setCurrentLocalStorageValue } = useStore((state) => state);
+  const [localStorageValue]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-local-storage-key");
+
+  useEffect(() => {
+    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+      const [localStorage] = await getCurrentLocalStorageValue(tabs[0].id, localStorageValue);
+      if (localStorage?.result) {
+        setCurrentLocalStorageValue(localStorage.result);
+      }
+    });
+  }, []);
 
   if (!overrides.length) {
     return <NoOverridesSection experimentationId={currentExperimentId}/>;
   }
 
   const saveToLocalStorage = (value: string) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      updateLocalStorageValue(tabs[0].id, localStorageValue, value);
+    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+      setCurrentLocalStorageValue(value);
+      await updateLocalStorageValue(tabs[0].id, localStorageValue, value);
     });
   };
 
@@ -40,7 +52,7 @@ export const ExperimentOverrides = ({overrides}: Props) => {
         {overrides.map((override) => (
           <Fragment key={override.ids[0]}>
             <Button
-              color={override.groupID === 'Control' ? 'default' : 'success'}
+              color={currentLocalStorageValue === override.ids[0] ? 'success' : 'default'}
               data-tooltip-id={`tooltip-${override.ids[0]}`}
               onPress={() => saveToLocalStorage(override.ids[0])}
               size="sm"
