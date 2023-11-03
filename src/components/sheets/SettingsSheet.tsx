@@ -1,24 +1,45 @@
 import {Button, Input, Radio, RadioGroup} from "@nextui-org/react";
 import {useLocalStorage} from "@uidotdev/usehooks";
 import {useStore} from "~store/useStore";
-import React from 'react';
+import React, {useState} from 'react';
 import Sheet from 'react-modal-sheet';
 
 const SettingsSheet = () => {
   const {isSettingsSheetOpen, setSettingsSheetOpen} = useStore((state) => state);
-  const [localStorageValue, setLocalStorageKey] = useLocalStorage("statsig-local-storage-key", null);
+  const [localStorageValue, setLocalStorageKey] = useLocalStorage("statsig-local-storage-key", '');
   const [typeApiKey, setTypeApiKey] = useLocalStorage("statsig-type-api-key", 'read-key');
-  const [value, setValue] = React.useState(localStorageValue);
+  const [value, setValue] = useState(localStorageValue);
+  const [invalid, setInvalid] = useState(false);
 
   const handleSave = () => {
+    if (value === '') {
+      setInvalid(true);
+      return;
+    }
+
     setLocalStorageKey(value);
     setSettingsSheetOpen(false);
   };
 
+  const handleClose = () => {
+    if (localStorageValue === '') {
+      setInvalid(true);
+      return;
+    }
+    setInvalid(false);
+    setSettingsSheetOpen(false);
+  };
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(event.target.value);
+    setInvalid(false);
+  };
+
   return (
     <Sheet
+      disableDrag={localStorageValue === ''}
       isOpen={isSettingsSheetOpen}
-      onClose={() => setSettingsSheetOpen(false)}
+      onClose={handleClose}
       snapPoints={[295]}
     >
       <Sheet.Container className={'p-5'}>
@@ -31,8 +52,10 @@ const SettingsSheet = () => {
         <Sheet.Content className="flex flex-col justify-between gap-2 mt-6" disableDrag>
           <Input
             description="For example: 'FEATURE_MANAGEMENT_USER_ID'"
+            errorMessage={invalid && "Please enter a local storage key, for example: 'FEATURE_MANAGEMENT_USER_ID'"}
+            isInvalid={invalid}
             label="Local storage key"
-            onChange={(event => setValue(event.target.value))}
+            onChange={handleInputChange}
             placeholder="Enter a local storage key"
             size="sm"
             type="text"
@@ -53,16 +76,21 @@ const SettingsSheet = () => {
           </RadioGroup>
 
           <div className="flex justify-end space-x-2">
-            <Button color="danger" onPress={() => setSettingsSheetOpen(false)} variant="light">
-              Close
-            </Button>
-            <Button color="primary" onPress={handleSave}>
+            {localStorageValue !== '' && (
+              <Button color="danger" onPress={handleClose} variant="light">
+                Close
+              </Button>
+            )}
+            <Button
+              color="primary"
+              onPress={handleSave}
+            >
               Save
             </Button>
           </div>
         </Sheet.Content>
       </Sheet.Container>
-      <Sheet.Backdrop onTap={() => setSettingsSheetOpen(false)}/>
+      <Sheet.Backdrop onTap={handleClose}/>
     </Sheet>
   );
 };
