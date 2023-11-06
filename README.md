@@ -75,3 +75,13 @@ To see your popup, click on the puzzle piece icon on the Chrome toolbar, and cli
 **Pro-tip:** pin your extension to the Chrome toolbar for easy access by clicking the pin button.
 
 ![](https://docs.plasmo.com/screenshots/popup_example.png)
+
+
+## Screenshots
+![image](https://github.com/aaron5670/statsig-browser-extension/assets/17295145/a6f89a77-562a-4313-bc1c-bd864cedb66e)
+![image](https://github.com/aaron5670/statsig-browser-extension/assets/17295145/ceb10db9-e5d8-49e4-9122-b41ce8c21f97)
+![image](https://github.com/aaron5670/statsig-browser-extension/assets/17295145/e772c8df-35e3-4659-b021-3c891f7c1360)
+![image](https://github.com/aaron5670/statsig-browser-extension/assets/17295145/266e82c0-dcbd-4072-82d5-2bc4cd478803)
+
+
+
