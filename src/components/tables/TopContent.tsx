@@ -30,6 +30,7 @@ const TopContent = ({
             base: "w-full sm:max-w-[44%]",
             inputWrapper: "border-1",
           }}
+          autoFocus={true}
           isClearable
           onClear={() => setFilterValue("")}
           onValueChange={onSearchChange}
