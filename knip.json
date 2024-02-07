@@ -1,0 +1,5 @@
+{
+  "entry": ["src/popup.tsx"],
+  "project": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
+  "ignoreDependencies": ["@types/chrome", "autoprefixer", "@nextui-org/shared-icons", "data-base64"]
+}

@@ -1,8 +1,8 @@
 import type {Dispatch, SetStateAction} from "react";
 
+import {Dropdown, DropdownItem, DropdownMenu, DropdownTrigger} from "@nextui-org/react";
 import {NextUIProvider} from "@nextui-org/react";
 import {Button, Navbar, NavbarBrand, NavbarItem} from "@nextui-org/react";
-import {Dropdown, DropdownItem, DropdownMenu, DropdownTrigger} from "@nextui-org/react";
 import {useLocalStorage} from "@uidotdev/usehooks";
 import Experiments from "~components/Experiments";
 import {SettingsIcon} from "~components/icons/SettingsIcon";

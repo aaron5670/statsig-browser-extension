@@ -30,9 +30,18 @@ import React, {useCallback, useMemo, useState} from "react";
 import {columns, statusOptions} from "./data";
 import {VerticalDotsIcon} from "./icons/VerticalDotsIcon";
 
+const statusMap: Record<string, string> = {
+  abandoned: "Abandoned",
+  active: "In Progress",
+  archived: "Archived",
+  decision_made: "Decision Made",
+  setup: "Setup",
+};
+
 const statusColorMap: Record<string, ChipProps["color"]> = {
   abandoned: "danger",
   active: "success",
+  decision_made: "primary",
   setup: "warning",
 };
 
@@ -99,7 +108,7 @@ export default function Experiments() {
     switch (columnKey) {
       case "name":
         return (
-          <p onClick={() => setCurrentExperiment(experiment.id)}>{cellValue}</p>
+          <p onClick={() => setCurrentExperiment(experiment.id)}>{experiment.name}</p>
         );
       case "status":
         return (
@@ -110,7 +119,7 @@ export default function Experiments() {
             size="sm"
             variant="dot"
           >
-            {cellValue}
+            {statusMap[experiment.status]}
           </Chip>
         );
       case 'allocation':
@@ -119,7 +128,7 @@ export default function Experiments() {
             className="capitalize border-none gap-1 text-default-600"
              onClick={() => setCurrentExperiment(experiment.id)}
           >
-            {cellValue}%
+            {experiment.allocation}%
           </p>
         );
       case "tags":
@@ -166,6 +175,8 @@ export default function Experiments() {
         );
       default:
         return (
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           <p onClick={() => setCurrentExperiment(experiment.id)}>{cellValue}</p>
         );
     }
