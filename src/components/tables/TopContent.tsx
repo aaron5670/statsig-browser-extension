@@ -5,7 +5,7 @@ import {ExternalLinkIcon} from "~components/icons/ExternalLinkIcon";
 import {SearchIcon} from "~components/icons/SearchIcon";
 import React, {useMemo} from "react";
 
-export function capitalize(string: string) {
+function capitalize(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 

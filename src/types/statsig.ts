@@ -1,4 +1,5 @@
 export interface Experiment {
+  allocation: number;
   createdTime: number;
   creatorName: string;
   description: string;
