@@ -5,12 +5,19 @@ export interface Experiment {
   description: string;
   endTime: number;
   groups: Group[];
+  healthChecks: HealthCheck[];
   hypothesis: string;
   id: string;
   name: string;
   startTime: number;
   status: string;
   tags: string[];
+}
+
+export interface HealthCheck {
+  description: string;
+  name: string;
+  status: 'PASSED' | 'WAITING';
 }
 
 export interface Group {

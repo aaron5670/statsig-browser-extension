@@ -1,4 +1,5 @@
 import {Button, ScrollShadow, Spinner} from "@nextui-org/react";
+import {HealthCheckSection} from "~components/HealthCheckSection";
 import {HypothesisSection} from "~components/HypothesisSection";
 import {ExperimentOverrides} from "~components/experiment/ExperimentOverrides";
 import {ExternalLinkIcon} from "~components/icons/ExternalLinkIcon";
@@ -33,7 +34,7 @@ const ExperimentSheet = () => {
     <Sheet
       isOpen={isExperimentSheetOpen}
       onClose={handleCloseSheet}
-      snapPoints={[250]}
+      snapPoints={[300]}
     >
       <Sheet.Container>
         <Sheet.Header>
@@ -96,6 +97,7 @@ const ExperimentSheet = () => {
                 {!error && (
                   <ScrollShadow className="w-full px-3 pb-5">
                     {overrides && <ExperimentOverrides overrides={overrides}/>}
+                    <HealthCheckSection healthChecks={experiment?.healthChecks}/>
                     {experiment && <HypothesisSection hypothesis={experiment.hypothesis}/>}
                   </ScrollShadow>
                 )}

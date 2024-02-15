@@ -24,7 +24,7 @@ const TopContent = ({
                     }) => useMemo(() => {
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-between gap-3 items-end">
+      <div className="flex justify-between items-center">
         <Input
           classNames={{
             base: "w-full sm:max-w-[44%]",
@@ -34,7 +34,7 @@ const TopContent = ({
           isClearable
           onClear={() => setFilterValue("")}
           onValueChange={onSearchChange}
-          placeholder="Search by name..."
+          placeholder="Search experiment by name..."
           size="sm"
           startContent={<SearchIcon className="text-default-300"/>}
           value={filterValue}
