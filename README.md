@@ -3,9 +3,7 @@
 With this extension you can test Statsig experiments by injecting custom values
 into the LocalStorage of the current page.
 
-![image](https://github.com/aaron5670/statsig-browser-extension/assets/17295145/15e15741-6c07-41eb-aa14-27180f716d24)
-
-Build with [Plasmo](https://docs.plasmo.com/).
+![Statsig Chrome Extension](https://github.com/aaron5670/statsig-browser-extension/assets/17295145/2e75d3f1-1ba3-4b07-9146-11c456edd1af)
 
 ## Installation
 
