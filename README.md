@@ -1,5 +1,3 @@
-Certainly! Here's an improved version of your README.md:
-
 # Statsig Experimentation - Chrome Extension
 
 ![Statsig Chrome Extension](https://github.com/aaron5670/statsig-browser-extension/assets/17295145/2e75d3f1-1ba3-4b07-9146-11c456edd1af)
