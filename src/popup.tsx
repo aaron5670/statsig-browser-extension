@@ -14,6 +14,7 @@ import {
   getCurrentLocalStorageValue,
   removeLocalStorageValue,
 } from "~handlers/localStorageHandlers";
+import {injectStatsigDebugger} from "~handlers/statsigDebuggerHandlers";
 import {fetcher} from "~helpers/fetcher";
 import {useStore} from "~store/useStore";
 import statsigLogo from "data-base64:./statsig-logo.svg";
@@ -49,6 +50,12 @@ function IndexPopup() {
     getLocalStorageValue();
   }, []);
 
+  const openStatsigDebugger = () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+      await injectStatsigDebugger(tabs[0].id);
+    });
+  };
+
   const getLocalStorageValue = async () => {
     chrome.tabs.query({active: true, currentWindow: true}, async (tabs) => {
       const [localStorage] = await getCurrentLocalStorageValue(tabs[0].id, localStorageValue);
@@ -82,6 +89,12 @@ function IndexPopup() {
             <NavbarBrand>
               <img alt="Statsig logo" src={statsigLogo} width={125}/>
             </NavbarBrand>
+            <button
+              className="text-sm text-gray-700 hover:text-gray-900"
+              onClick={openStatsigDebugger}
+            >
+              Open Statsig Debugger
+            </button>
             {currentLocalStorageValue && (
               <div>
                 <p className="text-sm text-gray-700">Current localStorage value</p>
