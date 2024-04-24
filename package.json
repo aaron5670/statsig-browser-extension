@@ -13,7 +13,6 @@
     "knip": "knip"
   },
   "dependencies": {
-    "@img/sharp-linux-x64": "^0.33.3",
     "@nextui-org/react": "^2.3.5",
     "@uidotdev/usehooks": "^2.4.1",
     "@vahagn13/react-json-view": "^1.0.15",
