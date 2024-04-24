@@ -13,26 +13,26 @@ import {Tooltip} from "react-tooltip";
 
 const ExperimentSheet = () => {
   const {
-    currentExperimentId,
-    isExperimentSheetOpen,
-    setExperimentSheetOpen,
+    currentItemId,
+    isItemSheetOpen,
+    setItemSheetOpen,
     setManageExperimentModalOpen
   } = useStore((state) => state);
-  const {error, isLoading: isLoadingOverrides, overrides} = useOverrides(currentExperimentId);
-  const {experiment, isLoading: isLoadingExperiment} = useExperiment(currentExperimentId);
+  const {error, isLoading: isLoadingOverrides, overrides} = useOverrides(currentItemId);
+  const {experiment, isLoading: isLoadingExperiment} = useExperiment(currentItemId);
 
   const handleCloseSheet = () => {
-    setExperimentSheetOpen(false);
+    setItemSheetOpen(false);
   };
 
   const handleOpenExperimentSettings = () => {
-    setExperimentSheetOpen(false);
+    setItemSheetOpen(false);
     setManageExperimentModalOpen(true);
   };
 
   return (
     <Sheet
-      isOpen={isExperimentSheetOpen}
+      isOpen={isItemSheetOpen}
       onClose={handleCloseSheet}
       snapPoints={[300]}
     >
@@ -47,7 +47,7 @@ const ExperimentSheet = () => {
                   <h1
                     className="text-xl font-bold cursor-pointer"
                     data-tooltip-id="copy-key-tooltip"
-                    onClick={() => navigator.clipboard.writeText(currentExperimentId)}
+                    onClick={() => navigator.clipboard.writeText(currentItemId)}
                   >
                     {experiment?.name}
                   </h1>
@@ -66,7 +66,7 @@ const ExperimentSheet = () => {
                 as="a"
                 color="primary"
                 endContent={<ExternalLinkIcon color="white"/>}
-                href={`https://console.statsig.com/experiments/${currentExperimentId}`}
+                href={`https://console.statsig.com/experiments/${currentItemId}`}
                 size="sm"
                 target="_blank"
                 variant="solid"
@@ -93,7 +93,7 @@ const ExperimentSheet = () => {
               </div>
             ) : (
               <>
-                {error && <p className="text-sm text-red-600">{error}</p>}
+                {error && <p className="text-sm text-red-600 p-4 text-center">{error}</p>}
                 {!error && (
                   <ScrollShadow className="w-full px-3 pb-5">
                     {overrides && <ExperimentOverrides overrides={overrides}/>}

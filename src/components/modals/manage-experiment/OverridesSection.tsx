@@ -12,17 +12,17 @@ type View = 'form' | 'table';
 export const OverridesSection = () => {
   const [typeApiKey] = useLocalStorage("statsig-type-api-key", 'read-key');
   const [view, setView] = useState<View>('table');
-  const {currentExperimentId} = useStore((state) => state);
-  const {experiment} = useExperiment(currentExperimentId);
+  const {currentItemId} = useStore((state) => state);
+  const {experiment} = useExperiment(currentItemId);
   const groups = experiment?.groups || [];
 
   const [selectedGroup, setSelectedGroup] = useState('');
   const [overrideId, setOverrideId] = useState('');
 
-  const {isMutating, trigger} = useSWRMutation(`/experiments/${currentExperimentId}/overrides`, createOverride);
+  const {isMutating, trigger} = useSWRMutation(`/experiments/${currentItemId}/overrides`, createOverride);
 
   const addOverride = async () => {
-    await trigger({experimentId: currentExperimentId, override: {groupID: selectedGroup, ids: [overrideId]}});
+    await trigger({experimentId: currentItemId, override: {groupID: selectedGroup, ids: [overrideId]}});
 
     setView('table');
   };

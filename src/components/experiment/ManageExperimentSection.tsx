@@ -3,10 +3,10 @@ import {useStore} from "~store/useStore";
 import React from "react";
 
 export const ManageExperimentSection = () => {
-  const {setExperimentSheetOpen, setManageExperimentModalOpen} = useStore((state) => state);
+  const {setItemSheetOpen, setManageExperimentModalOpen} = useStore((state) => state);
 
   const handleModalOpen = () => {
-    setExperimentSheetOpen(false);
+    setItemSheetOpen(false);
     setManageExperimentModalOpen(true);
   };
 

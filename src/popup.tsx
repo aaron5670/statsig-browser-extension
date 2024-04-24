@@ -1,15 +1,11 @@
-import type {Dispatch, SetStateAction} from "react";
+import {type Dispatch, lazy, type SetStateAction, Suspense} from "react";
 
-import {Dropdown, DropdownItem, DropdownMenu, DropdownTrigger} from "@nextui-org/react";
+import {Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Select, SelectItem} from "@nextui-org/react";
 import {NextUIProvider} from "@nextui-org/react";
 import {Button, Navbar, NavbarBrand, NavbarItem} from "@nextui-org/react";
 import {useLocalStorage} from "@uidotdev/usehooks";
 import Experiments from "~components/Experiments";
 import {SettingsIcon} from "~components/icons/SettingsIcon";
-import LoginModal from "~components/modals/LoginModal";
-import {ManageExperimentModal} from "~components/modals/manage-experiment/ManageExperimentModal";
-import ExperimentSheet from "~components/sheets/ExperimentSheet";
-import SettingsSheet from "~components/sheets/SettingsSheet";
 import {
   getCurrentLocalStorageValue,
   removeLocalStorageValue,
@@ -20,8 +16,26 @@ import statsigLogo from "data-base64:./statsig-logo.svg";
 import React, {useEffect} from "react";
 import {RxCross2} from "react-icons/rx";
 import {SWRConfig, mutate} from "swr";
+import DynamicConfigs from "~components/DynamicConfigs";
+
+const ExperimentSheet = lazy(() => import('~components/sheets/ExperimentSheet'));
+const ManageExperimentModal = lazy(() => import('~components/modals/manage-experiment/ManageExperimentModal'));
+const DynamicConfigSheet = lazy(() => import('~components/sheets/DynamicConfigSheet'));
+const LoginModal = lazy(() => import('~components/modals/LoginModal'));
+const SettingsSheet = lazy(() => import('~components/sheets/SettingsSheet'));
 
 import './main.css';
+
+const types = [
+  {
+    name: "Experiments",
+    description: "Search for experiments",
+  },
+  {
+    name: "Dynamic Configs",
+    description: "Search for dynamic configs",
+  }
+];
 
 function IndexPopup() {
   const {
@@ -32,6 +46,7 @@ function IndexPopup() {
   } = useStore((state) => state);
   const [apiKey, setApiKey]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-console-api-key");
   const [localStorageValue]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-local-storage-key");
+  const [experimentOrConfig, setExperimentOrConfig]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-experiment-or-config", "Experiments");
 
   useEffect(() => {
     // if there is no api key, open the auth modal
@@ -84,7 +99,7 @@ function IndexPopup() {
             </NavbarBrand>
             {currentLocalStorageValue && (
               <div>
-                <p className="text-sm text-gray-700">Current localStorage value</p>
+                <p className="text-sm text-gray-700">Current localStorage</p>
                 <div className="flex items-center gap-2">
                   <p className="text-tiny text-foreground-400">
                     {currentLocalStorageValue}
@@ -97,6 +112,25 @@ function IndexPopup() {
                 </div>
               </div>
             )}
+            <Select
+              items={types}
+              placeholder="Select a type..."
+              className="max-w-[200px]"
+              size="sm"
+              value={experimentOrConfig}
+              defaultSelectedKeys={[experimentOrConfig]}
+              onChange={(value) => setExperimentOrConfig(value.target.value)}
+              required
+            >
+              {({name, description}) => (
+                <SelectItem key={name} textValue={name} value={name} className="flex gap-2 items-center">
+                  <div className="flex flex-col">
+                    <span className="text-small">{name}</span>
+                    <span className="text-tiny text-default-400">{description}</span>
+                  </div>
+                </SelectItem>
+              )}
+            </Select>
             <NavbarItem>
               <Dropdown backdrop="opaque">
                 <DropdownTrigger>
@@ -117,11 +151,31 @@ function IndexPopup() {
           </Navbar>
 
           <div className="container mx-auto">
-            <SettingsSheet/>
-            <ExperimentSheet/>
-            <ManageExperimentModal/>
-            <LoginModal/>
-            <Experiments/>
+            <Suspense>
+              <SettingsSheet/>
+            </Suspense>
+            {experimentOrConfig === "Experiments" && (
+                <>
+                  <Suspense>
+                    <ExperimentSheet/>
+                  </Suspense>
+                  <Suspense>
+                    <ManageExperimentModal/>
+                  </Suspense>
+                  <Experiments/>
+                </>
+            )}
+            {experimentOrConfig === "Dynamic Configs" && (
+                <>
+                  <Suspense>
+                    <DynamicConfigSheet/>
+                  </Suspense>
+                  <DynamicConfigs/>
+                </>
+            )}
+            <Suspense>
+              <LoginModal/>
+            </Suspense>
           </div>
         </div>
       </SWRConfig>

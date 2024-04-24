@@ -14,6 +14,20 @@ export interface Experiment {
   tags: string[];
 }
 
+export interface DynamicConfig {
+  id: string;
+  name: string;
+  description: string;
+  lastModifiedTime: number;
+  lastModifierName: string;
+  createdTime: number;
+  creatorName: string;
+  tags: string[];
+  isEnabled: boolean;
+  defaultValue: any; // JSON Object
+  defaultValueJsonC: string;
+}
+
 export interface HealthCheck {
   description: string;
   name: string;
