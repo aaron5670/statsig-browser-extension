@@ -13,7 +13,7 @@ import {DeleteIcon} from "../icons/DeleteIcon";
 
 export default function OverridesTable() {
   const [typeApiKey] = useLocalStorage("statsig-type-api-key", 'read-key');
-  const currentExperimentId = useStore((state) => state.currentExperimentId);
+  const currentExperimentId = useStore((state) => state.currentItemId);
   const {overrides} = useOverrides(currentExperimentId);
 
   const {trigger} = useSWRMutation(`/experiments/${currentExperimentId}/overrides`, deleteOverride);

@@ -22,8 +22,8 @@ interface Props {
 
 export default function GroupsTable({changeView, setCurrentGroup}: Props) {
   const [typeApiKey] = useLocalStorage("statsig-type-api-key", 'read-key');
-  const {currentExperimentId} = useStore((state) => state);
-  const {experiment} = useExperiment(currentExperimentId);
+  const {currentItemId} = useStore((state) => state);
+  const {experiment} = useExperiment(currentItemId);
   const {groups} = experiment;
 
   const columns = [

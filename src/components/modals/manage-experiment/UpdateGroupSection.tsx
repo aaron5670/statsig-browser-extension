@@ -9,19 +9,19 @@ import React, {useState} from "react";
 import useSWRMutation from "swr/mutation";
 
 export const UpdateGroupSection = ({changeView, group}: {changeView: () => void, group: Group}) => {
-  const {currentExperimentId} = useStore((state) => state);
-  const {experiment} = useExperiment(currentExperimentId);
+  const {currentItemId} = useStore((state) => state);
+  const {experiment} = useExperiment(currentItemId);
   const groups = experiment?.groups || [];
   const [groupName, setGroupName] = useState(group.name);
 
-  const {isMutating, trigger} = useSWRMutation(`/experiments/${currentExperimentId}`, updateGroup);
+  const {isMutating, trigger} = useSWRMutation(`/experiments/${currentItemId}`, updateGroup);
 
   const handleGroupUpdate = async () => {
     const nextState = produce(groups, draft => {
       draft.find((g) => g.id === group.id).name = groupName;
     });
 
-    await trigger({experimentId: currentExperimentId, groups: nextState}, {
+    await trigger({experimentId: currentItemId, groups: nextState}, {
       optimisticData: () => ({nextState})
     });
 

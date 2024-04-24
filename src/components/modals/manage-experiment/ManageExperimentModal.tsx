@@ -10,8 +10,8 @@ import {OverridesSection} from "~components/modals/manage-experiment/OverridesSe
 import {useStore} from "~store/useStore";
 import React, {useState} from "react";
 
-export const ManageExperimentModal = () => {
-  const {currentExperimentId, isManageExperimentModalOpen, setExperimentSheetOpen, setManageExperimentModalOpen} = useStore((state) => state);
+const ManageExperimentModal = () => {
+  const {currentItemId, isManageExperimentModalOpen, setItemSheetOpen, setManageExperimentModalOpen} = useStore((state) => state);
   const [selected, setSelected] = useState("login");
 
   const {isOpen, onOpenChange} = useDisclosure({
@@ -21,11 +21,11 @@ export const ManageExperimentModal = () => {
     }
   });
 
-  if (!currentExperimentId) return null;
+  if (!currentItemId) return null;
 
   const handleCloseModal = () => {
     setManageExperimentModalOpen(false);
-    setExperimentSheetOpen(true);
+    setItemSheetOpen(true);
   };
 
   return (
@@ -60,3 +60,5 @@ export const ManageExperimentModal = () => {
     </Modal>
   );
 };
+
+export default ManageExperimentModal;

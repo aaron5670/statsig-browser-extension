@@ -1,10 +1,9 @@
-import type {Experiment} from "~types/statsig";
+import type {DynamicConfig} from "~types/statsig";
 import type {ChangeEvent, Key} from "react";
 
 import {
   Button,
   Chip,
-  type ChipProps,
   Dropdown,
   DropdownItem,
   DropdownMenu,
@@ -23,32 +22,17 @@ import {useLocalStorage} from "@uidotdev/usehooks";
 import {ExternalLinkIcon} from "~components/icons/ExternalLinkIcon";
 import BottomContent from "~components/tables/BottomContent";
 import TopContent from "~components/tables/TopContent";
-import {useExperiments} from "~hooks/useExperiments";
 import {useStore} from "~store/useStore";
 import React, {useCallback, useMemo, useState} from "react";
 
-import {experimentColumns, experimentStatusOptions} from "./data";
+import {dynamicConfigColumns} from "./data";
 import {VerticalDotsIcon} from "./icons/VerticalDotsIcon";
+import {useDynamicConfigs} from "~hooks/useDynamicConfigs";
 
-const statusMap: Record<string, string> = {
-  abandoned: "Abandoned",
-  active: "In Progress",
-  archived: "Archived",
-  decision_made: "Decision Made",
-  setup: "Setup",
-};
-
-const statusColorMap: Record<string, ChipProps["color"]> = {
-  abandoned: "danger",
-  active: "success",
-  decision_made: "primary",
-  setup: "warning",
-};
-
-export default function Experiments() {
-  const {experiments, isLoading} = useExperiments();
-  const [visibleColumns, setVisibleColumns] = useLocalStorage("table-visible-columns", ["name", "status", "actions"]);
-  const [rowsPerPage, setRowsPerPage] = useLocalStorage("table-rows-per-page", 5);
+export default function DynamicConfigs() {
+  const {dynamicConfigs, isLoading} = useDynamicConfigs();
+  const [visibleColumns, setVisibleColumns] = useLocalStorage("dynamic-config-table-visible-columns", ["name", "tags", "actions"]);
+  const [rowsPerPage, setRowsPerPage] = useLocalStorage("dynamic-config-table-rows-per-page", 5);
   const {setCurrentItemId, setItemSheetOpen} = useStore((state) => state);
   const [filterValue, setFilterValue] = useState("");
   const [statusFilter, setStatusFilter] = useState<Selection>("all");
@@ -57,28 +41,23 @@ export default function Experiments() {
     direction: "ascending",
   });
   const [page, setPage] = useState(1);
-  const pages = Math.ceil(experiments.length / rowsPerPage);
+  const pages = Math.ceil(dynamicConfigs.length / rowsPerPage);
   const hasSearchFilter = Boolean(filterValue);
 
   const headerColumns = useMemo(() => {
-    return experimentColumns.filter((column) => Array.from(visibleColumns).includes(column.uid));
+    return dynamicConfigColumns.filter((column) => Array.from(visibleColumns).includes(column.uid));
   }, [visibleColumns]);
 
   const filteredItems = useMemo(() => {
-    let filteredExperiments = [...experiments];
+    let filteredExperiments = [...dynamicConfigs];
 
     if (hasSearchFilter) {
       filteredExperiments = filteredExperiments.filter((experiment) =>
         experiment.name.toLowerCase().includes(filterValue.toLowerCase()),
       );
     }
-    if (statusFilter !== "all" && Array.from(statusFilter).length !== experimentStatusOptions.length) {
-      filteredExperiments = filteredExperiments.filter((experiment) =>
-        Array.from(statusFilter).includes(experiment.status),
-      );
-    }
     return filteredExperiments;
-  }, [experiments.length, filterValue, statusFilter]);
+  }, [dynamicConfigs.length, filterValue, statusFilter]);
 
   const items = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
@@ -93,17 +72,17 @@ export default function Experiments() {
   };
 
   const sortedItems = () => {
-    return [...items].sort((a: Experiment, b: Experiment) => {
-      const first = a[sortDescriptor.column as keyof Experiment] as number;
-      const second = b[sortDescriptor.column as keyof Experiment] as number;
+    return [...items].sort((a: DynamicConfig, b: DynamicConfig) => {
+      const first = a[sortDescriptor.column as keyof DynamicConfig] as number;
+      const second = b[sortDescriptor.column as keyof DynamicConfig] as number;
       const cmp = first < second ? -1 : first > second ? 1 : 0;
 
       return sortDescriptor.direction === "descending" ? -cmp : cmp;
     });
   };
 
-  const renderCell = useCallback((experiment: Experiment, columnKey: Key) => {
-    const cellValue = experiment[columnKey as keyof Experiment];
+  const renderCell = useCallback((experiment: DynamicConfig, columnKey: Key) => {
+    const cellValue = experiment[columnKey as keyof DynamicConfig];
 
     switch (columnKey) {
       case "name":
@@ -114,22 +93,13 @@ export default function Experiments() {
         return (
           <Chip
             className="capitalize border-none gap-1 text-default-600"
-            color={statusColorMap[experiment.status]}
+            color={experiment.isEnabled ? "success" : "danger"}
             onClick={() => setCurrentExperiment(experiment.id)}
             size="sm"
             variant="dot"
           >
-            {statusMap[experiment.status]}
+            {experiment.isEnabled ? "Enabled" : "Disabled"}
           </Chip>
-        );
-      case 'allocation':
-        return (
-          <p
-            className="capitalize border-none gap-1 text-default-600"
-             onClick={() => setCurrentExperiment(experiment.id)}
-          >
-            {experiment.allocation}%
-          </p>
         );
       case "tags":
         return (
@@ -150,6 +120,18 @@ export default function Experiments() {
             ))}
           </div>
         );
+      case "isEnabled":
+        return (
+            <Chip
+                className="capitalize border-none gap-1 text-default-600"
+                color={experiment.isEnabled ? "success" : "danger"}
+                onClick={() => setCurrentExperiment(experiment.id)}
+                size="sm"
+                variant="dot"
+            >
+              {experiment.isEnabled ? "Enabled" : "Disabled"}
+            </Chip>
+        );
       case "actions":
         return (
           <div className="relative flex justify-end items-center gap-2">
@@ -164,7 +146,7 @@ export default function Experiments() {
                 <DropdownItem
                   as={'a'}
                   endContent={<ExternalLinkIcon/>}
-                  href={`https://console.statsig.com/experiments/${experiment.id}`}
+                  href={`https://console.statsig.com/dynamic_configs/${experiment.id}`}
                   target="_blank"
                 >
                   Open on Statsig
@@ -212,8 +194,8 @@ export default function Experiments() {
         wrapper: ["max-h-[382px]", "max-w-3xl", "min-h-[242px]"],
       }}
       topContent={<TopContent
-        type="experiments"
-        total={experiments.length}
+        type="dynamicConfigs"
+        total={dynamicConfigs.length}
         filterValue={filterValue}
         hasSearchFilter={hasSearchFilter}
         onRowsPerPageChange={onRowsPerPageChange}
@@ -225,7 +207,7 @@ export default function Experiments() {
         statusFilter={statusFilter}
         visibleColumns={visibleColumns}
       />}
-      aria-label="Table with all Statsig experiments"
+      aria-label="Table with all Statsig Dynamic Configs"
       bottomContentPlacement="outside"
       fullWidth
       isCompact
@@ -248,11 +230,11 @@ export default function Experiments() {
         )}
       </TableHeader>
       <TableBody
-        emptyContent={isLoading ? <Spinner className="h-full"/> : "No experiments found"}
+        emptyContent={isLoading ? <Spinner className="h-full"/> : "No dynamic configs found"}
         isLoading={!isLoading}
         items={sortedItems()}
       >
-        {(item: Experiment) => (
+        {(item: DynamicConfig) => (
           <TableRow key={item.id}>
             {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
           </TableRow>

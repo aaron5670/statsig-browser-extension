@@ -19,7 +19,7 @@ interface Props {
 }
 
 export const ExperimentOverrides = ({overrides}: Props) => {
-  const { currentExperimentId, currentLocalStorageValue, setCurrentLocalStorageValue } = useStore((state) => state);
+  const { currentItemId, currentLocalStorageValue, setCurrentLocalStorageValue } = useStore((state) => state);
   const [localStorageValue]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-local-storage-key");
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export const ExperimentOverrides = ({overrides}: Props) => {
   }, []);
 
   if (!overrides.length) {
-    return <NoOverridesSection experimentationId={currentExperimentId}/>;
+    return <NoOverridesSection experimentationId={currentItemId}/>;
   }
 
   const saveToLocalStorage = (value: string) => {

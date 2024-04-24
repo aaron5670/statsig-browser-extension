@@ -1,31 +1,31 @@
 import { create } from 'zustand';
 
 interface FieldState {
-  currentExperimentId?: string;
+  currentItemId?: string;
   currentLocalStorageValue: string;
   isAuthModalOpen: boolean;
-  isExperimentSheetOpen: boolean;
+  isItemSheetOpen: boolean;
   isManageExperimentModalOpen: boolean;
   isSettingsSheetOpen: boolean;
   setAuthModalOpen: (isAuthModalOpen: boolean) => void;
-  setCurrentExperimentId: (currentExperimentId: string) => void;
+  setCurrentItemId: (currentItemId: string) => void;
   setCurrentLocalStorageValue: (currentLocalStorageValue: string) => void;
-  setExperimentSheetOpen: (isExperimentModalOpen: boolean) => void;
+  setItemSheetOpen: (isItemSheetOpen: boolean) => void;
   setManageExperimentModalOpen: (isManageExperimentModalOpen: boolean) => void;
   setSettingsSheetOpen: (isSettingsModalOpen: boolean) => void;
 }
 
 export const useStore = create<FieldState>((set) => ({
-  currentExperimentId: null,
+  currentItemId: null,
   currentLocalStorageValue: null,
   isAuthModalOpen: false,
-  isExperimentSheetOpen: false,
+  isItemSheetOpen: false,
   isManageExperimentModalOpen: false,
   isSettingsSheetOpen: false,
   setAuthModalOpen: (isAuthModalOpen) => set(() => ({ isAuthModalOpen })),
-  setCurrentExperimentId: (currentExperimentId) => set(() => ({ currentExperimentId })),
+  setCurrentItemId: (currentItemId) => set(() => ({ currentItemId })),
   setCurrentLocalStorageValue: (currentLocalStorageValue) => set(() => ({ currentLocalStorageValue })),
-  setExperimentSheetOpen: (isExperimentModalOpen) => set(() => ({ isExperimentSheetOpen: isExperimentModalOpen })),
+  setItemSheetOpen: (isItemSheetOpen) => set(() => ({ isItemSheetOpen })),
   setManageExperimentModalOpen: (isManageExperimentModalOpen) => set(() => ({ isManageExperimentModalOpen })),
   setSettingsSheetOpen: (isSettingsModalOpen) => set(() => ({ isSettingsSheetOpen: isSettingsModalOpen })),
 }));
