@@ -28,7 +28,8 @@ jobs:
           cache: "pnpm"
 
       - name: Build and zip extension artifact
-        run: pnpm build --zip
+        # Note: I added the sharp package because the GitHub CI was failing due to the missing sharp package?!?
+        run: pnpm install sharp && pnpm build --zip
 
       - name: Browser Platform Publish
         uses: PlasmoHQ/bpp@v3
