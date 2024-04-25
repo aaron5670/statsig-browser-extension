@@ -31,6 +31,7 @@ jobs:
           cache: "pnpm"
 
       - name: Build the extension
+        # Note: I added the sharp package because the GitHub CI was failing due to the missing sharp package?!?
         run: pnpm install sharp && pnpm build --zip
 
       - name: Archive the extension production build as ZIP
