@@ -8,7 +8,7 @@ import {useOverrides} from "~hooks/useOverrides";
 import {useStore} from "~store/useStore";
 import React from 'react';
 import {AiOutlineSetting} from "react-icons/ai";
-import Sheet from 'react-modal-sheet';
+import {Sheet} from 'react-modal-sheet';
 import {Tooltip} from "react-tooltip";
 
 const ExperimentSheet = () => {

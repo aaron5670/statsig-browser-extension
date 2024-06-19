@@ -198,12 +198,14 @@ export default function Experiments() {
 
   return (
     <Table
+      aria-label="Table with all Statsig experiments"
       bottomContent={<BottomContent
         hasSearchFilter={hasSearchFilter}
         page={page}
         setPage={setPage}
         total={pages}
       />}
+      bottomContentPlacement="outside"
       classNames={{
         base: ["base-class"],
         emptyWrapper: ["empty-wrapper-class"],
@@ -211,9 +213,14 @@ export default function Experiments() {
         tr: ["hover:bg-default-50", "cursor-pointer"],
         wrapper: ["max-h-[382px]", "max-w-3xl", "min-h-[242px]"],
       }}
+      fullWidth
+      isCompact
+      isHeaderSticky
+      onSortChange={setSortDescriptor}
+      removeWrapper
+      selectionMode="none"
+      sortDescriptor={sortDescriptor}
       topContent={<TopContent
-        type="experiments"
-        total={experiments.length}
         filterValue={filterValue}
         hasSearchFilter={hasSearchFilter}
         onRowsPerPageChange={onRowsPerPageChange}
@@ -223,17 +230,10 @@ export default function Experiments() {
         setStatusFilter={setStatusFilter}
         setVisibleColumns={setVisibleColumns}
         statusFilter={statusFilter}
+        total={experiments.length}
+        type="experiments"
         visibleColumns={visibleColumns}
       />}
-      aria-label="Table with all Statsig experiments"
-      bottomContentPlacement="outside"
-      fullWidth
-      isCompact
-      isHeaderSticky
-      onSortChange={setSortDescriptor}
-      removeWrapper
-      selectionMode="none"
-      sortDescriptor={sortDescriptor}
       topContentPlacement="outside"
     >
       <TableHeader columns={headerColumns}>

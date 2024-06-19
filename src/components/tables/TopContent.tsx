@@ -14,8 +14,6 @@ function capitalize(string: string) {
 }
 
 const TopContent = ({
-                      type,
-                      total,
                       filterValue,
                       hasSearchFilter,
                       onRowsPerPageChange,
@@ -25,17 +23,19 @@ const TopContent = ({
                       setStatusFilter,
                       setVisibleColumns,
                       statusFilter,
+                      total,
+                      type,
                       visibleColumns,
                     }) => useMemo(() => {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-between items-center">
         <Input
+          autoFocus={true}
           classNames={{
             base: "w-full sm:max-w-[44%]",
             inputWrapper: "border-1",
           }}
-          autoFocus={true}
           isClearable
           onClear={() => setFilterValue("")}
           onValueChange={onSearchChange}
@@ -58,12 +58,12 @@ const TopContent = ({
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu
-                  onSelectionChange={(item) => {
-                    setStatusFilter(item);
-                  }}
                   aria-label="Table Columns"
                   closeOnSelect={false}
                   disallowEmptySelection
+                  onSelectionChange={(item) => {
+                    setStatusFilter(item);
+                  }}
                   selectedKeys={statusFilter}
                   selectionMode="multiple"
                 >
@@ -87,12 +87,12 @@ const TopContent = ({
                         </Button>
                     </DropdownTrigger>
                     <DropdownMenu
-                        onSelectionChange={(item) => {
-                            setVisibleColumns(Array.from(item));
-                        }}
                         aria-label="Table Columns"
                         closeOnSelect={false}
                         disallowEmptySelection
+                        onSelectionChange={(item) => {
+                            setVisibleColumns(Array.from(item));
+                        }}
                         selectedKeys={visibleColumns}
                         selectionMode="multiple"
                     >
@@ -116,12 +116,12 @@ const TopContent = ({
                         </Button>
                     </DropdownTrigger>
                     <DropdownMenu
-                        onSelectionChange={(item) => {
-                            setVisibleColumns(Array.from(item));
-                        }}
                         aria-label="Table Columns"
                         closeOnSelect={false}
                         disallowEmptySelection
+                        onSelectionChange={(item) => {
+                            setVisibleColumns(Array.from(item));
+                        }}
                         selectedKeys={visibleColumns}
                         selectionMode="multiple"
                     >

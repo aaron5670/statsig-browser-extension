@@ -2,7 +2,7 @@ import {Button, Input, Radio, RadioGroup} from "@nextui-org/react";
 import {useLocalStorage} from "@uidotdev/usehooks";
 import {useStore} from "~store/useStore";
 import React, {useState} from 'react';
-import Sheet from 'react-modal-sheet';
+import {Sheet} from 'react-modal-sheet';
 
 const SettingsSheet = () => {
   const {isSettingsSheetOpen, setSettingsSheetOpen} = useStore((state) => state);

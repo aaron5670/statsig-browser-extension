@@ -22,12 +22,12 @@ import {useLocalStorage} from "@uidotdev/usehooks";
 import {ExternalLinkIcon} from "~components/icons/ExternalLinkIcon";
 import BottomContent from "~components/tables/BottomContent";
 import TopContent from "~components/tables/TopContent";
+import {useDynamicConfigs} from "~hooks/useDynamicConfigs";
 import {useStore} from "~store/useStore";
 import React, {useCallback, useMemo, useState} from "react";
 
 import {dynamicConfigColumns} from "./data";
 import {VerticalDotsIcon} from "./icons/VerticalDotsIcon";
-import {useDynamicConfigs} from "~hooks/useDynamicConfigs";
 
 export default function DynamicConfigs() {
   const {dynamicConfigs, isLoading} = useDynamicConfigs();
@@ -180,12 +180,14 @@ export default function DynamicConfigs() {
 
   return (
     <Table
+      aria-label="Table with all Statsig Dynamic Configs"
       bottomContent={<BottomContent
         hasSearchFilter={hasSearchFilter}
         page={page}
         setPage={setPage}
         total={pages}
       />}
+      bottomContentPlacement="outside"
       classNames={{
         base: ["base-class"],
         emptyWrapper: ["empty-wrapper-class"],
@@ -193,9 +195,14 @@ export default function DynamicConfigs() {
         tr: ["hover:bg-default-50", "cursor-pointer"],
         wrapper: ["max-h-[382px]", "max-w-3xl", "min-h-[242px]"],
       }}
+      fullWidth
+      isCompact
+      isHeaderSticky
+      onSortChange={setSortDescriptor}
+      removeWrapper
+      selectionMode="none"
+      sortDescriptor={sortDescriptor}
       topContent={<TopContent
-        type="dynamicConfigs"
-        total={dynamicConfigs.length}
         filterValue={filterValue}
         hasSearchFilter={hasSearchFilter}
         onRowsPerPageChange={onRowsPerPageChange}
@@ -205,17 +212,10 @@ export default function DynamicConfigs() {
         setStatusFilter={setStatusFilter}
         setVisibleColumns={setVisibleColumns}
         statusFilter={statusFilter}
+        total={dynamicConfigs.length}
+        type="dynamicConfigs"
         visibleColumns={visibleColumns}
       />}
-      aria-label="Table with all Statsig Dynamic Configs"
-      bottomContentPlacement="outside"
-      fullWidth
-      isCompact
-      isHeaderSticky
-      onSortChange={setSortDescriptor}
-      removeWrapper
-      selectionMode="none"
-      sortDescriptor={sortDescriptor}
       topContentPlacement="outside"
     >
       <TableHeader columns={headerColumns}>

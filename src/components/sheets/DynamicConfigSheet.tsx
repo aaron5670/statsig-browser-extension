@@ -1,10 +1,10 @@
 import {Button, ScrollShadow, Spinner} from "@nextui-org/react";
 import {ExternalLinkIcon} from "~components/icons/ExternalLinkIcon";
-import {useStore} from "~store/useStore";
-import React, {lazy, Suspense} from 'react';
-import Sheet from 'react-modal-sheet';
-import {Tooltip} from "react-tooltip";
 import {useDynamicConfig} from "~hooks/useDynamicConfig";
+import {useStore} from "~store/useStore";
+import React, {Suspense, lazy} from 'react';
+import {Sheet} from 'react-modal-sheet';
+import {Tooltip} from "react-tooltip";
 // import ReactJson from "@vahagn13/react-json-view";
 
 const ReactJson = lazy(() => import('@vahagn13/react-json-view'));
@@ -15,7 +15,7 @@ const DynamicConfigSheet = () => {
     isItemSheetOpen,
     setItemSheetOpen,
   } = useStore((state) => state);
-  const {dynamicConfig, isLoading, error} = useDynamicConfig(currentItemId);
+  const {dynamicConfig, error, isLoading} = useDynamicConfig(currentItemId);
 
   const handleCloseSheet = () => {
     setItemSheetOpen(false);
@@ -113,17 +113,17 @@ const DynamicConfigSheet = () => {
                       </p>
                       <Suspense fallback={<Spinner size="lg"/>}>
                         <ReactJson
-                            src={dynamicConfig.defaultValue}
-                            name={false}
-                            theme="bright:inverted"
-                            iconStyle="triangle"
-                            enableClipboard={false}
-                            onEdit={false}
-                            onDelete={false}
-                            onAdd={false}
                             displayDataTypes={false}
                             displayObjectSize={true}
+                            enableClipboard={false}
+                            iconStyle="triangle"
                             indentWidth={4}
+                            name={false}
+                            onAdd={false}
+                            onDelete={false}
+                            onEdit={false}
+                            src={dynamicConfig.defaultValue}
+                            theme="bright:inverted"
                         />
                       </Suspense>
                     </ScrollShadow>
