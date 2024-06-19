@@ -3,8 +3,8 @@ import type {DynamicConfig} from "~types/statsig";
 import useSWR from "swr";
 
 export const useDynamicConfig = (dynamicConfigId: string): {
-  error: null | string,
   dynamicConfig?: DynamicConfig,
+  error: null | string,
   isLoading: boolean,
 } => {
   const key = dynamicConfigId ? `https://statsigapi.net/console/v1/dynamic_configs/${dynamicConfigId}` : null;
@@ -14,8 +14,8 @@ export const useDynamicConfig = (dynamicConfigId: string): {
   const dynamicConfig = data?.data;
 
   return {
-    error,
     dynamicConfig,
+    error,
     isLoading,
   };
 };

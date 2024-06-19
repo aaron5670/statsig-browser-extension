@@ -21,8 +21,3 @@ export const experimentStatusOptions = [
     {name: "Abandoned", uid: "abandoned"},
     {name: "Setup", uid: "setup"},
 ];
-
-export const dynamicConfigStatusOptions = [
-    {name: "Enabled", uid: 'true'},
-    {name: "Disabled", uid: 'false'},
-];

@@ -40,10 +40,10 @@ const ManageExperimentModal = () => {
       <ModalContent>
         <ModalBody className="p-3 gap-0">
           <Tabs
+            aria-label="Experiment tabs"
             classNames={{
               panel: "pb-0",
             }}
-            aria-label="Experiment tabs"
             fullWidth
             onSelectionChange={(value: string) => setSelected(value)}
             selectedKey={selected}

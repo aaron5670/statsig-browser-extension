@@ -46,6 +46,7 @@ export default function OverridesTable() {
           <div className="flex items-center">
             <Tooltip color="danger" content="Delete override">
               <p
+                className="text-lg text-danger cursor-pointer active:opacity-50"
                 onClick={() => trigger({experimentId: currentExperimentId, override}, {
                   optimisticData: current => {
                     const userIDOverrides = current?.data?.userIDOverrides || [];
@@ -62,7 +63,6 @@ export default function OverridesTable() {
                     };
                   },
                 })}
-                className="text-lg text-danger cursor-pointer active:opacity-50"
               >
                 <DeleteIcon/>
               </p>
