@@ -2,28 +2,50 @@ import type {DynamicConfig} from "~types/statsig";
 
 import {useLocalStorage} from "@uidotdev/usehooks";
 import {api} from "~helpers/fetcher";
+import {useEffect, useState} from "react";
 import useSWR from "swr";
 
-export const useDynamicConfigs = (): {
-  error: null | string,
-  dynamicConfigs: DynamicConfig[],
-  isLoading: boolean,
-} => {
-  const [apiKey] = useLocalStorage("statsig-console-api-key");
-  const {data, isLoading} = useSWR(apiKey ? '/dynamic_configs' : null, () => api.get('/dynamic_configs', {
-    headers: {
-      "STATSIG-API-KEY": apiKey as string,
-    }
-  }).then(res => res.data)
-    .catch(err => err)
-  );
+const limit = 100;
 
-  const error = data?.status || !data?.data ? 'An error occurred while fetching dynamic configs data.' : null;
-  const dynamicConfigs = data?.data || [];
+export const useDynamicConfigs = (): {
+    dynamicConfigs: DynamicConfig[],
+    error: null | string,
+    isLoading: boolean,
+} => {
+    const [page, setPage] = useState(1);
+    const [dynamicConfigs, setDynamicConfigs] = useState<DynamicConfig[]>([]);
+    const [apiKey] = useLocalStorage("statsig-console-api-key");
+
+    const { data, error, isLoading } = useSWR(apiKey ? ['/dynamic_configs', page] : null, () =>
+        api.get('/dynamic_configs', {
+            headers: {
+                "STATSIG-API-KEY": apiKey as string,
+            },
+            params: {
+                limit,
+                page,
+            }
+        }).then(res => res.data)
+            .catch(err => err)
+    );
+
+  useEffect(() => {
+    if (data?.data && data?.pagination?.totalItems > dynamicConfigs.length) {
+      setDynamicConfigs(prev => [...prev, ...data.data]);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (data?.pagination?.totalItems && dynamicConfigs.length < data.pagination.totalItems) {
+      setPage(prev => prev + 1);
+    }
+  }, [dynamicConfigs]);
+
+  const fetchError = error ? 'An error occurred while fetching experiment data.' : null;
 
   return {
-    error,
     dynamicConfigs,
+    error: fetchError,
     isLoading,
-  };
+    };
 };
