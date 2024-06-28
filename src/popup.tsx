@@ -1,22 +1,21 @@
-import {type Dispatch, lazy, type SetStateAction, Suspense} from "react";
-
 import {Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Select, SelectItem} from "@nextui-org/react";
 import {NextUIProvider} from "@nextui-org/react";
 import {Button, Navbar, NavbarBrand, NavbarItem} from "@nextui-org/react";
 import {useLocalStorage} from "@uidotdev/usehooks";
+import DynamicConfigs from "~components/DynamicConfigs";
 import Experiments from "~components/Experiments";
 import {SettingsIcon} from "~components/icons/SettingsIcon";
 import {
   getCurrentLocalStorageValue,
-  removeLocalStorageValue,
+  removeLocalStorageValue, updateLocalStorageValue,
 } from "~handlers/localStorageHandlers";
 import {fetcher} from "~helpers/fetcher";
 import {useStore} from "~store/useStore";
 import statsigLogo from "data-base64:./statsig-logo.svg";
+import {type Dispatch, type SetStateAction, Suspense, lazy} from "react";
 import React, {useEffect} from "react";
 import {RxCross2} from "react-icons/rx";
 import {SWRConfig, mutate} from "swr";
-import DynamicConfigs from "~components/DynamicConfigs";
 
 const ExperimentSheet = lazy(() => import('~components/sheets/ExperimentSheet'));
 const ManageExperimentModal = lazy(() => import('~components/modals/manage-experiment/ManageExperimentModal'));
@@ -28,12 +27,12 @@ import './main.css';
 
 const types = [
   {
-    name: "Experiments",
     description: "Search for experiments",
+    name: "Experiments",
   },
   {
-    name: "Dynamic Configs",
     description: "Search for dynamic configs",
+    name: "Dynamic Configs",
   }
 ];
 
@@ -47,6 +46,8 @@ function IndexPopup() {
   const [apiKey, setApiKey]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-console-api-key");
   const [localStorageValue]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-local-storage-key");
   const [experimentOrConfig, setExperimentOrConfig]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-experiment-or-config", "Experiments");
+  const [currentOverrides] = useLocalStorage("statsig-current-overrides", []);
+  const hasCustomOverride = currentOverrides?.find((override) => override.name === currentLocalStorageValue);
 
   useEffect(() => {
     // if there is no api key, open the auth modal
@@ -89,6 +90,19 @@ function IndexPopup() {
     });
   };
 
+  const handleOverrides = (value: string) => {
+    // Save the selected override to local storage
+    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+      // if the value is empty, remove the local storage value
+      if (value === '') {
+        handleRemoveLocalStorageValue();
+      }
+
+      setCurrentLocalStorageValue(value);
+      await updateLocalStorageValue(tabs[0].id, localStorageValue, value);
+    });
+  };
+
   return (
     <NextUIProvider>
       <SWRConfig value={{fetcher}}>
@@ -97,38 +111,59 @@ function IndexPopup() {
             <NavbarBrand>
               <img alt="Statsig logo" src={statsigLogo} width={125}/>
             </NavbarBrand>
-            {currentLocalStorageValue && (
-              <div>
-                <p className="text-sm text-gray-700">Current localStorage</p>
-                <div className="flex items-center gap-2">
-                  <p className="text-tiny text-foreground-400">
-                    {currentLocalStorageValue}
-                  </p>
-                  <RxCross2
-                    className="text-red-500 cursor-pointer hover:text-red-800"
-                    onClick={handleRemoveLocalStorageValue}
-                    size={15}
-                  />
-                </div>
-              </div>
-            )}
-            <Select
-              items={types}
-              placeholder="Select a type..."
-              className="max-w-[200px]"
-              size="sm"
-              value={experimentOrConfig}
-              defaultSelectedKeys={[experimentOrConfig]}
-              onChange={(value) => setExperimentOrConfig(value.target.value)}
-              required
-            >
-              {({name, description}) => (
-                <SelectItem key={name} textValue={name} value={name} className="flex gap-2 items-center">
-                  <div className="flex flex-col">
-                    <span className="text-small">{name}</span>
-                    <span className="text-tiny text-default-400">{description}</span>
+            <div>
+            {hasCustomOverride ? (
+                <Select
+                    className="min-w-[175px]"
+                    defaultSelectedKeys={[currentLocalStorageValue]}
+                    items={currentOverrides as {name: string}[]}
+                    onChange={(value) => handleOverrides(value.target.value)}
+                    placeholder="No override enabled"
+                    required
+                    selectedKeys={[currentLocalStorageValue]}
+                    size="sm"
+                >
+                  {({name}) => (
+                      <SelectItem className="flex gap-2 items-center" key={name} textValue={name} value={name}>
+                        <div className="flex flex-col">
+                          <span className="text-small">{name}</span>
+                        </div>
+                      </SelectItem>
+                  )}
+                </Select>
+            ) : (
+                <>
+                  <p className="text-sm text-gray-700">Current localStorage</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-tiny text-foreground-400">
+                      {currentLocalStorageValue}
+                    </p>
+                    <RxCross2
+                        className="text-red-500 cursor-pointer hover:text-red-800"
+                        onClick={handleRemoveLocalStorageValue}
+                        size={15}
+                    />
                   </div>
-                </SelectItem>
+                </>
+            )}
+            </div>
+            <Select
+                className="max-w-[200px]"
+                defaultSelectedKeys={[experimentOrConfig]}
+                items={types}
+                onChange={(value) => setExperimentOrConfig(value.target.value)}
+                placeholder="Select a type..."
+                required
+                size="sm"
+                value={experimentOrConfig}
+            >
+              {({description, name}) => (
+                  <SelectItem className="flex gap-2 items-center" key={name} textValue={name} value={name}>
+                    <div className="flex flex-col">
+                      <span className="text-small">{name}</span>
+                      <span className="text-tiny text-default-400">{description}</span>
+                    </div>
+                  </SelectItem>
               )}
             </Select>
             <NavbarItem>

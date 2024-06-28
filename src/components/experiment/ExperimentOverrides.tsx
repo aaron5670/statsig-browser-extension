@@ -21,6 +21,7 @@ interface Props {
 export const ExperimentOverrides = ({overrides}: Props) => {
   const { currentItemId, currentLocalStorageValue, setCurrentLocalStorageValue } = useStore((state) => state);
   const [localStorageValue]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-local-storage-key");
+  const [currentOverrides, setCurrentOverrides] = useLocalStorage("statsig-current-overrides");
 
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
@@ -36,11 +37,17 @@ export const ExperimentOverrides = ({overrides}: Props) => {
   }
 
   const saveToLocalStorage = (value: string) => {
+    // Store all overrides in local storage, so we can easily toggle between them later
+    setCurrentOverrides(overrides.map((override) => ({name: override.ids[0]})));
+
+    // Save the selected override to local storage
     chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
       setCurrentLocalStorageValue(value);
       await updateLocalStorageValue(tabs[0].id, localStorageValue, value);
     });
   };
+
+  console.log('currentOverrides', currentOverrides);
 
   return (
     <div>
