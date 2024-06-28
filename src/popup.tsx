@@ -112,11 +112,11 @@ function IndexPopup() {
               <img alt="Statsig logo" src={statsigLogo} width={125}/>
             </NavbarBrand>
             <div>
-            {hasCustomOverride ? (
+              {hasCustomOverride && (
                 <Select
                     className="min-w-[175px]"
                     defaultSelectedKeys={[currentLocalStorageValue]}
-                    items={currentOverrides as {name: string}[]}
+                    items={currentOverrides as { name: string }[]}
                     onChange={(value) => handleOverrides(value.target.value)}
                     placeholder="No override enabled"
                     required
@@ -131,7 +131,8 @@ function IndexPopup() {
                       </SelectItem>
                   )}
                 </Select>
-            ) : (
+              )}
+              {currentLocalStorageValue && !hasCustomOverride && (
                 <>
                   <p className="text-sm text-gray-700">Current localStorage</p>
                   <div className="flex items-center gap-2">
@@ -145,7 +146,7 @@ function IndexPopup() {
                     />
                   </div>
                 </>
-            )}
+              )}
             </div>
             <Select
                 className="max-w-[200px]"
