@@ -25,6 +25,7 @@ import BottomContent from "~components/tables/BottomContent";
 import TopContent from "~components/tables/TopContent";
 import {useExperiments} from "~hooks/useExperiments";
 import {useStore} from "~store/useStore";
+import Fuse from 'fuse.js';
 import React, {useCallback, useMemo, useState} from "react";
 
 import {experimentColumns, experimentStatusOptions} from "./data";
@@ -65,19 +66,18 @@ export default function Experiments() {
   }, [visibleColumns]);
 
   const filteredItems = useMemo(() => {
-    let filteredExperiments = [...experiments];
+    const fuse = new Fuse(experiments, {
+      keys: ['name']
+    });
 
     if (hasSearchFilter) {
-      filteredExperiments = filteredExperiments.filter((experiment) =>
-        experiment.name.toLowerCase().includes(filterValue.toLowerCase()),
-      );
+      const searchResults = fuse.search(filterValue);
+      return searchResults.map((result) => result.item);
     }
     if (statusFilter !== "all" && Array.from(statusFilter).length !== experimentStatusOptions.length) {
-      filteredExperiments = filteredExperiments.filter((experiment) =>
-        Array.from(statusFilter).includes(experiment.status),
-      );
+      return experiments.filter((experiment) => Array.from(statusFilter).includes(experiment.status));
     }
-    return filteredExperiments;
+    return experiments;
   }, [experiments.length, filterValue, statusFilter]);
 
   const items = useMemo(() => {
