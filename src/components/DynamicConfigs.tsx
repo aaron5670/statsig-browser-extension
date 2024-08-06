@@ -24,6 +24,7 @@ import BottomContent from "~components/tables/BottomContent";
 import TopContent from "~components/tables/TopContent";
 import {useDynamicConfigs} from "~hooks/useDynamicConfigs";
 import {useStore} from "~store/useStore";
+import Fuse from "fuse.js";
 import React, {useCallback, useMemo, useState} from "react";
 
 import {dynamicConfigColumns} from "./data";
@@ -49,14 +50,17 @@ export default function DynamicConfigs() {
   }, [visibleColumns]);
 
   const filteredItems = useMemo(() => {
-    let filteredExperiments = [...dynamicConfigs];
+    // let filteredExperiments = [...dynamicConfigs];
+    const fuse = new Fuse(dynamicConfigs, {
+      keys: ['name']
+    });
 
     if (hasSearchFilter) {
-      filteredExperiments = filteredExperiments.filter((experiment) =>
-        experiment.name.toLowerCase().includes(filterValue.toLowerCase()),
-      );
+      const searchResults = fuse.search(filterValue);
+      return searchResults.map((result) => result.item);
     }
-    return filteredExperiments;
+
+    return dynamicConfigs;
   }, [dynamicConfigs.length, filterValue, statusFilter]);
 
   const items = useMemo(() => {
