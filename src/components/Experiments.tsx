@@ -67,7 +67,9 @@ export default function Experiments() {
 
   const filteredItems = useMemo(() => {
     const fuse = new Fuse(experiments, {
-      keys: ['name']
+      distance: 70,
+      keys: ['name'],
+      threshold: 0.4
     });
 
     if (hasSearchFilter) {
@@ -80,6 +82,7 @@ export default function Experiments() {
     return experiments;
   }, [experiments.length, filterValue, statusFilter]);
 
+
   const items = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
@@ -87,19 +90,11 @@ export default function Experiments() {
     return filteredItems.slice(start, end);
   }, [page, filteredItems, rowsPerPage]);
 
+  console.log('items', filteredItems);
+
   const setCurrentExperiment = (experimentId: string) => {
     setCurrentItemId(experimentId);
     setItemSheetOpen(true);
-  };
-
-  const sortedItems = () => {
-    return [...items].sort((a: Experiment, b: Experiment) => {
-      const first = a[sortDescriptor.column as keyof Experiment] as number;
-      const second = b[sortDescriptor.column as keyof Experiment] as number;
-      const cmp = first < second ? -1 : first > second ? 1 : 0;
-
-      return sortDescriptor.direction === "descending" ? -cmp : cmp;
-    });
   };
 
   const renderCell = useCallback((experiment: Experiment, columnKey: Key) => {
@@ -250,7 +245,7 @@ export default function Experiments() {
       <TableBody
         emptyContent={isLoading ? <Spinner className="h-full"/> : "No experiments found"}
         isLoading={!isLoading}
-        items={sortedItems()}
+        items={items}
       >
         {(item: Experiment) => (
           <TableRow key={item.id}>
