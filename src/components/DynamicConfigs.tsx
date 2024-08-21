@@ -50,9 +50,10 @@ export default function DynamicConfigs() {
   }, [visibleColumns]);
 
   const filteredItems = useMemo(() => {
-    // let filteredExperiments = [...dynamicConfigs];
     const fuse = new Fuse(dynamicConfigs, {
-      keys: ['name']
+      distance: 70,
+      keys: ['name'],
+      threshold: 0.4
     });
 
     if (hasSearchFilter) {
@@ -73,16 +74,6 @@ export default function DynamicConfigs() {
   const setCurrentExperiment = (experimentId: string) => {
     setCurrentItemId(experimentId);
     setItemSheetOpen(true);
-  };
-
-  const sortedItems = () => {
-    return [...items].sort((a: DynamicConfig, b: DynamicConfig) => {
-      const first = a[sortDescriptor.column as keyof DynamicConfig] as number;
-      const second = b[sortDescriptor.column as keyof DynamicConfig] as number;
-      const cmp = first < second ? -1 : first > second ? 1 : 0;
-
-      return sortDescriptor.direction === "descending" ? -cmp : cmp;
-    });
   };
 
   const renderCell = useCallback((experiment: DynamicConfig, columnKey: Key) => {
@@ -236,7 +227,7 @@ export default function DynamicConfigs() {
       <TableBody
         emptyContent={isLoading ? <Spinner className="h-full"/> : "No dynamic configs found"}
         isLoading={!isLoading}
-        items={sortedItems()}
+        items={items}
       >
         {(item: DynamicConfig) => (
           <TableRow key={item.id}>
