@@ -21,7 +21,7 @@ interface Props {
 export const ExperimentOverrides = ({overrides}: Props) => {
   const { currentItemId, currentLocalStorageValue, setCurrentLocalStorageValue } = useStore((state) => state);
   const [localStorageValue]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-local-storage-key");
-  const [currentOverrides, setCurrentOverrides] = useLocalStorage("statsig-current-overrides");
+  const [, setCurrentOverrides] = useLocalStorage("statsig-current-overrides");
 
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
@@ -46,8 +46,6 @@ export const ExperimentOverrides = ({overrides}: Props) => {
       await updateLocalStorageValue(tabs[0].id, localStorageValue, value);
     });
   };
-
-  console.log('currentOverrides', currentOverrides);
 
   return (
     <div>

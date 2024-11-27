@@ -42,7 +42,6 @@ export default function DynamicConfigs() {
     direction: "ascending",
   });
   const [page, setPage] = useState(1);
-  const pages = Math.ceil(dynamicConfigs.length / rowsPerPage);
   const hasSearchFilter = Boolean(filterValue);
 
   const headerColumns = useMemo(() => {
@@ -51,9 +50,10 @@ export default function DynamicConfigs() {
 
   const filteredItems = useMemo(() => {
     const fuse = new Fuse(dynamicConfigs, {
-      distance: 70,
-      keys: ['name'],
-      threshold: 0.4
+      keys: ['name', 'id'],
+      findAllMatches: true,
+      location: 10,
+      distance: 600,
     });
 
     if (hasSearchFilter) {
@@ -63,6 +63,8 @@ export default function DynamicConfigs() {
 
     return dynamicConfigs;
   }, [dynamicConfigs.length, filterValue, statusFilter]);
+
+  const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
   const items = useMemo(() => {
     const start = (page - 1) * rowsPerPage;

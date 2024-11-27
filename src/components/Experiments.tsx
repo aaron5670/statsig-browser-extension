@@ -1,5 +1,6 @@
 import type {Experiment} from "~types/statsig";
 import type {ChangeEvent, Key} from "react";
+import React, {useCallback, useMemo, useState} from "react";
 
 import {
   Button,
@@ -26,7 +27,6 @@ import TopContent from "~components/tables/TopContent";
 import {useExperiments} from "~hooks/useExperiments";
 import {useStore} from "~store/useStore";
 import Fuse from 'fuse.js';
-import React, {useCallback, useMemo, useState} from "react";
 
 import {experimentColumns, experimentStatusOptions} from "./data";
 import {VerticalDotsIcon} from "./icons/VerticalDotsIcon";
@@ -58,7 +58,6 @@ export default function Experiments() {
     direction: "ascending",
   });
   const [page, setPage] = useState(1);
-  const pages = Math.ceil(experiments.length / rowsPerPage);
   const hasSearchFilter = Boolean(filterValue);
 
   const headerColumns = useMemo(() => {
@@ -67,9 +66,10 @@ export default function Experiments() {
 
   const filteredItems = useMemo(() => {
     const fuse = new Fuse(experiments, {
-      distance: 70,
-      keys: ['name'],
-      threshold: 0.4
+      keys: ['name', 'id'],
+      findAllMatches: true,
+      location: 10,
+      distance: 600,
     });
 
     if (hasSearchFilter) {
@@ -79,9 +79,11 @@ export default function Experiments() {
     if (statusFilter !== "all" && Array.from(statusFilter).length !== experimentStatusOptions.length) {
       return experiments.filter((experiment) => Array.from(statusFilter).includes(experiment.status));
     }
+
     return experiments;
   }, [experiments.length, filterValue, statusFilter]);
 
+  const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
   const items = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
@@ -89,8 +91,6 @@ export default function Experiments() {
 
     return filteredItems.slice(start, end);
   }, [page, filteredItems, rowsPerPage]);
-
-  console.log('items', filteredItems);
 
   const setCurrentExperiment = (experimentId: string) => {
     setCurrentItemId(experimentId);
