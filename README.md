@@ -1,17 +1,17 @@
-# Statsig Experimentation - Chrome Extension
+# Statsig Experimentation - Chrome & Firefox Extension
 
-![Statsig Chrome Extension](https://github.com/aaron5670/statsig-browser-extension/assets/17295145/2e75d3f1-1ba3-4b07-9146-11c456edd1af)
+![Statsig Browser Extension](https://github.com/aaron5670/statsig-browser-extension/assets/17295145/2e75d3f1-1ba3-4b07-9146-11c456edd1af)
 
-The Statsig Experimentation Chrome Extension is a powerful tool designed for managing and testing Statsig Experiments
+The Statsig Experimentation Browser Extension is a powerful tool designed for managing and testing Statsig Experiments
 directly within your Chromium browser. With a user-friendly interface, it provides a seamless way to search, view, and
 handle your experiments without leaving your browser environment.
 
 ## Installation
 
-### Option 1: Chrome Web Store installation
+### Option 1: Web Store installation (recommended)
 
-1. Install the Statsig Experimentation Chrome Extension directly from
-   the [Chrome Web Store](https://chrome.google.com/webstore/detail/statsig-features-and-expe/doialjibpidkdpdneplcnmkbdojpagdd/).
+-    [Chrome Web Store](https://chrome.google.com/webstore/detail/statsig-features-and-expe/doialjibpidkdpdneplcnmkbdojpagdd/).
+-    [Firefox Addons Store](https://addons.mozilla.org/en-US/firefox/addon/statsig-experimentation/).
 
 ### Option 2: Manual build and installation
 
