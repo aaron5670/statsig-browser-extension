@@ -32,7 +32,7 @@ jobs:
 
       - name: Build the extension
         # Note: I added the sharp package because the GitHub CI was failing due to the missing sharp package?!?
-        run: pnpm build --zip
+        run: pnpm install sharp && pnpm build --zip
         env:
           NODE_OPTIONS: "--max-old-space-size=8192"
 
