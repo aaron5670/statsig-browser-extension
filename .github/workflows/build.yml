@@ -35,6 +35,8 @@ jobs:
         run: pnpm install sharp && pnpm build --zip
         env:
           NODE_OPTIONS: "--max-old-space-size=8192"
+          npm_config_platform: "linux"
+          npm_config_arch: "x64"
 
       - name: Archive the extension production build as ZIP
         uses: actions/upload-artifact@v4
