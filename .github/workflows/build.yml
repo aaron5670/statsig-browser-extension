@@ -8,34 +8,31 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - name: Cache pnpm modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-
-
-      - uses: pnpm/action-setup@v3
-        with:
-          version: latest
-          run_install: true
-
-      - name: Use Node.js 20.x
+      
+      - name: Use Node.js 18.x
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
-          cache: "pnpm"
+          node-version: 18.x
+          cache: "npm"
+
+      - name: Install dependencies with npm
+        run: npm i
 
       - name: Build the extension
-        # Note: I added the sharp package because the GitHub CI was failing due to the missing sharp package?!?
-        run: pnpm install sharp && pnpm build --zip
+        run: |
+          export NODE_OPTIONS="--max-old-space-size=4096 --trace-warnings"
+          echo "Building extension without zip first..."
+          npm run build
+          echo "Build completed, now creating zip..."
+          cd build && zip -r chrome-mv3-prod.zip chrome-mv3-prod/
+        env:
+          NODE_ENV: production
 
       - name: Archive the extension production build as ZIP
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ github.sha }}-prod-build
           path: build/chrome-mv3-prod.zip
