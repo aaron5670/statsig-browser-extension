@@ -31,7 +31,11 @@ jobs:
           cache: "pnpm"
 
       - name: Build the extension
-        run: pnpm build --zip
+        run: |
+          export NODE_OPTIONS="--max-old-space-size=4096"
+          pnpm build --zip
+        env:
+          NODE_ENV: production
 
       - name: Archive the extension production build as ZIP
         uses: actions/upload-artifact@v4
