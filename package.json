@@ -105,7 +105,9 @@
       "@parcel/transformer-raw": "2.8.3",
       "@parcel/transformer-sass": "2.8.3",
       "@parcel/transformer-svg-react": "2.8.3",
-      "@parcel/transformer-worklet": "2.8.3"
+      "@parcel/transformer-worklet": "2.8.3",
+      "lmdb": "2.5.2",
+      "parcel": "2.8.3"
     }
   }
 }
