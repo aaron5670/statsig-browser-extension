@@ -1,14 +1,14 @@
 {
   "name": "statsig-browser-extension",
   "displayName": "Statsig Features and Experimentation",
-  "version": "1.11.0",
+  "version": "1.11.1",
   "description": "A browser extension for the feature management and experimentation platform Statsig.",
   "author": "(Aaron van den Berg <a.vdberg98@gmail.com>)",
   "homepage": "https://aaronvandenberg.nl/",
   "scripts": {
     "dev": "plasmo dev",
     "lint": "npx eslint --ext .ts,.tsx,.js,.jsx src/**/* --fix",
-    "build": "plasmo build",
+    "build": "plasmo build --zip",
     "test": "plasmo test",
     "knip": "knip"
   },
