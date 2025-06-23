@@ -1,32 +1,33 @@
-import {Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input} from "@nextui-org/react";
+import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input } from "@nextui-org/react";
 import {
-    dynamicConfigColumns,
-    experimentColumns,
-    experimentStatusOptions
+  dynamicConfigColumns,
+  experimentColumns,
+  experimentStatusOptions,
+  featureGateColumns
 } from "~components/data";
-import {ChevronDownIcon} from "~components/icons/ChevronDownIcon";
-import {ExternalLinkIcon} from "~components/icons/ExternalLinkIcon";
-import {SearchIcon} from "~components/icons/SearchIcon";
-import React, {useMemo} from "react";
+import { ChevronDownIcon } from "~components/icons/ChevronDownIcon";
+import { ExternalLinkIcon } from "~components/icons/ExternalLinkIcon";
+import { SearchIcon } from "~components/icons/SearchIcon";
+import React, { useMemo } from "react";
 
 function capitalize(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 const TopContent = ({
-                      filterValue,
-                      hasSearchFilter,
-                      onRowsPerPageChange,
-                      onSearchChange,
-                      rowsPerPage,
-                      setFilterValue,
-                      setStatusFilter,
-                      setVisibleColumns,
-                      statusFilter,
-                      total,
-                      type,
-                      visibleColumns,
-                    }) => useMemo(() => {
+  filterValue,
+  hasSearchFilter,
+  onRowsPerPageChange,
+  onSearchChange,
+  rowsPerPage,
+  setFilterValue,
+  setStatusFilter,
+  setVisibleColumns,
+  statusFilter,
+  total,
+  type,
+  visibleColumns,
+}) => useMemo(() => {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-between items-center">
@@ -39,104 +40,133 @@ const TopContent = ({
           isClearable
           onClear={() => setFilterValue("")}
           onValueChange={onSearchChange}
-          placeholder={`Search ${type === 'experiments' ? 'experiment' : 'dynamic config'} by name...`}
+          placeholder={`Search ${type === 'experiments' ? 'experiment' : type === 'dynamicConfigs' ? 'dynamic config' : 'feature gate'} by name...`}
           size="sm"
-          startContent={<SearchIcon className="text-default-300"/>}
+          startContent={<SearchIcon className="text-default-300" />}
           value={filterValue}
           variant="bordered"
         />
         <div className="flex gap-3">
-            {type === 'experiments' && (
-              <Dropdown>
-                <DropdownTrigger className="hidden sm:flex">
-                  <Button
-                    endContent={<ChevronDownIcon />}
-                    size="sm"
-                    variant="flat"
-                  >
-                    Status
-                  </Button>
-                </DropdownTrigger>
-                <DropdownMenu
-                  aria-label="Table Columns"
-                  closeOnSelect={false}
-                  disallowEmptySelection
-                  onSelectionChange={(item) => {
-                    setStatusFilter(item);
-                  }}
-                  selectedKeys={statusFilter}
-                  selectionMode="multiple"
+          {type === 'experiments' && (
+            <Dropdown>
+              <DropdownTrigger className="hidden sm:flex">
+                <Button
+                  endContent={<ChevronDownIcon />}
+                  size="sm"
+                  variant="flat"
                 >
-                    {experimentStatusOptions.map((status) => (
-                        <DropdownItem className="capitalize" key={status.uid}>
-                            {capitalize(status.name)}
-                        </DropdownItem>
-                    ))}
-                </DropdownMenu>
-              </Dropdown>
-            )}
-            {type === 'experiments' && (
-                <Dropdown>
-                    <DropdownTrigger className="hidden sm:flex">
-                        <Button
-                            endContent={<ChevronDownIcon/>}
-                            size="sm"
-                            variant="flat"
-                        >
-                            Columns
-                        </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu
-                        aria-label="Table Columns"
-                        closeOnSelect={false}
-                        disallowEmptySelection
-                        onSelectionChange={(item) => {
-                            setVisibleColumns(Array.from(item));
-                        }}
-                        selectedKeys={visibleColumns}
-                        selectionMode="multiple"
-                    >
-                        {experimentColumns.map((column) => (
-                            <DropdownItem className="capitalize" key={column.uid}>
-                                {capitalize(column.name)}
-                            </DropdownItem>
-                        ))}
-                    </DropdownMenu>
-                </Dropdown>
-            )}
-            {type === 'dynamicConfigs' && (
-                <Dropdown>
-                    <DropdownTrigger className="hidden sm:flex">
-                        <Button
-                            endContent={<ChevronDownIcon/>}
-                            size="sm"
-                            variant="flat"
-                        >
-                            Columns
-                        </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu
-                        aria-label="Table Columns"
-                        closeOnSelect={false}
-                        disallowEmptySelection
-                        onSelectionChange={(item) => {
-                            setVisibleColumns(Array.from(item));
-                        }}
-                        selectedKeys={visibleColumns}
-                        selectionMode="multiple"
-                    >
-                        {dynamicConfigColumns.map((column) => (
-                            <DropdownItem className="capitalize" key={column.uid}>
-                                {capitalize(column.name)}
-                            </DropdownItem>
-                        ))}
-                    </DropdownMenu>
-                </Dropdown>
-            )}
+                  Status
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                aria-label="Table Columns"
+                closeOnSelect={false}
+                disallowEmptySelection
+                onSelectionChange={(item) => {
+                  setStatusFilter(item);
+                }}
+                selectedKeys={statusFilter}
+                selectionMode="multiple"
+              >
+                {experimentStatusOptions.map((status) => (
+                  <DropdownItem className="capitalize" key={status.uid}>
+                    {capitalize(status.name)}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+          )}
+          {type === 'experiments' && (
+            <Dropdown>
+              <DropdownTrigger className="hidden sm:flex">
+                <Button
+                  endContent={<ChevronDownIcon />}
+                  size="sm"
+                  variant="flat"
+                >
+                  Columns
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                aria-label="Table Columns"
+                closeOnSelect={false}
+                disallowEmptySelection
+                onSelectionChange={(item) => {
+                  setVisibleColumns(Array.from(item));
+                }}
+                selectedKeys={visibleColumns}
+                selectionMode="multiple"
+              >
+                {experimentColumns.map((column) => (
+                  <DropdownItem className="capitalize" key={column.uid}>
+                    {capitalize(column.name)}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+          )}
+          {type === 'dynamicConfigs' && (
+            <Dropdown>
+              <DropdownTrigger className="hidden sm:flex">
+                <Button
+                  endContent={<ChevronDownIcon />}
+                  size="sm"
+                  variant="flat"
+                >
+                  Columns
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                aria-label="Table Columns"
+                closeOnSelect={false}
+                disallowEmptySelection
+                onSelectionChange={(item) => {
+                  setVisibleColumns(Array.from(item));
+                }}
+                selectedKeys={visibleColumns}
+                selectionMode="multiple"
+              >
+                {dynamicConfigColumns.map((column) => (
+                  <DropdownItem className="capitalize" key={column.uid}>
+                    {capitalize(column.name)}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+          )}
+          {type === 'featureGates' && (
+            <Dropdown>
+              <DropdownTrigger className="hidden sm:flex">
+                <Button
+                  endContent={<ChevronDownIcon />}
+                  size="sm"
+                  variant="flat"
+                >
+                  Columns
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                aria-label="Table Columns"
+                closeOnSelect={false}
+                disallowEmptySelection
+                onSelectionChange={(item) => {
+                  setVisibleColumns(Array.from(item));
+                }}
+                selectedKeys={visibleColumns}
+                selectionMode="multiple"
+              >
+                {featureGateColumns.map((column) => (
+                  <DropdownItem className="capitalize" key={column.uid}>
+                    {capitalize(column.name)}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+          )}
           <Button
             as={'a'}
             className="bg-foreground text-background"
-            endContent={<ExternalLinkIcon color={'white'}/>}
+            endContent={<ExternalLinkIcon color={'white'} />}
             href={"https://console.statsig.com/"}
             size="sm"
             target="_blank"
@@ -147,7 +177,7 @@ const TopContent = ({
       </div>
       <div className="flex justify-between items-center">
         <span className="text-default-400 text-small">
-            Total {total} {type === 'experiments' ? 'experiments' : 'dynamic configs'}
+          Total {total} {type === 'experiments' ? 'experiments' : type === 'dynamicConfigs' ? 'dynamic configs' : 'feature gates'}
         </span>
         <label className="flex items-center text-default-400 text-small">
           Rows per page:

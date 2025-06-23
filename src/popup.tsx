@@ -4,6 +4,7 @@ import { Button, Navbar, NavbarBrand, NavbarItem } from "@nextui-org/react";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import DynamicConfigs from "~components/DynamicConfigs";
 import Experiments from "~components/Experiments";
+import FeatureGates from "~components/FeatureGates";
 import { SettingsIcon } from "~components/icons/SettingsIcon";
 import {
   getCurrentStorageValue,
@@ -21,6 +22,7 @@ import statsigLogo from "url:../assets/statsig-logo.png";
 const ExperimentSheet = lazy(() => import('~components/sheets/ExperimentSheet'));
 const ManageExperimentModal = lazy(() => import('~components/modals/manage-experiment/ManageExperimentModal'));
 const DynamicConfigSheet = lazy(() => import('~components/sheets/DynamicConfigSheet'));
+const FeatureGateSheet = lazy(() => import('~components/sheets/FeatureGateSheet'));
 const LoginModal = lazy(() => import('~components/modals/LoginModal'));
 const SettingsSheet = lazy(() => import('~components/sheets/SettingsSheet'));
 
@@ -34,6 +36,10 @@ const types = [
   {
     description: "Search for dynamic configs",
     name: "Dynamic Configs",
+  },
+  {
+    description: "Search for feature gates",
+    name: "Feature Gates",
   }
 ];
 
@@ -209,6 +215,14 @@ function IndexPopup() {
                   <DynamicConfigSheet />
                 </Suspense>
                 <DynamicConfigs />
+              </>
+            )}
+            {experimentOrConfig === "Feature Gates" && (
+              <>
+                <Suspense>
+                  <FeatureGateSheet />
+                </Suspense>
+                <FeatureGates />
               </>
             )}
             <Suspense>

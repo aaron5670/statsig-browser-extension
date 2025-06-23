@@ -28,6 +28,44 @@ export interface DynamicConfig {
   tags: string[];
 }
 
+export interface FeatureGate {
+  id: string;
+  name: string;
+  description: string;
+  idType: string;
+  lastModifierID: string;
+  lastModifiedTime: number;
+  lastModifierName: string;
+  lastModifierEmail: string | null;
+  creatorID: string;
+  createdTime: number;
+  creatorName: string;
+  creatorEmail: string | null;
+  targetApps: string[];
+  holdoutIDs: string[];
+  tags: string[];
+  isEnabled: boolean;
+  status: string;
+  rules: any[];
+  checksPerHour: number;
+  type: string;
+  typeReason: string;
+  team: string | null;
+  reviewSettings: {
+    requiredReview: boolean;
+    allowedReviewers: string[];
+  };
+  measureMetricLifts: boolean;
+  owner: {
+    ownerID: string;
+    ownerName: string;
+    ownerType: string;
+    ownerEmail: string;
+  };
+  monitoringMetrics: any[];
+  version?: number;
+}
+
 export interface HealthCheck {
   description: string;
   name: string;
