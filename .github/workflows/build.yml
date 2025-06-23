@@ -12,10 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Use Node.js 18.x
+      - name: Use Node.js 22.x
         uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 22.x
           cache: "npm"
 
       - name: Install dependencies with npm
@@ -24,10 +24,7 @@ jobs:
       - name: Build the extension
         run: |
           export NODE_OPTIONS="--max-old-space-size=4096 --trace-warnings"
-          echo "Building extension without zip first..."
-          npm run build
-          echo "Build completed, now creating zip..."
-          cd build && zip -r chrome-mv3-prod.zip chrome-mv3-prod/
+          npm run build --zip
         env:
           NODE_ENV: production
 
