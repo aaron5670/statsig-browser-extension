@@ -1,21 +1,22 @@
-import {Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Select, SelectItem} from "@nextui-org/react";
-import {NextUIProvider} from "@nextui-org/react";
-import {Button, Navbar, NavbarBrand, NavbarItem} from "@nextui-org/react";
-import {useLocalStorage} from "@uidotdev/usehooks";
+import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Select, SelectItem } from "@nextui-org/react";
+import { NextUIProvider } from "@nextui-org/react";
+import { Button, Navbar, NavbarBrand, NavbarItem } from "@nextui-org/react";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import DynamicConfigs from "~components/DynamicConfigs";
 import Experiments from "~components/Experiments";
-import {SettingsIcon} from "~components/icons/SettingsIcon";
+import { SettingsIcon } from "~components/icons/SettingsIcon";
 import {
-  getCurrentLocalStorageValue,
-  removeLocalStorageValue, updateLocalStorageValue,
+  getCurrentStorageValue,
+  removeStorageValue,
+  updateStorageValue,
 } from "~handlers/localStorageHandlers";
-import {fetcher} from "~helpers/fetcher";
-import {useStore} from "~store/useStore";
-import statsigLogo from "data-base64:./statsig-logo.svg";
-import {type Dispatch, type SetStateAction, Suspense, lazy} from "react";
-import React, {useEffect} from "react";
-import {RxCross2} from "react-icons/rx";
-import {SWRConfig, mutate} from "swr";
+import { fetcher } from "~helpers/fetcher";
+import { useStore } from "~store/useStore";
+import { type Dispatch, type SetStateAction, Suspense, lazy } from "react";
+import React, { useEffect } from "react";
+import { RxCross2 } from "react-icons/rx";
+import { SWRConfig, mutate } from "swr";
+import statsigLogo from "url:../assets/statsig-logo.png";
 
 const ExperimentSheet = lazy(() => import('~components/sheets/ExperimentSheet'));
 const ManageExperimentModal = lazy(() => import('~components/modals/manage-experiment/ManageExperimentModal'));
@@ -45,6 +46,7 @@ function IndexPopup() {
   } = useStore((state) => state);
   const [apiKey, setApiKey]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-console-api-key");
   const [localStorageValue]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-local-storage-key");
+  const [storageType]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-storage-type", "localStorage");
   const [experimentOrConfig, setExperimentOrConfig]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-experiment-or-config", "Experiments");
   const [currentOverrides] = useLocalStorage("statsig-current-overrides", []);
   const hasCustomOverride = currentOverrides?.find((override) => override.name === currentLocalStorageValue);
@@ -66,10 +68,10 @@ function IndexPopup() {
   }, []);
 
   const getLocalStorageValue = async () => {
-    chrome.tabs.query({active: true, currentWindow: true}, async (tabs) => {
-      const [localStorage] = await getCurrentLocalStorageValue(tabs[0].id, localStorageValue);
-      if (localStorage?.result) {
-        setCurrentLocalStorageValue(localStorage.result);
+    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+      const [storage] = await getCurrentStorageValue(tabs[0].id, localStorageValue, storageType as 'cookie' | 'localStorage');
+      if (storage?.result) {
+        setCurrentLocalStorageValue(storage.result);
       }
     });
   };
@@ -82,8 +84,8 @@ function IndexPopup() {
 
   const handleRemoveLocalStorageValue = () => {
     chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-      setCurrentLocalStorageValue('LocalStorage cleared...');
-      await removeLocalStorageValue(tabs[0].id, localStorageValue);
+      setCurrentLocalStorageValue(`${storageType === 'localStorage' ? 'LocalStorage' : 'Cookie'} cleared...`);
+      await removeStorageValue(tabs[0].id, localStorageValue, storageType as 'cookie' | 'localStorage');
       setTimeout(() => {
         getLocalStorageValue();
       }, 2000);
@@ -99,79 +101,79 @@ function IndexPopup() {
       }
 
       setCurrentLocalStorageValue(value);
-      await updateLocalStorageValue(tabs[0].id, localStorageValue, value);
+      await updateStorageValue(tabs[0].id, localStorageValue, value, storageType as 'cookie' | 'localStorage');
     });
   };
 
   return (
     <NextUIProvider>
-      <SWRConfig value={{fetcher}}>
+      <SWRConfig value={{ fetcher }}>
         <div className="w-[700px] min-h-[410px]">
           <Navbar>
             <NavbarBrand>
-              <img alt="Statsig logo" src={statsigLogo} width={125}/>
+              <img alt="Statsig logo" className="ml-1" src={statsigLogo} width={140} />
             </NavbarBrand>
             <div>
               {hasCustomOverride && (
                 <Select
-                    className="min-w-[175px]"
-                    defaultSelectedKeys={[currentLocalStorageValue]}
-                    items={currentOverrides as { name: string }[]}
-                    onChange={(value) => handleOverrides(value.target.value)}
-                    placeholder="No override enabled"
-                    required
-                    selectedKeys={[currentLocalStorageValue]}
-                    size="sm"
+                  className="min-w-[175px]"
+                  defaultSelectedKeys={[currentLocalStorageValue]}
+                  items={currentOverrides as { name: string }[]}
+                  onChange={(value) => handleOverrides(value.target.value)}
+                  placeholder="No override enabled"
+                  required
+                  selectedKeys={[currentLocalStorageValue]}
+                  size="sm"
                 >
-                  {({name}) => (
-                      <SelectItem className="flex gap-2 items-center" key={name} textValue={name} value={name}>
-                        <div className="flex flex-col">
-                          <span className="text-small">{name}</span>
-                        </div>
-                      </SelectItem>
+                  {({ name }) => (
+                    <SelectItem className="flex gap-2 items-center" key={name} textValue={name} value={name}>
+                      <div className="flex flex-col">
+                        <span className="text-small">{name}</span>
+                      </div>
+                    </SelectItem>
                   )}
                 </Select>
               )}
               {currentLocalStorageValue && !hasCustomOverride && (
                 <>
-                  <p className="text-sm text-gray-700">Current localStorage</p>
+                  <p className="text-sm text-gray-700">Current {storageType === 'localStorage' ? 'localStorage' : 'cookie'}</p>
                   <div className="flex items-center gap-2">
                     <p className="text-tiny text-foreground-400">
                       {currentLocalStorageValue}
                     </p>
                     <RxCross2
-                        className="text-red-500 cursor-pointer hover:text-red-800"
-                        onClick={handleRemoveLocalStorageValue}
-                        size={15}
+                      className="text-red-500 cursor-pointer hover:text-red-800"
+                      onClick={handleRemoveLocalStorageValue}
+                      size={15}
                     />
                   </div>
                 </>
               )}
             </div>
             <Select
-                className="max-w-[200px]"
-                defaultSelectedKeys={[experimentOrConfig]}
-                items={types}
-                onChange={(value) => setExperimentOrConfig(value.target.value)}
-                placeholder="Select a type..."
-                required
-                size="sm"
-                value={experimentOrConfig}
+              className="max-w-[200px]"
+              defaultSelectedKeys={[experimentOrConfig]}
+              items={types}
+              onChange={(value) => setExperimentOrConfig(value.target.value)}
+              placeholder="Select a type..."
+              required
+              size="sm"
+              value={experimentOrConfig}
             >
-              {({description, name}) => (
-                  <SelectItem className="flex gap-2 items-center" key={name} textValue={name} value={name}>
-                    <div className="flex flex-col">
-                      <span className="text-small">{name}</span>
-                      <span className="text-tiny text-default-400">{description}</span>
-                    </div>
-                  </SelectItem>
+              {({ description, name }) => (
+                <SelectItem className="flex gap-2 items-center" key={name} textValue={name} value={name}>
+                  <div className="flex flex-col">
+                    <span className="text-small">{name}</span>
+                    <span className="text-tiny text-default-400">{description}</span>
+                  </div>
+                </SelectItem>
               )}
             </Select>
             <NavbarItem>
               <Dropdown backdrop="opaque">
                 <DropdownTrigger>
                   <Button variant="flat">
-                    <SettingsIcon/>
+                    <SettingsIcon />
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu aria-label="Static Actions">
@@ -188,29 +190,29 @@ function IndexPopup() {
 
           <div className="container mx-auto">
             <Suspense>
-              <SettingsSheet/>
+              <SettingsSheet />
             </Suspense>
             {experimentOrConfig === "Experiments" && (
-                <>
-                  <Suspense>
-                    <ExperimentSheet/>
-                  </Suspense>
-                  <Suspense>
-                    <ManageExperimentModal/>
-                  </Suspense>
-                  <Experiments/>
-                </>
+              <>
+                <Suspense>
+                  <ExperimentSheet />
+                </Suspense>
+                <Suspense>
+                  <ManageExperimentModal />
+                </Suspense>
+                <Experiments />
+              </>
             )}
             {experimentOrConfig === "Dynamic Configs" && (
-                <>
-                  <Suspense>
-                    <DynamicConfigSheet/>
-                  </Suspense>
-                  <DynamicConfigs/>
-                </>
+              <>
+                <Suspense>
+                  <DynamicConfigSheet />
+                </Suspense>
+                <DynamicConfigs />
+              </>
             )}
             <Suspense>
-              <LoginModal/>
+              <LoginModal />
             </Suspense>
           </div>
         </div>

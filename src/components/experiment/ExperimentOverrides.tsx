@@ -1,12 +1,12 @@
-import type {Dispatch, SetStateAction} from "react";
+import type { Dispatch, SetStateAction } from "react";
 
-import {Button} from "@nextui-org/react";
-import {useLocalStorage} from "@uidotdev/usehooks";
-import {NoOverridesSection} from "~components/experiment/NoOverridesSection";
-import {getCurrentLocalStorageValue, updateLocalStorageValue} from "~handlers/localStorageHandlers";
-import {useStore} from "~store/useStore";
-import React, {Fragment, useEffect} from "react";
-import {Tooltip} from "react-tooltip";
+import { Button } from "@nextui-org/react";
+import { useLocalStorage } from "@uidotdev/usehooks";
+import { NoOverridesSection } from "~components/experiment/NoOverridesSection";
+import { getCurrentStorageValue, updateStorageValue } from "~handlers/localStorageHandlers";
+import { useStore } from "~store/useStore";
+import React, { Fragment, useEffect } from "react";
+import { Tooltip } from "react-tooltip";
 
 export type Override = {
   environment?: string;
@@ -18,32 +18,33 @@ interface Props {
   overrides: Override[];
 }
 
-export const ExperimentOverrides = ({overrides}: Props) => {
+export const ExperimentOverrides = ({ overrides }: Props) => {
   const { currentItemId, currentLocalStorageValue, setCurrentLocalStorageValue } = useStore((state) => state);
   const [localStorageValue]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-local-storage-key");
+  const [storageType]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-storage-type", "localStorage");
   const [, setCurrentOverrides] = useLocalStorage("statsig-current-overrides");
 
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-      const [localStorage] = await getCurrentLocalStorageValue(tabs[0].id, localStorageValue);
-      if (localStorage?.result) {
-        setCurrentLocalStorageValue(localStorage.result);
+      const [storage] = await getCurrentStorageValue(tabs[0].id, localStorageValue, storageType as 'cookie' | 'localStorage');
+      if (storage?.result) {
+        setCurrentLocalStorageValue(storage.result);
       }
     });
   }, []);
 
   if (!overrides.length) {
-    return <NoOverridesSection experimentationId={currentItemId}/>;
+    return <NoOverridesSection experimentationId={currentItemId} />;
   }
 
   const saveToLocalStorage = (value: string) => {
     // Store all overrides in local storage, so we can easily toggle between them later
-    setCurrentOverrides(overrides.map((override) => ({name: override.ids[0]})));
+    setCurrentOverrides(overrides.map((override) => ({ name: override.ids[0] })));
 
-    // Save the selected override to local storage
+    // Save the selected override to storage
     chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
       setCurrentLocalStorageValue(value);
-      await updateLocalStorageValue(tabs[0].id, localStorageValue, value);
+      await updateStorageValue(tabs[0].id, localStorageValue, value, storageType as 'cookie' | 'localStorage');
     });
   };
 
