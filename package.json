@@ -16,7 +16,6 @@
     "@nextui-org/react": "^2.4.8",
     "@uidotdev/usehooks": "^2.4.1",
     "@vahagn13/react-json-view": "^1.0.15",
-    "@xenova/transformers": "^2.17.2",
     "axios": "^1.7.8",
     "framer-motion": "^11.11.17",
     "fuse.js": "^7.0.0",
@@ -28,7 +27,6 @@
     "react-modal-sheet": "^3.3.0",
     "react-tooltip": "^5.28.0",
     "swr": "^2.2.5",
-    "vector-storage": "^1.0.55",
     "zustand": "^5.0.1"
   },
   "devDependencies": {
