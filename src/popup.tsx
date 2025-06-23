@@ -25,6 +25,7 @@ const DynamicConfigSheet = lazy(() => import('~components/sheets/DynamicConfigSh
 const FeatureGateSheet = lazy(() => import('~components/sheets/FeatureGateSheet'));
 const LoginModal = lazy(() => import('~components/modals/LoginModal'));
 const SettingsSheet = lazy(() => import('~components/sheets/SettingsSheet'));
+const UserDetailsSheet = lazy(() => import('~components/sheets/UserDetailsSheet'));
 
 import './main.css';
 
@@ -48,7 +49,8 @@ function IndexPopup() {
     currentLocalStorageValue,
     setAuthModalOpen,
     setCurrentLocalStorageValue,
-    setSettingsSheetOpen
+    setSettingsSheetOpen,
+    setUserDetailsSheetOpen
   } = useStore((state) => state);
   const [apiKey, setApiKey]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-console-api-key");
   const [localStorageValue]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-local-storage-key");
@@ -186,6 +188,9 @@ function IndexPopup() {
                   <DropdownItem key="Settings" onClick={() => setSettingsSheetOpen(true)}>
                     Settings
                   </DropdownItem>
+                  <DropdownItem key="UserDetails" onClick={() => setUserDetailsSheetOpen(true)}>
+                    User Details
+                  </DropdownItem>
                   <DropdownItem className="text-danger" color="danger" key="delete" onClick={handleLogout}>
                     Logout
                   </DropdownItem>
@@ -197,6 +202,9 @@ function IndexPopup() {
           <div className="container mx-auto">
             <Suspense>
               <SettingsSheet />
+            </Suspense>
+            <Suspense>
+              <UserDetailsSheet />
             </Suspense>
             {experimentOrConfig === "Experiments" && (
               <>
