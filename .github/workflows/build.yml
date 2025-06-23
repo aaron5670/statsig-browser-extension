@@ -24,7 +24,10 @@ jobs:
       - name: Build the extension
         run: |
           export NODE_OPTIONS="--max-old-space-size=4096 --trace-warnings"
-          npm run build --zip
+          echo "Building extension without zip first..."
+          npm run build
+          echo "Build completed, now creating zip..."
+          cd build && zip -r chrome-mv3-prod.zip chrome-mv3-prod/
         env:
           NODE_ENV: production
 
