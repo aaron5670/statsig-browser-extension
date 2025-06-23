@@ -11,30 +11,21 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - name: Cache pnpm modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-
-
-      - uses: pnpm/action-setup@v3
-        with:
-          version: latest
-          run_install: true
-
+      
       - name: Use Node.js 18.x
         uses: actions/setup-node@v4
         with:
           node-version: 18.x
-          cache: "pnpm"
+          cache: "npm"
+
+      - name: Install dependencies with npm
+        run: npm i
 
       - name: Build the extension
         run: |
           export NODE_OPTIONS="--max-old-space-size=4096 --trace-warnings"
           echo "Building extension without zip first..."
-          pnpm build
+          npm run build
           echo "Build completed, now creating zip..."
           cd build && zip -r chrome-mv3-prod.zip chrome-mv3-prod/
         env:
