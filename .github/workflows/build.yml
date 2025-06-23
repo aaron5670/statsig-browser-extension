@@ -31,7 +31,7 @@ jobs:
           cache: "pnpm"
 
       - name: Build the extension
-        run: pnpm install sharp && pnpm build --zip
+        run: pnpm build --zip
 
       - name: Archive the extension production build as ZIP
         uses: actions/upload-artifact@v4
