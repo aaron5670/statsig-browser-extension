@@ -35,7 +35,7 @@ jobs:
         run: pnpm install sharp && pnpm build --zip
 
       - name: Archive the extension production build as ZIP
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ github.sha }}-prod-build
           path: build/chrome-mv3-prod.zip
