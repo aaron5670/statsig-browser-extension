@@ -25,6 +25,16 @@ export const featureGateColumns = [
     { name: "ACTIONS", uid: "actions" },
 ];
 
+export const auditLogColumns = [
+    { name: "NAME", sortable: false, uid: "name" },
+    { name: "ACTION", sortable: false, uid: "actionType" },
+    { name: "CHANGE LOG", sortable: false, uid: "changeLog" },
+    { name: "UPDATED BY", sortable: false, uid: "updatedBy" },
+    { name: "DATE", sortable: false, uid: "date" },
+    { name: "TAGS", sortable: false, uid: "tags" },
+    { name: "ACTIONS", uid: "actions" },
+];
+
 export const experimentStatusOptions = [
     { name: "Active", uid: "active" },
     { name: "Abandoned", uid: "abandoned" },

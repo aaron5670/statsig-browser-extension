@@ -1,5 +1,6 @@
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input } from "@nextui-org/react";
 import {
+  auditLogColumns,
   dynamicConfigColumns,
   experimentColumns,
   experimentStatusOptions,
@@ -40,7 +41,7 @@ const TopContent = ({
           isClearable
           onClear={() => setFilterValue("")}
           onValueChange={onSearchChange}
-          placeholder={`Search ${type === 'experiments' ? 'experiment' : type === 'dynamicConfigs' ? 'dynamic config' : 'feature gate'} by name...`}
+          placeholder={`Search ${type === 'experiments' ? 'experiment' : type === 'dynamicConfigs' ? 'dynamic config' : type === 'featureGates' ? 'feature gate' : 'audit log'} by name...`}
           size="sm"
           startContent={<SearchIcon className="text-default-300" />}
           value={filterValue}
@@ -163,6 +164,35 @@ const TopContent = ({
               </DropdownMenu>
             </Dropdown>
           )}
+          {type === 'auditLogs' && (
+            <Dropdown>
+              <DropdownTrigger className="hidden sm:flex">
+                <Button
+                  endContent={<ChevronDownIcon />}
+                  size="sm"
+                  variant="flat"
+                >
+                  Columns
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                aria-label="Table Columns"
+                closeOnSelect={false}
+                disallowEmptySelection
+                onSelectionChange={(item) => {
+                  setVisibleColumns(Array.from(item));
+                }}
+                selectedKeys={visibleColumns}
+                selectionMode="multiple"
+              >
+                {auditLogColumns.map((column) => (
+                  <DropdownItem className="capitalize" key={column.uid}>
+                    {capitalize(column.name)}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+          )}
           <Button
             as={'a'}
             className="bg-foreground text-background"
@@ -177,7 +207,7 @@ const TopContent = ({
       </div>
       <div className="flex justify-between items-center">
         <span className="text-default-400 text-small">
-          Total {total} {type === 'experiments' ? 'experiments' : type === 'dynamicConfigs' ? 'dynamic configs' : 'feature gates'}
+          Total {total} {type === 'experiments' ? 'experiments' : type === 'dynamicConfigs' ? 'dynamic configs' : type === 'featureGates' ? 'feature gates' : 'audit logs'}
         </span>
         <label className="flex items-center text-default-400 text-small">
           Rows per page:
