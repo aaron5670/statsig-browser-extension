@@ -6,6 +6,7 @@ import { useStore } from "~store/useStore";
 import React from 'react';
 import { Sheet } from 'react-modal-sheet';
 import { Tooltip } from "react-tooltip";
+import TimeAgo from 'react-timeago';
 
 const FeatureGateSheet = () => {
   const {
@@ -89,15 +90,15 @@ const FeatureGateSheet = () => {
                           <div className="font-medium col-span-1">Created at</div>
                           <div className="col-span-1 font-medium">Updated at</div>
                           <div className="col-span-1 text-right text-gray-700 text-xs sm:text-left">
-                            {new Date(featureGate.createdTime).toLocaleString()} <span
+                            <TimeAgo date={new Date(featureGate.createdTime)} /> <span
                               className="text-gray-700 text-xs">
-                              ({featureGate.creatorName})
+                              ({new Date(featureGate.createdTime).toLocaleDateString()})
                             </span>
                           </div>
                           <div className="col-span-1 text-right text-gray-700 text-xs sm:text-left">
-                            {new Date(featureGate.lastModifiedTime).toLocaleString()} <span
+                            <TimeAgo date={new Date(featureGate.lastModifiedTime)} /> <span
                               className="text-gray-700 text-xs">
-                              ({featureGate.lastModifierName})
+                              ({new Date(featureGate.lastModifiedTime).toLocaleDateString()})
                             </span>
                           </div>
                         </dl>

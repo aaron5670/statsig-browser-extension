@@ -82,3 +82,23 @@ export interface Group {
 interface ParameterValue {
   [key: string]: boolean | number | string;
 }
+
+export interface AuditLog {
+  id: string;
+  name: string;
+  changeLog: string;
+  actionType: string;
+  date: string;
+  time: string;
+  updatedBy: string;
+  updatedByUserID: string;
+  modifierEmail: string;
+  changes?: {
+    rules?: {
+      new: any[];
+      old: any[];
+    };
+  };
+  tags: string[];
+  targetAppIDs: string[];
+}

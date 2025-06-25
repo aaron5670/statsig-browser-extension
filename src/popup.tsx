@@ -2,6 +2,7 @@ import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Select, SelectIt
 import { NextUIProvider } from "@nextui-org/react";
 import { Button, Navbar, NavbarBrand, NavbarItem } from "@nextui-org/react";
 import { useLocalStorage } from "@uidotdev/usehooks";
+import AuditLogs from "~components/AuditLogs";
 import DynamicConfigs from "~components/DynamicConfigs";
 import Experiments from "~components/Experiments";
 import FeatureGates from "~components/FeatureGates";
@@ -19,6 +20,8 @@ import { RxCross2 } from "react-icons/rx";
 import { SWRConfig, mutate } from "swr";
 import statsigLogo from "url:../assets/statsig-logo.png";
 
+const AuditLogDetailSheet = lazy(() => import('~components/sheets/AuditLogDetailSheet'));
+const AuditLogSheet = lazy(() => import('~components/sheets/AuditLogSheet'));
 const ExperimentSheet = lazy(() => import('~components/sheets/ExperimentSheet'));
 const ManageExperimentModal = lazy(() => import('~components/modals/manage-experiment/ManageExperimentModal'));
 const DynamicConfigSheet = lazy(() => import('~components/sheets/DynamicConfigSheet'));
@@ -41,6 +44,10 @@ const types = [
   {
     description: "Search for feature gates",
     name: "Feature Gates",
+  },
+  {
+    description: "Search for audit logs",
+    name: "Audit Logs",
   }
 ];
 
@@ -50,7 +57,8 @@ function IndexPopup() {
     setAuthModalOpen,
     setCurrentLocalStorageValue,
     setSettingsSheetOpen,
-    setUserDetailsSheetOpen
+    setUserDetailsSheetOpen,
+    setAuditLogSheetOpen
   } = useStore((state) => state);
   const [apiKey, setApiKey]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-console-api-key");
   const [localStorageValue]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-local-storage-key");
@@ -185,11 +193,14 @@ function IndexPopup() {
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu aria-label="Static Actions">
-                  <DropdownItem key="Settings" onClick={() => setSettingsSheetOpen(true)}>
-                    Settings
+                  <DropdownItem key="AuditLogs" onClick={() => setAuditLogSheetOpen(true)}>
+                    Audit Logs
                   </DropdownItem>
                   <DropdownItem key="UserDetails" onClick={() => setUserDetailsSheetOpen(true)}>
                     User Details
+                  </DropdownItem>
+                  <DropdownItem key="Settings" onClick={() => setSettingsSheetOpen(true)}>
+                    Settings
                   </DropdownItem>
                   <DropdownItem className="text-danger" color="danger" key="delete" onClick={handleLogout}>
                     Logout
@@ -205,6 +216,12 @@ function IndexPopup() {
             </Suspense>
             <Suspense>
               <UserDetailsSheet />
+            </Suspense>
+            <Suspense>
+              <AuditLogDetailSheet />
+            </Suspense>
+            <Suspense>
+              <AuditLogSheet />
             </Suspense>
             {experimentOrConfig === "Experiments" && (
               <>
@@ -232,6 +249,9 @@ function IndexPopup() {
                 </Suspense>
                 <FeatureGates />
               </>
+            )}
+            {experimentOrConfig === "Audit Logs" && (
+              <AuditLogs />
             )}
             <Suspense>
               <LoginModal />
