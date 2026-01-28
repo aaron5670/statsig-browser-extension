@@ -1,7 +1,9 @@
 import { Button, ScrollShadow, Spinner } from "@nextui-org/react";
 import FeatureGateRules from "~components/FeatureGateRules";
+import { GateOverrides } from "~components/GateOverrides";
 import { ExternalLinkIcon } from "~components/icons/ExternalLinkIcon";
 import { useFeatureGate } from "~hooks/useFeatureGate";
+import { useGateOverrides } from "~hooks/useGateOverrides";
 import { useStore } from "~store/useStore";
 import React from 'react';
 import { Sheet } from 'react-modal-sheet';
@@ -14,11 +16,15 @@ const FeatureGateSheet = () => {
     isItemSheetOpen,
     setItemSheetOpen,
   } = useStore((state) => state);
-  const { featureGate, error, isLoading } = useFeatureGate(currentItemId);
+  const { featureGate, error: gateError, isLoading: isLoadingGate } = useFeatureGate(currentItemId);
+  const { overrides, error: overridesError, isLoading: isLoadingOverrides } = useGateOverrides(currentItemId);
 
   const handleCloseSheet = () => {
     setItemSheetOpen(false);
   };
+
+  const isLoading = isLoadingGate || isLoadingOverrides;
+  const error = gateError || overridesError;
 
   return (
     <Sheet
@@ -78,11 +84,16 @@ const FeatureGateSheet = () => {
                 {!error && (
                   <ScrollShadow className="w-full px-3 pb-5">
                     <section>
-                      <div className="space-y-2">
+                      <div className="space-y-4">
+
+                        {/* Gate Overrides Section - At the Top */}
+                        {overrides && <GateOverrides overrides={overrides} />}
+
+                        {/* Details Section */}
                         <div>
                           <h2 className="text-lg font-medium">Details</h2>
-                          <p>
-                            {featureGate.description || 'No description provided.'}
+                          <p className="text-sm text-gray-700">
+                            {featureGate?.description || 'No description provided.'}
                           </p>
                         </div>
 
@@ -103,18 +114,18 @@ const FeatureGateSheet = () => {
                           </div>
                         </dl>
 
-                        <dl className="grid grid-cols-2 gap-y-1 text-sm mt-4">
+                        <dl className="grid grid-cols-2 gap-y-1 text-sm mt-2">
                           <div className="font-medium col-span-1">Status</div>
                           <div className="col-span-1 font-medium">Enabled</div>
                           <div className="col-span-1 text-right text-gray-700 text-xs sm:text-left">
-                            {featureGate.status}
+                            {featureGate?.status}
                           </div>
                           <div className="col-span-1 text-right text-gray-700 text-xs sm:text-left">
-                            {featureGate.isEnabled ? 'Yes' : 'No'}
+                            {featureGate?.isEnabled ? 'Yes' : 'No'}
                           </div>
                         </dl>
 
-                        {featureGate.tags && featureGate.tags.length > 0 && (
+                        {featureGate?.tags && featureGate.tags.length > 0 && (
                           <>
                             <h3 className="text-md font-medium mt-3">Tags</h3>
                             <div className="flex flex-wrap gap-1">
