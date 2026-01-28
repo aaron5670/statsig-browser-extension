@@ -66,6 +66,19 @@ export interface FeatureGate {
   version?: number;
 }
 
+export interface GateOverride {
+  passingUserIDs: string[];
+  failingUserIDs: string[];
+  passingCustomIDs?: string[];
+  failingCustomIDs?: string[];
+  environmentOverrides: {
+    environment: string | null;
+    unitID: string | null;
+    passingIDs: string[];
+    failingIDs: string[];
+  }[];
+}
+
 export interface HealthCheck {
   description: string;
   name: string;
