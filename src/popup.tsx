@@ -218,10 +218,10 @@ function IndexPopup() {
               <UserDetailsSheet />
             </Suspense>
             <Suspense>
-              <AuditLogDetailSheet />
+              <AuditLogSheet />
             </Suspense>
             <Suspense>
-              <AuditLogSheet />
+              <AuditLogDetailSheet />
             </Suspense>
             {experimentOrConfig === "Experiments" && (
               <>

@@ -29,10 +29,12 @@ export default function AuditLogs() {
   const {
     setCurrentAuditLogId,
     setAuditLogDetailSheetOpen,
+    setAuditLogSheetOpen,
   } = useStore((state) => state);
 
   const setCurrentAuditLog = (auditLogId: string) => {
     setCurrentAuditLogId(auditLogId);
+    setAuditLogSheetOpen(false);
     setAuditLogDetailSheetOpen(true);
   };
 
@@ -151,7 +153,7 @@ export default function AuditLogs() {
   return (
     <div className="w-full overflow-hidden">
       {/* Header Controls */}
-      <div className="flex flex-col gap-4 p-4 border-b border-divider">
+      <div className="flex flex-col gap-3 p-3 border-b border-divider">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Button
@@ -160,13 +162,14 @@ export default function AuditLogs() {
               variant="flat"
               onPress={refresh}
               isLoading={isLoading}
+              className="h-8"
             >
               Refresh
             </Button>
           </div>
           <Button
             as={'a'}
-            className="bg-foreground text-background"
+            className="bg-foreground text-background h-8"
             endContent={<ExternalLinkIcon color={'white'} />}
             href={"https://console.statsig.com/"}
             size="sm"
@@ -178,9 +181,9 @@ export default function AuditLogs() {
 
         {/* Search */}
         <div className="relative">
-          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
           <input
-            className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            className="w-full pl-9 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
             placeholder="Search audit logs..."
             value={filterValue}
             onChange={(e) => onSearchChange(e.target.value)}
@@ -192,9 +195,9 @@ export default function AuditLogs() {
       <div>
         {filteredItems.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-gray-500">
-            <p>No audit logs found</p>
+            <p className="text-sm">No audit logs found</p>
             {filterValue && (
-              <p className="text-sm mt-1">Try adjusting your search terms</p>
+              <p className="text-[10px] mt-1">Try adjusting your search terms</p>
             )}
           </div>
         ) : (
@@ -202,40 +205,40 @@ export default function AuditLogs() {
             {filteredItems.map((auditLog) => (
               <div
                 key={auditLog.id}
-                className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                className="px-4 py-3 hover:bg-gray-50/80 cursor-pointer transition-colors"
                 onClick={() => setCurrentAuditLog(auditLog.id)}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     {/* Action and Name */}
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-1.5">
                       <Chip
                         color={getActionTypeColor(auditLog.actionType)}
                         size="sm"
                         variant="flat"
-                        className="text-xs font-medium"
+                        className="h-5 text-[10px] font-medium"
                       >
                         {getActionTypeLabel(auditLog.actionType)}
                       </Chip>
-                      <h3 className="font-medium text-gray-900 truncate flex-1">
+                      <h3 className="text-sm font-bold text-gray-900 truncate flex-1">
                         {auditLog.name}
                       </h3>
                     </div>
 
                     {/* Change Description */}
                     {auditLog.changeLog && (
-                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                      <p className="text-xs text-gray-600 mb-1.5 line-clamp-1 leading-relaxed">
                         {auditLog.changeLog}
                       </p>
                     )}
 
                     {/* User and Date */}
-                    <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
-                      <span>By {auditLog.updatedBy}</span>
+                    <div className="flex items-center gap-1.5 text-[10px] text-gray-400 mb-1.5 font-medium">
+                      <span className="text-gray-500">By {auditLog.updatedBy}</span>
                       {auditLog.modifierEmail && auditLog.modifierEmail !== auditLog.updatedBy && (
                         <>
                           <span>•</span>
-                          <span className="truncate max-w-[120px]">{auditLog.modifierEmail}</span>
+                          <span className="truncate max-w-[100px]">{auditLog.modifierEmail}</span>
                         </>
                       )}
                       <span>•</span>
@@ -251,7 +254,7 @@ export default function AuditLogs() {
                             color={getTagColor(tag)}
                             size="sm"
                             variant="dot"
-                            className="text-xs"
+                            className="h-5 text-[10px]"
                           >
                             {tag}
                           </Chip>
@@ -269,14 +272,16 @@ export default function AuditLogs() {
                           radius="full"
                           size="sm"
                           variant="light"
+                          className="h-7 w-7 min-w-0"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <VerticalDotsIcon height={16} width={16} />
+                          <VerticalDotsIcon height={14} width={14} />
                         </Button>
                       </DropdownTrigger>
-                      <DropdownMenu>
+                      <DropdownMenu aria-label="Audit log actions">
                         <DropdownItem
                           key="view"
+                          textValue="View Details"
                           onClick={(e) => {
                             e.stopPropagation();
                             setCurrentAuditLog(auditLog.id);
@@ -287,6 +292,7 @@ export default function AuditLogs() {
                         <DropdownItem
                           key="open"
                           as={'a'}
+                          textValue="Open on Statsig"
                           endContent={<ExternalLinkIcon />}
                           href={`https://console.statsig.com`}
                           target="_blank"
@@ -305,13 +311,15 @@ export default function AuditLogs() {
 
         {/* Load More Button */}
         {!isReachingEnd && filteredItems.length > 0 && (
-          <div className="p-4 text-center border-t border-divider">
+          <div className="p-3 text-center border-t border-divider">
             <Button
               color="primary"
               variant="flat"
               onPress={loadMore}
               isLoading={isLoadingMore}
               disabled={isLoadingMore}
+              size="sm"
+              className="h-8"
             >
               {isLoadingMore ? 'Loading...' : 'Load More'}
             </Button>
@@ -320,7 +328,7 @@ export default function AuditLogs() {
 
         {/* End of Results */}
         {isReachingEnd && filteredItems.length > 0 && (
-          <div className="p-4 text-center text-gray-500 text-sm border-t border-divider">
+          <div className="p-3 text-center text-gray-400 text-[10px] border-t border-divider font-medium">
             You've reached the end of the audit logs
           </div>
         )}
