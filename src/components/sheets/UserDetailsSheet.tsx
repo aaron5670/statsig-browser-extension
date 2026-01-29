@@ -18,17 +18,15 @@ const UserDetailsSheet = () => {
       snapPoints={[350]}
     >
       <Sheet.Container>
-        <Sheet.Header>
-          <div className="p-3">
-            <h1 className={'text-2xl font-bold'}>User Details</h1>
-            <p className="text-sm text-gray-700">
-              Current user information from the Statsig SDK on this page.
-            </p>
-          </div>
+        <Sheet.Header className="px-4 py-2 border-b">
+          <h1 className={'text-lg font-bold text-gray-900'}>User Details</h1>
+          <p className="text-xs text-gray-500">
+            Current user information from the Statsig SDK on this page.
+          </p>
         </Sheet.Header>
         <Sheet.Content>
           <Sheet.Scroller className="flex flex-col justify-between" draggableAt="both">
-            <ScrollShadow className="w-full px-3 pb-5">
+            <ScrollShadow className="w-full px-4 pb-5">
               <UserDetails />
             </ScrollShadow>
           </Sheet.Scroller>

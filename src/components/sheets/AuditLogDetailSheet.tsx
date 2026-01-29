@@ -25,6 +25,7 @@ const AuditLogDetailSheet = () => {
     currentAuditLogId,
     isAuditLogDetailSheetOpen,
     setAuditLogDetailSheetOpen,
+    setAuditLogSheetOpen,
   } = useStore((state) => state);
 
   const { auditLogs, isLoading } = useAuditLogs();
@@ -32,6 +33,7 @@ const AuditLogDetailSheet = () => {
 
   const handleCloseSheet = () => {
     setAuditLogDetailSheetOpen(false);
+    setAuditLogSheetOpen(true);
   };
 
   const getActionTypeColor = (actionType: string) => {
@@ -111,30 +113,25 @@ const AuditLogDetailSheet = () => {
       className="audit-log-detail-sheet"
     >
       <Sheet.Container>
-        <Sheet.Header className="px-4 py-3 border-b bg-white">
-          <div className="flex justify-between items-start gap-4">
+        <Sheet.Header className="px-4 py-2 border-b bg-white">
+          <div className="flex justify-between items-center gap-4">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-2 mb-1">
                 <Chip
                   color={getActionTypeColor(auditLog.actionType)}
                   variant="flat"
                   size="sm"
-                  className="font-medium"
+                  className="font-medium h-5 text-[10px]"
                 >
                   {getActionTypeLabel(auditLog.actionType)}
                 </Chip>
-                <span className="text-xs text-gray-500 font-medium">
+                <span className="text-[10px] text-gray-400 font-medium">
                   <TimeAgo date={auditLogDate} />
                 </span>
               </div>
-              <h1 className="text-lg font-bold text-gray-900 leading-tight break-words">
+              <h1 className="text-base font-bold text-gray-900 leading-tight truncate">
                 {auditLog.name}
               </h1>
-              {auditLog.changeLog && (
-                <p className="text-sm text-gray-600 mt-1 leading-relaxed break-words">
-                  {auditLog.changeLog}
-                </p>
-              )}
             </div>
             <Button
               as="a"
@@ -144,7 +141,7 @@ const AuditLogDetailSheet = () => {
               size="sm"
               target="_blank"
               variant="solid"
-              className="shrink-0"
+              className="shrink-0 h-8"
             >
               Open
             </Button>
@@ -153,29 +150,26 @@ const AuditLogDetailSheet = () => {
 
         <Sheet.Content>
           <Sheet.Scroller className="flex flex-col" draggableAt="both">
-            <div className="px-4 py-4 space-y-4">
+            <div className="px-4 py-3 space-y-3">
               {/* User & Date Info Card */}
-              <Card className="shadow-sm">
-                <CardBody className="p-4">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
+              <Card className="shadow-sm border-none bg-gray-50/50">
+                <CardBody className="p-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
                       <Avatar
                         name={getInitials(auditLog.updatedBy)}
-                        size="md"
-                        className="bg-primary text-white shrink-0"
+                        size="sm"
+                        className="bg-primary text-white shrink-0 w-8 h-8 text-[10px]"
                       />
                       <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-gray-900 truncate">
+                        <p className="text-sm font-semibold text-gray-900 truncate leading-tight">
                           {auditLog.updatedBy}
                         </p>
                         {auditLog.modifierEmail && (
-                          <p className="text-sm text-gray-500 truncate">
+                          <p className="text-xs text-gray-500 truncate">
                             {auditLog.modifierEmail}
                           </p>
                         )}
-                        <p className="text-xs text-gray-400 mt-1">
-                          <TimeAgo date={auditLogDate} />
-                        </p>
                       </div>
                     </div>
 
@@ -183,12 +177,12 @@ const AuditLogDetailSheet = () => {
                       <div className="shrink-0">
                         <div className="flex flex-wrap gap-1 justify-end max-w-32">
                           {auditLog.tags.slice(0, 2).map((tag) => (
-                            <Chip key={tag} size="sm" variant="flat" color="warning">
+                            <Chip key={tag} size="sm" variant="flat" color="warning" className="h-5 text-[10px]">
                               {tag}
                             </Chip>
                           ))}
                           {auditLog.tags.length > 2 && (
-                            <Chip size="sm" variant="flat" color="default">
+                            <Chip size="sm" variant="flat" color="default" className="h-5 text-[10px]">
                               +{auditLog.tags.length - 2}
                             </Chip>
                           )}
@@ -201,39 +195,37 @@ const AuditLogDetailSheet = () => {
 
               {/* Changes Section */}
               {hasChanges ? (
-                <Card className="shadow-sm">
-                  <CardHeader className="pb-2 px-4 pt-4">
-                    <div className="flex items-center justify-between w-full">
-                      <h3 className="text-lg font-semibold text-gray-900">Changes</h3>
-                      <Badge content={auditLog.changes.rules.new.length} color="primary" size="sm">
-                        <div className="w-6 h-6" />
-                      </Badge>
-                    </div>
+                <Card className="shadow-sm border-none">
+                  <CardHeader className="pb-0 px-3 pt-3 flex justify-between items-center">
+                    <h3 className="text-sm font-bold text-gray-900">Changes</h3>
+                    <Chip size="sm" variant="flat" color="primary" className="h-5 text-[10px]">
+                      {auditLog.changes.rules.new.length} rules
+                    </Chip>
                   </CardHeader>
-                  <CardBody className="pt-0 px-4 pb-4">
+                  <CardBody className="pt-0 px-3 pb-3">
                     <Tabs
                       aria-label="Changes"
                       variant="underlined"
                       classNames={{
-                        tabList: "gap-6 w-full",
+                        tabList: "gap-4 w-full border-b border-divider",
                         cursor: "w-full bg-primary",
-                        tab: "max-w-fit px-0 h-12",
-                        tabContent: "group-data-[selected=true]:text-primary"
+                        tab: "max-w-fit px-0 h-8",
+                        tabContent: "group-data-[selected=true]:text-primary text-xs"
                       }}
                     >
                       <Tab
                         key="before"
                         title={
-                          <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                            <span className="font-medium">Before</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                            <span>Before</span>
                           </div>
                         }
                       >
-                        <div className="mt-4">
-                          <div className="bg-red-50 border border-red-200 rounded-lg p-3 max-h-80 overflow-auto">
+                        <div className="mt-2">
+                          <div className="bg-red-50/50 border border-red-100 rounded-lg p-2 max-h-60 overflow-auto">
                             <Suspense fallback={
-                              <div className="flex justify-center p-4">
+                              <div className="flex justify-center p-2">
                                 <Spinner size="sm" />
                               </div>
                             }>
@@ -249,12 +241,11 @@ const AuditLogDetailSheet = () => {
                                 onEdit={false}
                                 src={auditLog.changes.rules.old}
                                 theme="bright:inverted"
-                                collapsed={2}
+                                collapsed={1}
                                 style={{
-                                  fontSize: '12px',
-                                  fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
-                                  wordBreak: 'break-all',
-                                  overflowWrap: 'break-word'
+                                  fontSize: '11px',
+                                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                                  backgroundColor: 'transparent'
                                 }}
                               />
                             </Suspense>
@@ -265,16 +256,16 @@ const AuditLogDetailSheet = () => {
                       <Tab
                         key="after"
                         title={
-                          <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                            <span className="font-medium">After</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                            <span>After</span>
                           </div>
                         }
                       >
-                        <div className="mt-4">
-                          <div className="bg-green-50 border border-green-200 rounded-lg p-3 max-h-80 overflow-auto">
+                        <div className="mt-2">
+                          <div className="bg-green-50/50 border border-green-100 rounded-lg p-2 max-h-60 overflow-auto">
                             <Suspense fallback={
-                              <div className="flex justify-center p-4">
+                              <div className="flex justify-center p-2">
                                 <Spinner size="sm" />
                               </div>
                             }>
@@ -290,12 +281,11 @@ const AuditLogDetailSheet = () => {
                                 onEdit={false}
                                 src={auditLog.changes.rules.new}
                                 theme="bright:inverted"
-                                collapsed={2}
+                                collapsed={1}
                                 style={{
-                                  fontSize: '12px',
-                                  fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
-                                  wordBreak: 'break-all',
-                                  overflowWrap: 'break-word'
+                                  fontSize: '11px',
+                                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                                  backgroundColor: 'transparent'
                                 }}
                               />
                             </Suspense>
@@ -306,32 +296,32 @@ const AuditLogDetailSheet = () => {
                       <Tab
                         key="summary"
                         title={
-                          <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                            <span className="font-medium">Summary</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+                            <span>Summary</span>
                           </div>
                         }
                       >
-                        <div className="mt-4 space-y-3">
-                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="mt-2">
+                          <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-3">
+                            <div className="grid grid-cols-2 gap-3 text-xs">
                               <div>
-                                <span className="font-medium text-gray-700">Fields Changed:</span>
-                                <p className="text-gray-600 mt-1">
+                                <span className="font-semibold text-gray-500 uppercase tracking-wider text-[10px]">Fields Changed</span>
+                                <p className="text-gray-900 mt-0.5 font-medium">
                                   {Object.keys(auditLog.changes.rules.new).length} fields
                                 </p>
                               </div>
                               <div>
-                                <span className="font-medium text-gray-700">Change Type:</span>
-                                <p className="text-gray-600 mt-1">
+                                <span className="font-semibold text-gray-500 uppercase tracking-wider text-[10px]">Change Type</span>
+                                <p className="text-gray-900 mt-0.5 font-medium truncate">
                                   {getActionTypeLabel(auditLog.actionType)}
                                 </p>
                               </div>
                             </div>
                             {auditLog.changeLog && (
-                              <div className="mt-3 pt-3 border-t border-blue-200">
-                                <span className="font-medium text-gray-700">Description:</span>
-                                <p className="text-gray-600 mt-1 leading-relaxed">
+                              <div className="mt-2 pt-2 border-t border-blue-100">
+                                <span className="font-semibold text-gray-500 uppercase tracking-wider text-[10px]">Description</span>
+                                <p className="text-gray-700 mt-0.5 leading-normal text-xs">
                                   {auditLog.changeLog}
                                 </p>
                               </div>
@@ -343,20 +333,17 @@ const AuditLogDetailSheet = () => {
                   </CardBody>
                 </Card>
               ) : (
-                <Card className="shadow-sm">
-                  <CardBody className="p-6">
+                <Card className="shadow-sm border-none bg-gray-50/50">
+                  <CardBody className="p-4">
                     <div className="text-center">
-                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                       </div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No Detailed Changes</h3>
-                      <p className="text-gray-600 mb-1">
+                      <h3 className="text-sm font-bold text-gray-900 mb-1">No Detailed Changes</h3>
+                      <p className="text-xs text-gray-500">
                         This action doesn't include detailed rule changes.
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        This might be a simple action like adding/removing tags or metadata updates.
                       </p>
                     </div>
                   </CardBody>
@@ -365,14 +352,14 @@ const AuditLogDetailSheet = () => {
 
               {/* Additional Tags (if many) */}
               {auditLog.tags.length > 2 && (
-                <Card className="shadow-sm">
-                  <CardHeader className="pb-2 px-4 pt-4">
-                    <h3 className="text-md font-semibold text-gray-900">All Tags</h3>
+                <Card className="shadow-sm border-none">
+                  <CardHeader className="pb-1 px-3 pt-3">
+                    <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider">All Tags</h3>
                   </CardHeader>
-                  <CardBody className="pt-0 px-4 pb-4">
-                    <div className="flex flex-wrap gap-2">
+                  <CardBody className="pt-0 px-3 pb-3">
+                    <div className="flex flex-wrap gap-1">
                       {auditLog.tags.map((tag) => (
-                        <Chip key={tag} size="sm" variant="flat" color="warning">
+                        <Chip key={tag} size="sm" variant="flat" color="warning" className="h-5 text-[10px]">
                           {tag}
                         </Chip>
                       ))}

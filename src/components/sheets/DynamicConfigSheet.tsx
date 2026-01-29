@@ -29,22 +29,22 @@ const DynamicConfigSheet = () => {
       snapPoints={[300]}
     >
       <Sheet.Container>
-        <Sheet.Header>
-          <div className="flex justify-between items-center p-3">
-            <div className="max-w-[525px]">
+        <Sheet.Header className="px-4 py-2 border-b">
+          <div className="flex justify-between items-center">
+            <div className="flex-1 min-w-0">
               {isLoading ? (
-                <div className="h-7 bg-gray-200 rounded-xl animate-pulse dark:bg-gray-700 w-[320px]" />
+                <div className="h-6 bg-gray-200 rounded-lg animate-pulse w-48" />
               ) : (
                 <>
                   <h1
-                    className="text-xl font-bold cursor-pointer"
+                    className="text-lg font-bold text-gray-900 truncate cursor-pointer"
                     data-tooltip-id="copy-key-tooltip"
                     onClick={() => navigator.clipboard.writeText(currentItemId)}
                   >
                     {dynamicConfig?.name}
                   </h1>
                   <Tooltip
-                    content="Copy experiment key"
+                    content="Copy dynamic config key"
                     id="copy-key-tooltip"
                     opacity={1}
                     place="top"
@@ -53,7 +53,7 @@ const DynamicConfigSheet = () => {
                 </>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="shrink-0 ml-4">
               <Button
                 as="a"
                 color="primary"
@@ -62,6 +62,7 @@ const DynamicConfigSheet = () => {
                 size="sm"
                 target="_blank"
                 variant="solid"
+                className="h-8"
               >
                 Statsig
               </Button>
@@ -71,62 +72,80 @@ const DynamicConfigSheet = () => {
         <Sheet.Content>
           <Sheet.Scroller className="flex flex-col justify-between" draggableAt="both">
             {isLoading ? (
-              <div className="flex justify-center h-full">
+              <div className="flex justify-center py-12">
                 <Spinner size="lg" />
               </div>
             ) : (
               <>
-                {error && <p className="text-sm text-red-600 p-4 text-center">{error}</p>}
+                {error && <p className="text-xs text-red-600 p-4 text-center">{error}</p>}
                 {!error && (
-                  <ScrollShadow className="w-full px-3 pb-5">
-                    <section>
-                      <div className="space-y-2">
+                  <ScrollShadow className="w-full px-4 py-3">
+                    <div className="space-y-4">
+                      {/* Details & Metadata Card */}
+                      <div className="bg-gray-50/50 rounded-lg p-3 border border-gray-100 space-y-3">
                         <div>
-                          <h2 className="text-lg font-medium">Details</h2>
-                          <p>
+                          <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Description</h3>
+                          <p className="text-xs text-gray-700 leading-relaxed">
                             {dynamicConfig.description || 'No description provided.'}
                           </p>
                         </div>
 
-                        <dl className="grid grid-cols-2 gap-y-1 text-sm">
-                          <div className="font-medium col-span-1">Created at</div>
-                          <div className="col-span-1 font-medium">Updated at</div>
-                          <div className="col-span-1 text-right text-gray-700 text-xs sm:text-left">
-                            <TimeAgo date={new Date(dynamicConfig.createdTime)} /> <span
-                              className="text-gray-700 text-xs">
-                              ({dynamicConfig.creatorName})
-                            </span>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-2 pt-2 border-t border-gray-100">
+                          <div>
+                            <span className="text-[10px] font-semibold text-gray-400 uppercase">Created</span>
+                            <div className="text-xs text-gray-700 font-medium truncate">
+                              <TimeAgo date={new Date(dynamicConfig.createdTime)} />
+                              <span className="text-[10px] text-gray-400 ml-1 font-normal">({dynamicConfig.creatorName})</span>
+                            </div>
                           </div>
-                          <div className="col-span-1 text-right text-gray-700 text-xs sm:text-left">
-                            <TimeAgo date={new Date(dynamicConfig.lastModifiedTime)} /> <span
-                              className="text-gray-700 text-xs">
-                              ({dynamicConfig.lastModifierName})
-                            </span>
+                          <div>
+                            <span className="text-[10px] font-semibold text-gray-400 uppercase">Updated</span>
+                            <div className="text-xs text-gray-700 font-medium truncate">
+                              <TimeAgo date={new Date(dynamicConfig.lastModifiedTime)} />
+                              <span className="text-[10px] text-gray-400 ml-1 font-normal">({dynamicConfig.lastModifierName})</span>
+                            </div>
                           </div>
-                        </dl>
-
+                        </div>
                       </div>
-                    </section>
 
-                    <h2 className="text-lg font-medium mt-3">Default Value</h2>
-                    <p className="text-sm mb-2">
-                      {dynamicConfig.defaultValue ? 'The default value for this dynamic config is:' : 'Default value not set.'}
-                    </p>
-                    <Suspense fallback={<Spinner size="lg" />}>
-                      <ReactJson
-                        displayDataTypes={false}
-                        displayObjectSize={true}
-                        enableClipboard={false}
-                        iconStyle="triangle"
-                        indentWidth={4}
-                        name={false}
-                        onAdd={false}
-                        onDelete={false}
-                        onEdit={false}
-                        src={dynamicConfig.defaultValue}
-                        theme="bright:inverted"
-                      />
-                    </Suspense>
+                      {/* Default Value Section */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between px-1">
+                          <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Default Value</h3>
+                          <span className="text-[10px] text-gray-400 font-medium">
+                            {dynamicConfig.defaultValue ? 'JSON Object' : 'Empty'}
+                          </span>
+                        </div>
+
+                        <div className="bg-white border border-gray-100 rounded-lg p-2 overflow-hidden shadow-sm">
+                          <Suspense fallback={
+                            <div className="flex justify-center p-4">
+                              <Spinner size="sm" />
+                            </div>
+                          }>
+                            <ReactJson
+                              displayDataTypes={false}
+                              displayObjectSize={false}
+                              enableClipboard={true}
+                              iconStyle="triangle"
+                              indentWidth={2}
+                              name={false}
+                              onAdd={false}
+                              onDelete={false}
+                              onEdit={false}
+                              src={dynamicConfig.defaultValue}
+                              theme="bright:inverted"
+                              collapsed={1}
+                              style={{
+                                fontSize: '11px',
+                                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                                backgroundColor: 'transparent'
+                              }}
+                            />
+                          </Suspense>
+                        </div>
+                      </div>
+                    </div>
                   </ScrollShadow>
                 )}
               </>

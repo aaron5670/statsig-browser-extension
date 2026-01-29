@@ -41,64 +41,75 @@ const SettingsSheet = () => {
       disableDrag={localStorageValue === ''}
       isOpen={isSettingsSheetOpen}
       onClose={handleClose}
-      snapPoints={[350]}
+      snapPoints={[380]}
     >
-      <Sheet.Container className={'p-5'}>
-        <Sheet.Header>
-          <h1 className={'text-2xl font-bold'}>Settings</h1>
-          <p className="text-sm text-gray-700">
-            Here you can set your storage key that will be used on the website to identify the user.
+      <Sheet.Container className="px-5 py-3">
+        <Sheet.Header className="border-b pb-2 mb-4">
+          <h1 className="text-lg font-bold text-gray-900">Settings</h1>
+          <p className="text-xs text-gray-500">
+            Configure your storage key and identification method.
           </p>
         </Sheet.Header>
-        <Sheet.Content className="flex flex-col justify-between gap-2 mt-6" disableDrag>
+        <Sheet.Content className="flex flex-col gap-3" disableDrag>
           <Input
-            description={`For example: '${storageType === 'localStorage' ? 'FEATURE_MANAGEMENT_USER_ID' : 'statsig_user_id'}'`}
-            errorMessage={invalid && `Please enter a ${storageType === 'localStorage' ? 'local storage' : 'cookie'} key, for example: '${storageType === 'localStorage' ? 'FEATURE_MANAGEMENT_USER_ID' : 'statsig_user_id'}'`}
+            description={`Example: '${storageType === 'localStorage' ? 'FEATURE_MANAGEMENT_USER_ID' : 'statsig_user_id'}'`}
+            errorMessage={invalid && `Enter a ${storageType === 'localStorage' ? 'local storage' : 'cookie'} key`}
             isInvalid={invalid}
             label={`${storageType === 'localStorage' ? 'Local storage' : 'Cookie'} key`}
             onChange={handleInputChange}
-            placeholder={`Enter a ${storageType === 'localStorage' ? 'local storage' : 'cookie'} key`}
+            placeholder={`Enter key...`}
             size="sm"
             type="text"
             value={value}
             variant="flat"
+            classNames={{
+              label: "text-xs font-bold",
+              description: "text-[10px]",
+              input: "text-sm"
+            }}
           />
 
           <RadioGroup
-            className="mt-3"
-            label="Where do you want to store the override?"
+            label="Storage Type"
             onValueChange={setStorageType}
             orientation="horizontal"
             size="sm"
             value={storageType}
+            classNames={{
+              label: "text-xs font-bold text-gray-700"
+            }}
           >
-            <Radio value="localStorage">Local Storage</Radio>
-            <Radio value="cookie">Cookie</Radio>
+            <Radio value="localStorage" classNames={{ label: "text-xs" }}>Local Storage</Radio>
+            <Radio value="cookie" classNames={{ label: "text-xs" }}>Cookie</Radio>
           </RadioGroup>
 
           <RadioGroup
-            className="mt-3"
-            label="What type of Statsig Console key are you using?"
+            label="Console Key Type"
             onValueChange={setTypeApiKey}
             orientation="horizontal"
             size="sm"
             value={typeApiKey}
+            classNames={{
+              label: "text-xs font-bold text-gray-700"
+            }}
           >
-            <Radio value="read-key">Read-only</Radio>
-            <Radio value="write-key">Read and write</Radio>
+            <Radio value="read-key" classNames={{ label: "text-xs" }}>Read-only</Radio>
+            <Radio value="write-key" classNames={{ label: "text-xs" }}>Read/Write</Radio>
           </RadioGroup>
 
-          <div className="flex justify-end space-x-2">
+          <div className="flex justify-end gap-2 mt-4">
             {localStorageValue !== '' && (
-              <Button color="danger" onPress={handleClose} variant="light">
+              <Button color="danger" onPress={handleClose} variant="light" size="sm">
                 Close
               </Button>
             )}
             <Button
               color="primary"
               onPress={handleSave}
+              size="sm"
+              className="font-bold"
             >
-              Save
+              Save Settings
             </Button>
           </div>
         </Sheet.Content>

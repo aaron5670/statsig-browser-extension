@@ -19,16 +19,16 @@ const AuditLogSheet = () => {
     >
       <Sheet.Container style={{ zIndex: 1000 }}>
         <Sheet.Header>
-          <div className="p-3">
-            <h1 className={'text-2xl font-bold'}>Audit Logs</h1>
-            <p className="text-sm text-gray-700">
+          <div className="px-4 py-2 border-b">
+            <h1 className={'text-lg font-bold text-gray-900'}>Audit Logs</h1>
+            <p className="text-xs text-gray-500">
               View and track all changes made to your Statsig configurations.
             </p>
           </div>
         </Sheet.Header>
         <Sheet.Content>
           <Sheet.Scroller className="flex flex-col justify-between" draggableAt="both">
-            <ScrollShadow className="w-full px-3 pb-5">
+            <ScrollShadow className="w-full px-4 pb-5">
               <AuditLogs />
             </ScrollShadow>
           </Sheet.Scroller>
