@@ -1,6 +1,7 @@
 # Statsig Experimentation - Chrome & Firefox Extension
 
-![Statsig Browser Extension](https://github.com/aaron5670/statsig-browser-extension/assets/17295145/2e75d3f1-1ba3-4b07-9146-11c456edd1af)
+<img width="1920" height="1080" alt="Statsig Browser Extension" src="https://github.com/user-attachments/assets/1a7b82b2-6d48-4352-963b-5546390ef666" />
+
 
 The Statsig Experimentation Browser Extension is a powerful tool designed for managing and testing Statsig Experiments
 directly within your Chromium browser. With a user-friendly interface, it provides a seamless way to search, view, and
