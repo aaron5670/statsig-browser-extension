@@ -54,7 +54,6 @@
       "https://*/*"
     ],
     "permissions": [
-      "contextMenus",
       "scripting"
     ]
   },
