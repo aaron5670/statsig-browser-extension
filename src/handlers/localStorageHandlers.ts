@@ -1,3 +1,4 @@
+import { browser } from "wxt/browser";
 import {
   deleteCookieValue,
   deleteLocalStorageValue,
@@ -12,7 +13,7 @@ const updateLocalStorageValue = async (
   localStorageKey: string,
   localStorageValue: string
 ) => {
-  await chrome.scripting.executeScript({
+  await browser.scripting.executeScript({
     args: [localStorageKey, localStorageValue],
     func: setLocalStorageValue,
     target: { tabId },
@@ -24,7 +25,7 @@ const removeLocalStorageValue = async (
   tabId: number,
   localStorageKey: string
 ) => {
-  await chrome.scripting.executeScript({
+  await browser.scripting.executeScript({
     args: [localStorageKey],
     func: deleteLocalStorageValue,
     target: { tabId },
@@ -36,7 +37,7 @@ const getCurrentLocalStorageValue = async (
   tabId: number,
   localStorageKey: string
 ) => {
-  return chrome.scripting.executeScript({
+  return browser.scripting.executeScript({
     args: [localStorageKey],
     func: getLocalStorageValue,
     target: { tabId },
@@ -50,7 +51,7 @@ const updateCookieValue = async (
   cookieKey: string,
   cookieValue: string
 ) => {
-  await chrome.scripting.executeScript({
+  await browser.scripting.executeScript({
     args: [cookieKey, cookieValue],
     func: setCookieValue,
     target: { tabId },
@@ -59,7 +60,7 @@ const updateCookieValue = async (
 };
 
 const removeCookieValue = async (tabId: number, cookieKey: string) => {
-  await chrome.scripting.executeScript({
+  await browser.scripting.executeScript({
     args: [cookieKey],
     func: deleteCookieValue,
     target: { tabId },
@@ -68,7 +69,7 @@ const removeCookieValue = async (tabId: number, cookieKey: string) => {
 };
 
 const getCurrentCookieValue = async (tabId: number, cookieKey: string) => {
-  return chrome.scripting.executeScript({
+  return browser.scripting.executeScript({
     args: [cookieKey],
     func: getCookieValue,
     target: { tabId },

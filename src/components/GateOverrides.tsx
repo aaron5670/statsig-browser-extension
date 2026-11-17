@@ -1,182 +1,66 @@
-import type { Dispatch, SetStateAction } from "react";
-import { Button } from "@heroui/react";
-import { useLocalStorage } from "@uidotdev/usehooks";
-import {
-  getCurrentStorageValue,
-  removeStorageValue,
-  updateStorageValue
-} from "~/handlers/localStorageHandlers";
-import { useStore } from "~/store/useStore";
-import { Fragment, useEffect } from "react";
-import { Tooltip } from "react-tooltip";
+import { keyListItems } from "~/helpers/keyListItems";
 import type { GateOverride } from "~/types/statsig";
+import {
+  OverrideButton,
+  OverrideControls
+} from "./experiment/OverrideControls";
 
-interface Props {
-  overrides: GateOverride;
-}
-
-export const GateOverrides = ({ overrides }: Props) => {
-  const { currentLocalStorageValue, setCurrentLocalStorageValue } = useStore(
-    (state) => state
-  );
-  const [localStorageValue]: [string, Dispatch<SetStateAction<string>>] =
-    useLocalStorage("statsig-local-storage-key");
-  const [storageType]: [string, Dispatch<SetStateAction<string>>] =
-    useLocalStorage("statsig-storage-type", "localStorage");
-  const [, setCurrentOverrides] = useLocalStorage("statsig-current-overrides");
-
-  useEffect(() => {
-    if (!localStorageValue) return;
-    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-      if (tabs[0]?.id) {
-        const [storage] = await getCurrentStorageValue(
-          tabs[0].id,
-          localStorageValue,
-          storageType as "cookie" | "localStorage"
-        );
-        if (storage?.result) {
-          setCurrentLocalStorageValue(storage.result);
-        }
+export function GateOverrides({ overrides }: { overrides: GateOverride }) {
+  const groups = [
+    { label: "Passing user IDs", ids: overrides.passingUserIDs },
+    { label: "Failing user IDs", ids: overrides.failingUserIDs },
+    { label: "Passing custom IDs", ids: overrides.passingCustomIDs },
+    { label: "Failing custom IDs", ids: overrides.failingCustomIDs },
+    ...(overrides.environmentOverrides ?? []).flatMap(
+      ({ environment, unitID, passingIDs, failingIDs }) => {
+        const scope = [environment || "All environments", unitID]
+          .filter(Boolean)
+          .join(" · ");
+        return [
+          { label: `Passing IDs · ${scope}`, ids: passingIDs },
+          { label: `Failing IDs · ${scope}`, ids: failingIDs }
+        ];
       }
-    });
-  }, [localStorageValue, setCurrentLocalStorageValue, storageType]);
-
-  const saveToLocalStorage = (value: string) => {
-    // Store all overrides in local storage, so we can easily toggle between them later
-    const allOverrideIds = [
-      ...overrides.passingUserIDs,
-      ...overrides.failingUserIDs,
-      ...(overrides.passingCustomIDs || []),
-      ...(overrides.failingCustomIDs || [])
-    ];
-    setCurrentOverrides(allOverrideIds.map((id) => ({ name: id })));
-
-    // Save the selected override to storage
-    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-      if (tabs[0]?.id) {
-        setCurrentLocalStorageValue(value);
-        await updateStorageValue(
-          tabs[0].id,
-          localStorageValue,
-          value,
-          storageType as "cookie" | "localStorage"
-        );
-      }
-    });
-  };
-
-  const clearOverride = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-      if (tabs[0]?.id) {
-        setCurrentLocalStorageValue("");
-        await removeStorageValue(
-          tabs[0].id,
-          localStorageValue,
-          storageType as "cookie" | "localStorage"
-        );
-      }
-    });
-  };
-
-  const hasOverrides =
-    overrides.passingUserIDs.length > 0 ||
-    overrides.failingUserIDs.length > 0 ||
-    (overrides.passingCustomIDs && overrides.passingCustomIDs.length > 0) ||
-    (overrides.failingCustomIDs && overrides.failingCustomIDs.length > 0);
-
-  if (!hasOverrides) {
-    return null;
+    )
+  ].filter(({ ids }) => ids?.length);
+  const options = groups.flatMap(({ ids }) => ids);
+  if (!options.length) {
+    return (
+      <section className="grid gap-1">
+        <h3 className="text-sm font-semibold">Gate overrides</h3>
+        <p className="text-sm text-default-600">
+          No overrides are configured for this feature gate.
+        </p>
+      </section>
+    );
   }
 
-  const hasActiveOverride = Boolean(currentLocalStorageValue);
-
   return (
-    <div>
-      <div className="flex items-center justify-between mb-1">
-        <h3 className="text-lg font-bold">Gate overrides</h3>
-        {hasActiveOverride && (
-          <>
-            <Button
-              color="default"
-              onPress={clearOverride}
-              size="sm"
-              variant="light"
-              data-tooltip-id="clear-override-tooltip">
-              Clear
-            </Button>
-            <Tooltip
-              content="Clear the active override"
-              id="clear-override-tooltip"
-              opacity={1}
-              place="top"
-              variant="dark"
-            />
-          </>
-        )}
-      </div>
-      <p className="text-sm text-gray-700 mb-3">
-        Here you can view and inject an override to your local storage.
-      </p>
-
-      {overrides.passingUserIDs.length > 0 && (
-        <div className="mb-3">
-          <p className="text-xs font-semibold text-gray-600 uppercase mb-1.5">
-            Passing User IDs
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {overrides.passingUserIDs.map((id) => (
-              <Fragment key={id}>
-                <Button
-                  color={
-                    currentLocalStorageValue === id ? "success" : "default"
-                  }
-                  data-tooltip-id={`tooltip-pass-${id}`}
-                  onPress={() => saveToLocalStorage(id)}
-                  size="sm"
-                  variant="flat">
-                  {id}
-                </Button>
-                <Tooltip
-                  content="Passing User ID"
-                  id={`tooltip-pass-${id}`}
-                  opacity={1}
-                  place="top"
-                  variant="dark"
-                />
-              </Fragment>
-            ))}
-          </div>
-        </div>
+    <OverrideControls options={options} title="Gate overrides">
+      {({ activeId, disabled, setOverride }) => (
+        <ul className="grid gap-3">
+          {keyListItems(groups, ({ label, ids }) =>
+            JSON.stringify([label, ids])
+          ).map(({ item, key }) => (
+            <li className="grid gap-1" key={key}>
+              <p className="text-xs font-medium text-default-600 wrap-anywhere">
+                {item.label}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {[...new Set(item.ids)].map((id) => (
+                  <OverrideButton
+                    key={id}
+                    identity={id}
+                    active={activeId === id}
+                    disabled={disabled}
+                    onApply={() => setOverride(id, options)}
+                  />
+                ))}
+              </div>
+            </li>
+          ))}
+        </ul>
       )}
-
-      {overrides.failingUserIDs.length > 0 && (
-        <div>
-          <p className="text-xs font-semibold text-gray-600 uppercase mb-1.5">
-            Failing User IDs
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {overrides.failingUserIDs.map((id) => (
-              <Fragment key={id}>
-                <Button
-                  color={currentLocalStorageValue === id ? "danger" : "default"}
-                  data-tooltip-id={`tooltip-fail-${id}`}
-                  onPress={() => saveToLocalStorage(id)}
-                  size="sm"
-                  variant="flat">
-                  {id}
-                </Button>
-                <Tooltip
-                  content="Failing User ID"
-                  id={`tooltip-fail-${id}`}
-                  opacity={1}
-                  place="top"
-                  variant="dark"
-                />
-              </Fragment>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+    </OverrideControls>
   );
-};
+}

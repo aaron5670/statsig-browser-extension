@@ -1,3 +1,147 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
 @source "../node_modules/@heroui/theme/dist";
+
+:root {
+  color-scheme: light;
+  background: hsl(var(--heroui-background));
+  color: hsl(var(--heroui-foreground));
+}
+
+::selection {
+  background: hsl(var(--heroui-primary-100));
+  color: hsl(var(--heroui-primary-900));
+}
+
+.popup-shell {
+  width: 700px;
+  max-width: 100%;
+  min-height: 420px;
+}
+
+.popup-gutter {
+  padding-inline: 20px;
+}
+
+.popup-header {
+  border-bottom: 1px solid hsl(var(--heroui-divider));
+}
+
+.popup-header-inner {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 16px;
+  min-height: 60px;
+}
+
+.popup-main {
+  min-width: 0;
+  padding-block: 16px;
+}
+
+.resource-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 4px;
+}
+
+.resource-nav button {
+  min-height: 36px;
+  border-radius: 6px;
+  padding-inline: 9px;
+  color: hsl(var(--heroui-foreground-600));
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 550;
+  text-align: center;
+}
+
+.resource-nav button:hover {
+  background: hsl(var(--heroui-default-100));
+  color: hsl(var(--heroui-foreground));
+}
+
+.resource-nav button[aria-current="page"] {
+  background: hsl(var(--heroui-primary-50));
+  color: hsl(var(--heroui-primary-700));
+}
+
+.resource-nav button:focus-visible {
+  outline: 2px solid hsl(var(--heroui-focus));
+  outline-offset: 2px;
+}
+
+.override-bar {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 12px;
+  border: 1px solid hsl(var(--heroui-divider));
+  border-radius: 8px;
+  background: hsl(var(--heroui-content2));
+  padding: 8px 12px;
+}
+
+.override-bar p:empty {
+  display: none;
+}
+
+.detail-dialog-content {
+  display: contents;
+}
+
+@media (max-height: 420px) {
+  .detail-dialog-content {
+    display: block;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .detail-dialog-body {
+    overflow-y: visible;
+  }
+
+  .detail-dialog-close {
+    position: static;
+    width: 32px;
+    height: 32px;
+    margin-block-start: 4px;
+    margin-inline-end: 12px;
+    flex: none;
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 600px) {
+  .popup-header-inner {
+    grid-template-columns: 1fr auto;
+    row-gap: 6px;
+    padding-block: 8px 6px;
+  }
+
+  .resource-nav {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .popup-gutter {
+    padding-inline: 12px;
+  }
+
+  .resource-nav {
+    column-gap: 2px;
+  }
+
+  .resource-nav button {
+    padding-inline: 2px;
+    font-size: 0.75rem;
+    line-height: 1.2;
+  }
+}

@@ -1,24 +1,48 @@
 export interface Experiment {
   allocation: number;
+  controlGroupID?: string | null;
   createdTime: number;
   creatorName: string;
+  decisionTime?: number | null;
   description: string;
-  endTime: number;
+  endTime: number | null;
   groups: Group[];
   healthChecks: HealthCheck[];
   hypothesis: string;
   id: string;
+  idType?: string;
+  inlineTargetingRules?: unknown[];
+  launchedGroupID?: string | null;
   lastModifiedTime?: number;
   name: string;
-  startTime: number;
+  otherMetrics?: ExperimentMetric[];
+  owner?: { ownerName?: string } | null;
+  primaryMetrics?: ExperimentMetric[];
+  secondaryMetrics?: ExperimentMetric[];
+  startTime: number | null;
   status: string;
   tags: string[];
+  targetingGateID?: string | null;
+  team?: string | null;
 }
+
+interface ExperimentMetric {
+  name: string;
+  type: string;
+}
+
+export type JsonData =
+  | null
+  | boolean
+  | number
+  | string
+  | JsonData[]
+  | { [key: string]: JsonData };
 
 export interface DynamicConfig {
   createdTime: number;
   creatorName: string;
-  defaultValue: never; // JSON Object
+  defaultValue?: JsonData;
   defaultValueJsonC: string;
   description: string;
   id: string;
@@ -83,18 +107,16 @@ export interface GateOverride {
 export interface HealthCheck {
   description: string;
   name: string;
-  status: "PASSED" | "WAITING";
+  status: string;
 }
 
 export interface Group {
   id: string;
   name: string;
-  parameterValues: ParameterValue;
+  isControl?: boolean;
+  parameterValues?: Record<string, JsonData>;
+  shipped?: boolean;
   size: number;
-}
-
-interface ParameterValue {
-  [key: string]: boolean | number | string;
 }
 
 export interface AuditLog {

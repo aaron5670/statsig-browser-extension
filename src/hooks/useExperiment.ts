@@ -8,21 +8,21 @@ export const useExperiment = (
   error: null | string;
   experiment?: Experiment;
   isLoading: boolean;
+  retry: () => void;
 } => {
-  const key = experimentId
-    ? `https://statsigapi.net/console/v1/experiments/${experimentId}`
-    : null;
-  const { data, isLoading } = useSWR(key);
+  const key = experimentId ? `/experiments/${experimentId}` : null;
+  const { data, error: requestError, isLoading, mutate } = useSWR(key);
 
   const error =
-    data?.status || !data?.data
-      ? "An error occurred while fetching experiment data."
+    requestError || data?.status || !data?.data
+      ? "Couldn’t load experiment details."
       : null;
   const experiment = data?.data;
 
   return {
     error,
     experiment,
-    isLoading
+    isLoading,
+    retry: () => void mutate()
   };
 };

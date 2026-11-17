@@ -1,333 +1,291 @@
 import {
+  Button,
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
+  HeroUIProvider,
   Select,
   SelectItem
 } from "@heroui/react";
-import { HeroUIProvider } from "@heroui/react";
-import { Button, Navbar, NavbarBrand, NavbarItem } from "@heroui/react";
 import { useLocalStorage } from "@uidotdev/usehooks";
+import { Activity, lazy, Suspense, useRef, useState } from "react";
+import { FiExternalLink } from "react-icons/fi";
+import { mutate, SWRConfig } from "swr";
 import AuditLogs from "~/components/AuditLogs";
 import DynamicConfigs from "~/components/DynamicConfigs";
 import Experiments from "~/components/Experiments";
 import FeatureGates from "~/components/FeatureGates";
 import { SettingsIcon } from "~/components/icons/SettingsIcon";
-import {
-  getCurrentStorageValue,
-  removeStorageValue,
-  updateStorageValue
-} from "~/handlers/localStorageHandlers";
+import LoginModal from "~/components/modals/LoginModal";
+import { RemoveTabValueButton } from "~/components/RemoveTabValueButton";
+import ReviewPrompt, {
+  chromeWebStoreReviewsUrl,
+  markReviewPromptSeen
+} from "~/components/ReviewPrompt";
+import SettingsSheet from "~/components/sheets/SettingsSheet";
 import { fetcher } from "~/helpers/fetcher";
+import { usePageOverride } from "~/hooks/usePageOverride";
 import { useStore } from "~/store/useStore";
-import { type Dispatch, type SetStateAction, Suspense, lazy } from "react";
-import { useCallback, useEffect, useRef } from "react";
-import { RxCross2 } from "react-icons/rx";
-import { SWRConfig, mutate } from "swr";
 import statsigLogo from "../assets/statsig-logo.png";
+import "./main.css";
 
-const AuditLogDetailSheet = lazy(
-  () => import("~/components/sheets/AuditLogDetailSheet")
-);
-const AuditLogSheet = lazy(() => import("~/components/sheets/AuditLogSheet"));
-const ExperimentSheet = lazy(
-  () => import("~/components/sheets/ExperimentSheet")
-);
 const ManageExperimentModal = lazy(
   () => import("~/components/modals/manage-experiment/ManageExperimentModal")
 );
 const DynamicConfigSheet = lazy(
   () => import("~/components/sheets/DynamicConfigSheet")
 );
+const ExperimentSheet = lazy(
+  () => import("~/components/sheets/ExperimentSheet")
+);
 const FeatureGateSheet = lazy(
   () => import("~/components/sheets/FeatureGateSheet")
 );
-const LoginModal = lazy(() => import("~/components/modals/LoginModal"));
-const SettingsSheet = lazy(() => import("~/components/sheets/SettingsSheet"));
 const UserDetailsSheet = lazy(
   () => import("~/components/sheets/UserDetailsSheet")
 );
 
-import "./main.css";
-
-const types = [
-  {
-    description: "Search for experiments",
-    name: "Experiments"
-  },
-  {
-    description: "Search for dynamic configs",
-    name: "Dynamic Configs"
-  },
-  {
-    description: "Search for feature gates",
-    name: "Feature Gates"
-  },
-  {
-    description: "Search for audit logs",
-    name: "Audit Logs"
-  }
-];
+const resourceViews = {
+  Experiments,
+  "Dynamic Configs": DynamicConfigs,
+  "Feature Gates": FeatureGates,
+  "Audit Logs": AuditLogs
+};
 
 function IndexPopup() {
   const {
-    currentLocalStorageValue,
-    setAuthModalOpen,
-    setCurrentLocalStorageValue,
+    isItemSheetOpen,
+    isManageExperimentModalOpen,
+    isSettingsSheetOpen,
+    isUserDetailsSheetOpen,
     setSettingsSheetOpen,
-    setUserDetailsSheetOpen,
-    setAuditLogSheetOpen
-  } = useStore((state) => state);
-  const [apiKey, setApiKey]: [string, Dispatch<SetStateAction<string>>] =
-    useLocalStorage("statsig-console-api-key");
-  const [localStorageValue]: [string, Dispatch<SetStateAction<string>>] =
-    useLocalStorage("statsig-local-storage-key");
-  const [storageType]: [string, Dispatch<SetStateAction<string>>] =
-    useLocalStorage("statsig-storage-type", "localStorage");
-  const [experimentOrConfig, setExperimentOrConfig]: [
-    string,
-    Dispatch<SetStateAction<string>>
-  ] = useLocalStorage("statsig-experiment-or-config", "Experiments");
-  const [currentOverrides] = useLocalStorage("statsig-current-overrides", []);
-  const hasCustomOverride = currentOverrides?.find(
-    (override) => override.name === currentLocalStorageValue
+    setUserDetailsSheetOpen
+  } = useStore();
+  const settingsMenu = useRef<HTMLButtonElement>(null);
+  const activeViewButton = useRef<HTMLButtonElement>(null);
+  const [reviewPromptDismissed, setReviewPromptDismissed] = useState(false);
+  const [apiKey, setApiKey] = useLocalStorage("statsig-console-api-key", "");
+  const [resource, setResource] = useLocalStorage(
+    "statsig-experiment-or-config",
+    "Experiments"
+  );
+  const [currentOverrides] = useLocalStorage<{ name: string }[]>(
+    "statsig-current-overrides",
+    []
+  );
+  const {
+    activeId,
+    clearFeedback,
+    disabled,
+    feedback,
+    hasStorageKey,
+    setOverride
+  } = usePageOverride(Boolean(apiKey));
+  const currentView = Object.hasOwn(resourceViews, resource)
+    ? resource
+    : "Experiments";
+  const activePreset = currentOverrides?.some(
+    (override) => override.name === activeId
   );
 
-  const hasInitialized = useRef(false);
-  const getLocalStorageValue = useCallback(() => {
-    chrome.tabs.query({ active: true, currentWindow: true }, async ([tab]) => {
-      if (tab?.id === undefined) return;
-
-      const [storage] = await getCurrentStorageValue(
-        tab.id,
-        localStorageValue,
-        storageType as "cookie" | "localStorage"
-      );
-      if (storage?.result) {
-        setCurrentLocalStorageValue(storage.result);
-      }
-    });
-  }, [localStorageValue, setCurrentLocalStorageValue, storageType]);
-
-  useEffect(() => {
-    if (hasInitialized.current) return;
-    hasInitialized.current = true;
-
-    if (!apiKey) {
-      setAuthModalOpen(true);
-    } else if (!localStorageValue) {
-      setSettingsSheetOpen(true);
-    } else {
-      getLocalStorageValue();
-    }
-  }, [
-    apiKey,
-    getLocalStorageValue,
-    localStorageValue,
-    setAuthModalOpen,
-    setSettingsSheetOpen
-  ]);
+  const handleConnect = (key: string) => {
+    setApiKey(key);
+    if (!hasStorageKey) setSettingsSheetOpen(true);
+  };
 
   const handleLogout = () => {
     setApiKey("");
-    setAuthModalOpen(true);
-    return mutate("https://statsigapi.net/console/v1/experiments", []);
+    void mutate(() => true, undefined, { revalidate: false });
   };
 
-  const handleRemoveLocalStorageValue = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-      setCurrentLocalStorageValue(
-        `${storageType === "localStorage" ? "LocalStorage" : "Cookie"} cleared...`
-      );
-      await removeStorageValue(
-        tabs[0].id,
-        localStorageValue,
-        storageType as "cookie" | "localStorage"
-      );
-      setTimeout(() => {
-        getLocalStorageValue();
-      }, 2000);
-    });
-  };
-
-  const handleOverrides = (value: string) => {
-    // Save the selected override to local storage
-    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-      // if the value is empty, remove the local storage value
-      if (value === "") {
-        handleRemoveLocalStorageValue();
-      }
-
-      setCurrentLocalStorageValue(value);
-      await updateStorageValue(
-        tabs[0].id,
-        localStorageValue,
-        value,
-        storageType as "cookie" | "localStorage"
-      );
-    });
+  const restoreSettingsFocus = () => {
+    requestAnimationFrame(() => settingsMenu.current?.focus());
   };
 
   return (
-    <HeroUIProvider>
+    <HeroUIProvider reducedMotion="user">
       <SWRConfig value={{ fetcher }}>
-        <div className="w-[700px] min-h-[410px]">
-          <Navbar>
-            <NavbarBrand>
-              <img
-                alt="Statsig logo"
-                className="ml-1"
-                src={statsigLogo}
-                width={140}
-              />
-            </NavbarBrand>
-            <div>
-              {hasCustomOverride && (
-                <Select
-                  aria-label="Active override"
-                  className="min-w-[175px]"
-                  defaultSelectedKeys={[currentLocalStorageValue]}
-                  items={currentOverrides as { name: string }[]}
-                  onChange={(value) => handleOverrides(value.target.value)}
-                  placeholder="No override enabled"
-                  required
-                  selectedKeys={[currentLocalStorageValue]}
-                  size="sm">
-                  {({ name }) => (
-                    <SelectItem
-                      className="flex gap-2 items-center"
-                      key={name}
-                      textValue={name}>
-                      <div className="flex flex-col">
-                        <span className="text-small">{name}</span>
-                      </div>
-                    </SelectItem>
-                  )}
-                </Select>
-              )}
-              {currentLocalStorageValue && !hasCustomOverride && (
+        <div className="popup-shell">
+          <header className="popup-header">
+            <div className="popup-header-inner popup-gutter">
+              <img alt="Statsig" src={statsigLogo} width={116} height={22} />
+              {apiKey && (
                 <>
-                  <p className="text-sm text-gray-700">
-                    Current{" "}
-                    {storageType === "localStorage" ? "localStorage" : "cookie"}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <p className="text-tiny text-foreground-400">
-                      {currentLocalStorageValue}
-                    </p>
-                    <RxCross2
-                      className="text-red-500 cursor-pointer hover:text-red-800"
-                      onClick={handleRemoveLocalStorageValue}
-                      size={15}
-                    />
-                  </div>
+                  <nav className="resource-nav" aria-label="Statsig resources">
+                    {Object.keys(resourceViews).map((view) => (
+                      <button
+                        aria-current={currentView === view ? "page" : undefined}
+                        key={view}
+                        ref={
+                          currentView === view ? activeViewButton : undefined
+                        }
+                        onClick={() => {
+                          clearFeedback();
+                          setResource(view);
+                          window.scrollTo(0, 0);
+                        }}
+                        type="button">
+                        {view}
+                      </button>
+                    ))}
+                  </nav>
+                  <Dropdown disableAnimation placement="bottom-end">
+                    <DropdownTrigger>
+                      <Button
+                        aria-label="Settings menu"
+                        className="size-9"
+                        isIconOnly
+                        radius="sm"
+                        ref={settingsMenu}
+                        size="sm"
+                        variant="bordered">
+                        <SettingsIcon />
+                      </Button>
+                    </DropdownTrigger>
+                    <DropdownMenu
+                      aria-label="Extension settings"
+                      onAction={(key) => {
+                        if (key === "user") setUserDetailsSheetOpen(true);
+                        if (key === "settings") setSettingsSheetOpen(true);
+                        if (import.meta.env.CHROME && key === "review") {
+                          markReviewPromptSeen();
+                          setReviewPromptDismissed(true);
+                        }
+                        if (key === "logout") handleLogout();
+                      }}>
+                      <DropdownItem key="user">User details</DropdownItem>
+                      <DropdownItem key="settings">Settings</DropdownItem>
+                      {import.meta.env.CHROME && (
+                        <DropdownItem
+                          endContent={
+                            <FiExternalLink aria-hidden="true" size={14} />
+                          }
+                          href={chromeWebStoreReviewsUrl}
+                          key="review"
+                          rel="noopener noreferrer"
+                          target="_blank"
+                          textValue="Leave a review">
+                          Leave a review
+                          <span className="sr-only"> (opens in a new tab)</span>
+                        </DropdownItem>
+                      )}
+                      <DropdownItem key="logout" color="danger">
+                        Sign out
+                      </DropdownItem>
+                    </DropdownMenu>
+                  </Dropdown>
                 </>
               )}
             </div>
-            <Select
-              aria-label="Statsig resource"
-              className="max-w-[200px]"
-              items={types}
-              onChange={(value) => setExperimentOrConfig(value.target.value)}
-              placeholder="Select a type..."
-              required
-              size="sm"
-              selectedKeys={[experimentOrConfig]}>
-              {({ description, name }) => (
-                <SelectItem
-                  className="flex gap-2 items-center"
-                  key={name}
-                  textValue={name}>
-                  <div className="flex flex-col">
-                    <span className="text-small">{name}</span>
-                    <span className="text-tiny text-default-400">
-                      {description}
-                    </span>
-                  </div>
-                </SelectItem>
-              )}
-            </Select>
-            <NavbarItem>
-              <Dropdown backdrop="opaque">
-                <DropdownTrigger>
-                  <Button aria-label="Settings menu" variant="flat">
-                    <SettingsIcon />
-                  </Button>
-                </DropdownTrigger>
-                <DropdownMenu aria-label="Static Actions">
-                  <DropdownItem
-                    key="AuditLogs"
-                    onClick={() => setAuditLogSheetOpen(true)}>
-                    Audit Logs
-                  </DropdownItem>
-                  <DropdownItem
-                    key="UserDetails"
-                    onClick={() => setUserDetailsSheetOpen(true)}>
-                    User Details
-                  </DropdownItem>
-                  <DropdownItem
-                    key="Settings"
-                    onClick={() => setSettingsSheetOpen(true)}>
-                    Settings
-                  </DropdownItem>
-                  <DropdownItem
-                    className="text-danger"
-                    color="danger"
-                    key="delete"
-                    onClick={handleLogout}>
-                    Logout
-                  </DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
-            </NavbarItem>
-          </Navbar>
+          </header>
 
-          <div className="container mx-auto">
-            <Suspense>
-              <SettingsSheet />
-            </Suspense>
-            <Suspense>
-              <UserDetailsSheet />
-            </Suspense>
-            <Suspense>
-              <AuditLogSheet />
-            </Suspense>
-            <Suspense>
-              <AuditLogDetailSheet />
-            </Suspense>
-            {experimentOrConfig === "Experiments" && (
-              <>
-                <Suspense>
-                  <ExperimentSheet />
-                </Suspense>
+          {apiKey ? (
+            <main className="popup-main popup-gutter" aria-label={currentView}>
+              {(activeId || feedback) && (
+                <div className="override-bar">
+                  {activeId && (
+                    <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
+                      <span className="text-sm font-medium">
+                        {activePreset
+                          ? "Active tab override"
+                          : "Stored tab value"}
+                      </span>
+                      {activePreset ? (
+                        <Select
+                          aria-label="Active tab override"
+                          className="w-48 max-w-full"
+                          classNames={{ trigger: "min-h-9" }}
+                          isDisabled={disabled}
+                          items={currentOverrides}
+                          onChange={(event) => {
+                            if (event.target.value) {
+                              void setOverride(event.target.value);
+                            }
+                          }}
+                          radius="sm"
+                          selectedKeys={[activeId]}
+                          size="sm"
+                          variant="bordered">
+                          {({ name }) => (
+                            <SelectItem key={name} textValue={name}>
+                              {name}
+                            </SelectItem>
+                          )}
+                        </Select>
+                      ) : (
+                        <code className="min-w-0 text-sm wrap-anywhere">
+                          {activeId}
+                        </code>
+                      )}
+                      <RemoveTabValueButton
+                        disabled={disabled}
+                        label={
+                          activePreset
+                            ? "Clear override"
+                            : "Remove stored value"
+                        }
+                        onRemovalFocus={() => activeViewButton.current?.focus()}
+                        onRemove={() => setOverride("")}
+                      />
+                    </div>
+                  )}
+                  <p
+                    className={
+                      feedback?.failed
+                        ? "text-sm text-danger-700"
+                        : "text-sm text-foreground-600"
+                    }
+                    role="status">
+                    {feedback?.message}
+                  </p>
+                </div>
+              )}
+              {Object.entries(resourceViews).map(([view, ResourceView]) => (
+                <Activity
+                  key={view}
+                  mode={view === currentView ? "visible" : "hidden"}>
+                  <ResourceView
+                    onReplaceKey={handleLogout}
+                    reviewPrompt={
+                      view === currentView &&
+                      import.meta.env.CHROME &&
+                      !reviewPromptDismissed && (
+                        <ReviewPrompt
+                          onDismiss={() => {
+                            setReviewPromptDismissed(true);
+                            restoreSettingsFocus();
+                          }}
+                          paused={
+                            isItemSheetOpen ||
+                            isManageExperimentModalOpen ||
+                            isSettingsSheetOpen ||
+                            isUserDetailsSheetOpen
+                          }
+                        />
+                      )
+                    }
+                  />
+                </Activity>
+              ))}
+              <SettingsSheet onDismiss={restoreSettingsFocus} />
+              <Suspense>
+                <UserDetailsSheet onDismiss={restoreSettingsFocus} />
+              </Suspense>
+              <Suspense>
+                {currentView === "Experiments" && <ExperimentSheet />}
+                {currentView === "Dynamic Configs" && <DynamicConfigSheet />}
+                {currentView === "Feature Gates" && <FeatureGateSheet />}
+              </Suspense>
+              {currentView === "Experiments" && (
                 <Suspense>
                   <ManageExperimentModal />
                 </Suspense>
-                <Experiments />
-              </>
-            )}
-            {experimentOrConfig === "Dynamic Configs" && (
-              <>
-                <Suspense>
-                  <DynamicConfigSheet />
-                </Suspense>
-                <DynamicConfigs />
-              </>
-            )}
-            {experimentOrConfig === "Feature Gates" && (
-              <>
-                <Suspense>
-                  <FeatureGateSheet />
-                </Suspense>
-                <FeatureGates />
-              </>
-            )}
-            {experimentOrConfig === "Audit Logs" && <AuditLogs />}
-            <Suspense>
-              <LoginModal />
-            </Suspense>
-          </div>
+              )}
+            </main>
+          ) : (
+            <LoginModal onConnect={handleConnect} />
+          )}
         </div>
       </SWRConfig>
     </HeroUIProvider>

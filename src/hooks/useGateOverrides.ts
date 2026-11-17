@@ -19,21 +19,23 @@ export const useGateOverrides = (
   error: null | string;
   isLoading: boolean;
   overrides: GateOverrideData | undefined;
+  retry: () => void;
 } => {
   const key = gateId
     ? `https://statsigapi.net/console/v1/gates/${gateId}/overrides`
     : null;
-  const { data, isLoading } = useSWR(key);
+  const { data, error: requestError, isLoading, mutate } = useSWR(key);
 
   const error =
-    data?.status || !data?.data
-      ? "An error occurred while fetching gate overrides."
+    requestError || data?.status || !data?.data
+      ? "Couldn’t load feature gate overrides."
       : null;
   const overrides = data?.data;
 
   return {
     error,
     isLoading,
-    overrides
+    overrides,
+    retry: () => void mutate()
   };
 };

@@ -1,7 +1,6 @@
-import type { AuditLog } from "~/types/statsig";
-
 import { useLocalStorage } from "@uidotdev/usehooks";
 import { api } from "~/helpers/fetcher";
+import type { AuditLog } from "~/types/statsig";
 import { useMemo } from "react";
 import useSWRInfinite from "swr/infinite";
 
@@ -9,95 +8,70 @@ const limit = 50;
 
 interface AuditPage {
   data: AuditLog[];
+  pagination?: { nextPage: string | null };
 }
 
-export const useAuditLogs = (): {
-  auditLogs: AuditLog[];
-  error: null | string;
-  isLoading: boolean;
-  isLoadingMore: boolean;
-  isReachingEnd: boolean;
-  loadMore: () => void;
-  refresh: () => void;
-} => {
-  const [apiKey] = useLocalStorage("statsig-console-api-key");
+function hasMore(page: AuditPage) {
+  return page.pagination
+    ? Boolean(page.pagination.nextPage)
+    : page.data.length >= limit;
+}
 
-  const getKey = (pageIndex: number, previousPageData: AuditPage | null) => {
-    // If no API key, don't fetch
-    if (!apiKey) return null;
+export function useAuditLogs() {
+  const [apiKey] = useLocalStorage("statsig-console-api-key", "");
+  const { data, error, isLoading, isValidating, size, setSize, mutate } =
+    useSWRInfinite(
+      (pageIndex: number, previousPage: AuditPage | null) =>
+        apiKey && (!pageIndex || (previousPage && hasMore(previousPage)))
+          ? (["/audit_logs", pageIndex + 1, apiKey] as const)
+          : null,
+      ([url, page, key]) =>
+        api
+          .get<AuditPage>(url, {
+            headers: { "STATSIG-API-KEY": key },
+            params: { limit, page }
+          })
+          .then((response) => response.data),
+      { revalidateFirstPage: false, shouldRetryOnError: false }
+    );
 
-    // If we reached the end (empty page), stop fetching
-    if (
-      previousPageData &&
-      (!previousPageData.data || previousPageData.data.length === 0)
-    )
-      return null;
-
-    // First page, we don't have `previousPageData`
-    if (pageIndex === 0) return ["/audit_logs", 1];
-
-    // Add the page number to the API endpoint
-    return ["/audit_logs", pageIndex + 1];
-  };
-
-  const fetcher = ([url, page]: [string, number]) =>
-    api
-      .get<AuditPage>(url, {
-        headers: {
-          "STATSIG-API-KEY": apiKey as string
-        },
-        params: {
-          limit,
-          page
-        }
-      })
-      .then((res) => res.data);
-
-  const { data, error, isLoading, size, setSize, mutate } = useSWRInfinite(
-    getKey,
-    fetcher,
-    {
-      revalidateFirstPage: false,
-      revalidateAll: false
-    }
+  const auditLogs = useMemo(
+    () =>
+      Array.from(
+        new Map(
+          data?.flatMap((page) =>
+            page.data.map((log) => [log.id, log] as const)
+          )
+        ).values()
+      ),
+    [data]
   );
-
-  // Flatten all pages into a single array of audit logs
-  const auditLogs = useMemo(() => {
-    if (!data) return [];
-    return data.flatMap((page) => page?.data || []);
-  }, [data]);
-
-  // Check if we're loading more data
-  const isLoadingMore =
-    isLoading || (size > 0 && data && typeof data[size - 1] === "undefined");
-
-  // Check if we've reached the end
-  const isReachingEnd = data && data[data.length - 1]?.data?.length < limit;
-
-  // Function to load more data
-  const loadMore = () => {
-    if (!isLoadingMore && !isReachingEnd) {
-      setSize(size + 1);
-    }
-  };
-
-  // Function to refresh data
-  const refresh = () => {
-    mutate();
-  };
-
-  const fetchError = error
-    ? "An error occurred while fetching audit log data."
-    : null;
+  const lastPage = data?.at(-1);
+  const isLoadingMore = Boolean(
+    isValidating && lastPage && size > data.length && hasMore(lastPage)
+  );
+  const isReachingEnd = Boolean(lastPage && !hasMore(lastPage));
+  const isAccessDenied = [401, 403].includes(error?.response?.status);
 
   return {
     auditLogs,
-    error: fetchError,
+    error: isAccessDenied
+      ? "This console key cannot access audit logs. Check its permissions in Statsig."
+      : error
+        ? "Audit logs could not be loaded. Check your connection and try again."
+        : null,
+    isAccessDenied,
+    isConnected: Boolean(apiKey),
     isLoading,
     isLoadingMore,
+    isRefreshing: isValidating && !isLoading && !isLoadingMore,
     isReachingEnd,
-    loadMore,
-    refresh
+    loadMore: () => {
+      if (!isValidating && !isReachingEnd && !error)
+        void setSize(size + 1).catch(() => {});
+    },
+    refresh: () => {
+      void mutate().catch(() => {});
+    }
   };
-};
+}

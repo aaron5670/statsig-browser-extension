@@ -1,28 +1,17 @@
-import { UpdateGroupSection } from "~/components/modals/manage-experiment/UpdateGroupSection";
 import GroupsTable from "~/components/tables/GroupsTable";
 import type { Group } from "~/types/statsig";
 import { useState } from "react";
+import { UpdateGroupSection } from "./UpdateGroupSection";
 
-type View = "form" | "table";
+export function GroupsSection() {
+  const [currentGroup, setCurrentGroup] = useState<Group>();
 
-export const GroupsSection = () => {
-  const [view, setView] = useState<View>("table");
-  const [currentGroup, setCurrentGroup] = useState<Group | null>(null);
-
-  const changeView = () => {
-    setView((state) => (state === "table" ? "form" : "table"));
-  };
-
-  return (
-    <div className="flex flex-col justify-between gap-4">
-      {view === "table" ? (
-        <GroupsTable
-          changeView={changeView}
-          setCurrentGroup={setCurrentGroup}
-        />
-      ) : (
-        <UpdateGroupSection changeView={changeView} group={currentGroup} />
-      )}
-    </div>
+  return currentGroup ? (
+    <UpdateGroupSection
+      group={currentGroup}
+      onBack={() => setCurrentGroup(undefined)}
+    />
+  ) : (
+    <GroupsTable onEdit={setCurrentGroup} />
   );
-};
+}

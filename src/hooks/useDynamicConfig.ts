@@ -8,21 +8,23 @@ export const useDynamicConfig = (
   dynamicConfig?: DynamicConfig;
   error: null | string;
   isLoading: boolean;
+  retry: () => void;
 } => {
   const key = dynamicConfigId
     ? `https://statsigapi.net/console/v1/dynamic_configs/${dynamicConfigId}`
     : null;
-  const { data, isLoading } = useSWR(key);
+  const { data, error: requestError, isLoading, mutate } = useSWR(key);
 
   const error =
-    data?.status || !data?.data
-      ? "An error occurred while fetching dynamic config data."
+    requestError || data?.status || !data?.data
+      ? "Couldn’t load dynamic config details."
       : null;
   const dynamicConfig = data?.data;
 
   return {
     dynamicConfig,
     error,
-    isLoading
+    isLoading,
+    retry: () => void mutate()
   };
 };

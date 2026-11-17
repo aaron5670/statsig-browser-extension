@@ -8,21 +8,23 @@ export const useFeatureGate = (
   featureGate?: FeatureGate;
   error: null | string;
   isLoading: boolean;
+  retry: () => void;
 } => {
   const key = featureGateId
     ? `https://statsigapi.net/console/v1/gates/${featureGateId}`
     : null;
-  const { data, isLoading } = useSWR(key);
+  const { data, error: requestError, isLoading, mutate } = useSWR(key);
 
   const error =
-    data?.status || !data?.data
-      ? "An error occurred while fetching feature gate data."
+    requestError || data?.status || !data?.data
+      ? "Couldn’t load feature gate details."
       : null;
   const featureGate = data?.data;
 
   return {
     featureGate,
     error,
-    isLoading
+    isLoading,
+    retry: () => void mutate()
   };
 };

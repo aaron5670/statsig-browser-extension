@@ -1,419 +1,139 @@
+import { Chip, Tab, Tabs } from "@heroui/react";
 import {
-  Button,
-  Spinner,
-  Card,
-  CardBody,
-  CardHeader,
-  Chip,
-  Avatar,
-  Tabs,
-  Tab
-} from "@heroui/react";
-import { ExternalLinkIcon } from "~/components/icons/ExternalLinkIcon";
-import { useStore } from "~/store/useStore";
-import { Suspense, lazy } from "react";
-import { Sheet } from "react-modal-sheet";
-import TimeAgo from "react-timeago";
-import { useAuditLogs } from "~/hooks/useAuditLogs";
+  auditActionLabel,
+  auditTimestamp
+} from "~/helpers/auditLogPresentation";
+import { keyListItems } from "~/helpers/keyListItems";
+import type { AuditLog, JsonData } from "~/types/statsig";
+import DetailDialog from "../DetailDialog";
 
-const ReactJson = lazy(() => import("@microlink/react-json-view"));
+import { JsonValue } from "./JsonValue";
 
-const AuditLogDetailSheet = () => {
-  const {
-    currentAuditLogId,
-    isAuditLogDetailSheetOpen,
-    setAuditLogDetailSheetOpen,
-    setAuditLogSheetOpen
-  } = useStore((state) => state);
-
-  const { auditLogs, isLoading } = useAuditLogs();
-  const auditLog = auditLogs.find((log) => log.id === currentAuditLogId);
-
-  const handleCloseSheet = () => {
-    setAuditLogDetailSheetOpen(false);
-    setAuditLogSheetOpen(true);
-  };
-
-  const getActionTypeColor = (actionType: string) => {
-    if (actionType.includes("create")) return "success";
-    if (actionType.includes("delete")) return "danger";
-    if (actionType.includes("update")) return "primary";
-    return "default";
-  };
-
-  const getActionTypeLabel = (actionType: string) => {
-    return actionType
-      .replace(/_/g, " ")
-      .replace(/\b\w/g, (l) => l.toUpperCase());
-  };
-
-  const getDateFromAuditLog = (date: string, time: string) => {
-    try {
-      // Try different date formats to handle the date parsing
-      const dateTime = new Date(`${date} ${time}`);
-      if (!Number.isNaN(dateTime.getTime())) {
-        return dateTime;
-      }
-      // Try ISO format
-      const isoDateTime = new Date(`${date}T${time}`);
-      if (!Number.isNaN(isoDateTime.getTime())) {
-        return isoDateTime;
-      }
-      // Fallback to current date if parsing fails
-      return new Date();
-    } catch {
-      return new Date();
-    }
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  const hasChanges =
-    auditLog?.changes?.rules?.new && auditLog?.changes?.rules?.old;
-
-  if (isLoading || !auditLog) {
+function RuleSnapshot({ rules }: { rules: unknown[] | undefined }) {
+  if (!rules) {
     return (
-      <Sheet
-        isOpen={isAuditLogDetailSheetOpen}
-        onClose={handleCloseSheet}
-        style={{ zIndex: 10000 }}
-        className="audit-log-detail-sheet">
-        <Sheet.Container style={{ maxHeight: 400 }}>
-          <Sheet.Header className="px-4 py-3 border-b">
-            <div className="flex justify-between items-center">
-              <div className="flex-1">
-                <div className="h-6 bg-gray-200 rounded animate-pulse w-full max-w-xs mb-2" />
-                <div className="h-4 bg-gray-100 rounded animate-pulse w-full max-w-sm" />
-              </div>
-              <div className="ml-4">
-                <div className="h-8 w-20 bg-gray-200 rounded animate-pulse" />
-              </div>
-            </div>
-          </Sheet.Header>
-          <Sheet.Content>
-            <div className="flex justify-center items-center h-40">
-              <Spinner size="lg" />
-            </div>
-          </Sheet.Content>
-        </Sheet.Container>
-        <Sheet.Backdrop onTap={handleCloseSheet} />
-      </Sheet>
+      <p className="text-sm text-default-600">
+        Statsig did not include this rule snapshot.
+      </p>
     );
   }
 
-  const auditLogDate = getDateFromAuditLog(auditLog.date, auditLog.time);
+  if (rules.length === 0) {
+    return (
+      <p className="text-sm text-default-600">No rules in this snapshot.</p>
+    );
+  }
 
   return (
-    <Sheet
-      isOpen={isAuditLogDetailSheetOpen}
-      onClose={handleCloseSheet}
-      style={{ zIndex: 10000 }}
-      className="audit-log-detail-sheet">
-      <Sheet.Container style={{ maxHeight: 400 }}>
-        <Sheet.Header className="px-4 py-2 border-b bg-white">
-          <div className="flex justify-between items-center gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <Chip
-                  color={getActionTypeColor(auditLog.actionType)}
-                  variant="flat"
-                  size="sm"
-                  className="font-medium h-5 text-[10px]">
-                  {getActionTypeLabel(auditLog.actionType)}
-                </Chip>
-                <span className="text-[10px] text-gray-400 font-medium">
-                  <TimeAgo date={auditLogDate} />
-                </span>
-              </div>
-              <h1 className="text-base font-bold text-gray-900 leading-tight truncate">
-                {auditLog.name}
-              </h1>
-            </div>
-            <Button
-              as="a"
-              color="primary"
-              endContent={<ExternalLinkIcon color="white" />}
-              href={`https://console.statsig.com`}
-              size="sm"
-              target="_blank"
-              variant="solid"
-              className="shrink-0 h-8">
-              Open
-            </Button>
+    <div className="min-w-0 rounded-xl border border-divider bg-default-50 px-3 py-2 font-mono text-xs leading-6 wrap-anywhere">
+      <JsonValue expanded value={rules as JsonData[]} />
+    </div>
+  );
+}
+
+export default function AuditLogDetailSheet({
+  log,
+  onClose
+}: {
+  log: AuditLog;
+  onClose: () => void;
+}) {
+  const date = auditTimestamp(log.date, log.time);
+  const actor = log.updatedBy || log.modifierEmail;
+  const rules = log.changes?.rules;
+
+  return (
+    <DetailDialog
+      isOpen
+      onClose={onClose}
+      title={log.name || "Audit log entry"}
+      description={auditActionLabel(log.actionType)}>
+      <div className="grid gap-5">
+        <dl className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,12rem),1fr))] gap-4 rounded-xl border border-divider bg-default-50 px-4 py-3 text-sm">
+          <div className="min-w-0">
+            <dt className="text-xs font-medium text-default-600">Changed by</dt>
+            <dd className="mt-1 font-medium wrap-anywhere">
+              {actor || "Unknown"}
+            </dd>
+            {log.modifierEmail && log.modifierEmail !== actor && (
+              <dd className="mt-0.5 text-xs text-default-600 wrap-anywhere">
+                {log.modifierEmail}
+              </dd>
+            )}
           </div>
-        </Sheet.Header>
+          <div className="min-w-0">
+            <dt className="text-xs font-medium text-default-600">
+              Date and time
+            </dt>
+            <dd className="mt-1">
+              {date ? (
+                <time dateTime={date.toISOString()}>
+                  {date.toLocaleString(undefined, {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                    timeZoneName: "short"
+                  })}
+                </time>
+              ) : (
+                "Unavailable"
+              )}
+            </dd>
+          </div>
+        </dl>
 
-        <Sheet.Content scrollClassName="flex flex-col">
-          <div className="px-4 py-3 space-y-3">
-            {/* User & Date Info Card */}
-            <Card className="shadow-sm border-none bg-gray-50/50">
-              <CardBody className="p-2">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <Avatar
-                      name={getInitials(auditLog.updatedBy)}
-                      size="sm"
-                      className="bg-primary text-white shrink-0 w-8 h-8 text-[10px]"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-gray-900 truncate leading-tight">
-                        {auditLog.updatedBy}
-                      </p>
-                      {auditLog.modifierEmail && (
-                        <p className="text-xs text-gray-500 truncate">
-                          {auditLog.modifierEmail}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+        <section className="grid gap-2">
+          <h3 className="text-sm font-semibold">Changes</h3>
+          {log.changeLog && (
+            <p className="text-sm wrap-anywhere">{log.changeLog}</p>
+          )}
+          {rules?.old || rules?.new ? (
+            <Tabs
+              aria-label="Rule snapshots"
+              disableAnimation
+              radius="sm"
+              size="sm"
+              classNames={{ panel: "min-w-0 px-0 pb-0" }}>
+              <Tab
+                key="before"
+                title={`Before${rules.old ? ` (${rules.old.length})` : ""}`}>
+                <RuleSnapshot rules={rules.old} />
+              </Tab>
+              <Tab
+                key="after"
+                title={`After${rules.new ? ` (${rules.new.length})` : ""}`}>
+                <RuleSnapshot rules={rules.new} />
+              </Tab>
+            </Tabs>
+          ) : (
+            <p className="text-sm text-default-600">
+              {log.changeLog
+                ? "This entry has no rule snapshots."
+                : "This entry has no description or rule snapshots."}
+            </p>
+          )}
+        </section>
 
-                  {auditLog.tags.length > 0 && (
-                    <div className="shrink-0">
-                      <div className="flex flex-wrap gap-1 justify-end max-w-32">
-                        {auditLog.tags.slice(0, 2).map((tag) => (
-                          <Chip
-                            key={tag}
-                            size="sm"
-                            variant="flat"
-                            color="warning"
-                            className="h-5 text-[10px]">
-                            {tag}
-                          </Chip>
-                        ))}
-                        {auditLog.tags.length > 2 && (
-                          <Chip
-                            size="sm"
-                            variant="flat"
-                            color="default"
-                            className="h-5 text-[10px]">
-                            +{auditLog.tags.length - 2}
-                          </Chip>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardBody>
-            </Card>
-
-            {/* Changes Section */}
-            {hasChanges ? (
-              <Card className="shadow-sm border-none">
-                <CardHeader className="pb-0 px-3 pt-3 flex justify-between items-center">
-                  <h3 className="text-sm font-bold text-gray-900">Changes</h3>
+        {log.tags?.length > 0 && (
+          <section className="grid gap-2">
+            <h3 className="text-sm font-semibold">Tags</h3>
+            <ul className="flex flex-wrap gap-1.5">
+              {keyListItems(log.tags, (tag) => tag).map(({ item, key }) => (
+                <li key={key} className="min-w-0">
                   <Chip
                     size="sm"
                     variant="flat"
-                    color="primary"
-                    className="h-5 text-[10px]">
-                    {auditLog.changes.rules.new.length} rules
+                    className="h-auto max-w-full whitespace-normal py-0.5 wrap-anywhere">
+                    {item}
                   </Chip>
-                </CardHeader>
-                <CardBody className="pt-0 px-3 pb-3">
-                  <Tabs
-                    aria-label="Changes"
-                    variant="underlined"
-                    classNames={{
-                      tabList: "gap-4 w-full border-b border-divider",
-                      cursor: "w-full bg-primary",
-                      tab: "max-w-fit px-0 h-8",
-                      tabContent:
-                        "group-data-[selected=true]:text-primary text-xs"
-                    }}>
-                    <Tab
-                      key="before"
-                      title={
-                        <div className="flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
-                          <span>Before</span>
-                        </div>
-                      }>
-                      <div className="mt-2">
-                        <div className="bg-red-50/50 border border-red-100 rounded-lg p-2 max-h-60 overflow-auto">
-                          <Suspense
-                            fallback={
-                              <div className="flex justify-center p-2">
-                                <Spinner size="sm" />
-                              </div>
-                            }>
-                            <ReactJson
-                              displayDataTypes={false}
-                              displayObjectSize={false}
-                              enableClipboard={true}
-                              iconStyle="triangle"
-                              indentWidth={2}
-                              name={false}
-                              onAdd={false}
-                              onDelete={false}
-                              onEdit={false}
-                              src={auditLog.changes.rules.old}
-                              theme="bright:inverted"
-                              collapsed={1}
-                              style={{
-                                fontSize: "11px",
-                                fontFamily:
-                                  "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-                                backgroundColor: "transparent"
-                              }}
-                            />
-                          </Suspense>
-                        </div>
-                      </div>
-                    </Tab>
-
-                    <Tab
-                      key="after"
-                      title={
-                        <div className="flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                          <span>After</span>
-                        </div>
-                      }>
-                      <div className="mt-2">
-                        <div className="bg-green-50/50 border border-green-100 rounded-lg p-2 max-h-60 overflow-auto">
-                          <Suspense
-                            fallback={
-                              <div className="flex justify-center p-2">
-                                <Spinner size="sm" />
-                              </div>
-                            }>
-                            <ReactJson
-                              displayDataTypes={false}
-                              displayObjectSize={false}
-                              enableClipboard={true}
-                              iconStyle="triangle"
-                              indentWidth={2}
-                              name={false}
-                              onAdd={false}
-                              onDelete={false}
-                              onEdit={false}
-                              src={auditLog.changes.rules.new}
-                              theme="bright:inverted"
-                              collapsed={1}
-                              style={{
-                                fontSize: "11px",
-                                fontFamily:
-                                  "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-                                backgroundColor: "transparent"
-                              }}
-                            />
-                          </Suspense>
-                        </div>
-                      </div>
-                    </Tab>
-
-                    <Tab
-                      key="summary"
-                      title={
-                        <div className="flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
-                          <span>Summary</span>
-                        </div>
-                      }>
-                      <div className="mt-2">
-                        <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-3">
-                          <div className="grid grid-cols-2 gap-3 text-xs">
-                            <div>
-                              <span className="font-semibold text-gray-500 uppercase tracking-wider text-[10px]">
-                                Fields Changed
-                              </span>
-                              <p className="text-gray-900 mt-0.5 font-medium">
-                                {Object.keys(auditLog.changes.rules.new).length}{" "}
-                                fields
-                              </p>
-                            </div>
-                            <div>
-                              <span className="font-semibold text-gray-500 uppercase tracking-wider text-[10px]">
-                                Change Type
-                              </span>
-                              <p className="text-gray-900 mt-0.5 font-medium truncate">
-                                {getActionTypeLabel(auditLog.actionType)}
-                              </p>
-                            </div>
-                          </div>
-                          {auditLog.changeLog && (
-                            <div className="mt-2 pt-2 border-t border-blue-100">
-                              <span className="font-semibold text-gray-500 uppercase tracking-wider text-[10px]">
-                                Description
-                              </span>
-                              <p className="text-gray-700 mt-0.5 leading-normal text-xs">
-                                {auditLog.changeLog}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </Tab>
-                  </Tabs>
-                </CardBody>
-              </Card>
-            ) : (
-              <Card className="shadow-sm border-none bg-gray-50/50">
-                <CardBody className="p-4">
-                  <div className="text-center">
-                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <svg
-                        aria-hidden="true"
-                        className="w-5 h-5 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                      </svg>
-                    </div>
-                    <h3 className="text-sm font-bold text-gray-900 mb-1">
-                      No Detailed Changes
-                    </h3>
-                    <p className="text-xs text-gray-500">
-                      This action doesn't include detailed rule changes.
-                    </p>
-                  </div>
-                </CardBody>
-              </Card>
-            )}
-
-            {/* Additional Tags (if many) */}
-            {auditLog.tags.length > 2 && (
-              <Card className="shadow-sm border-none">
-                <CardHeader className="pb-1 px-3 pt-3">
-                  <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider">
-                    All Tags
-                  </h3>
-                </CardHeader>
-                <CardBody className="pt-0 px-3 pb-3">
-                  <div className="flex flex-wrap gap-1">
-                    {auditLog.tags.map((tag) => (
-                      <Chip
-                        key={tag}
-                        size="sm"
-                        variant="flat"
-                        color="warning"
-                        className="h-5 text-[10px]">
-                        {tag}
-                      </Chip>
-                    ))}
-                  </div>
-                </CardBody>
-              </Card>
-            )}
-          </div>
-        </Sheet.Content>
-      </Sheet.Container>
-      <Sheet.Backdrop onTap={handleCloseSheet} />
-    </Sheet>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+      </div>
+    </DetailDialog>
   );
-};
-
-export default AuditLogDetailSheet;
+}
