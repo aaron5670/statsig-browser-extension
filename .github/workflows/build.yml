@@ -11,15 +11,21 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Use Node.js 18.x
+
+      - name: Use Node.js 24.x
         uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 24.x
           cache: "npm"
 
       - name: Install dependencies with npm
-        run: npm i
+        run: npm ci
+
+      - name: Check TypeScript
+        run: npm run typecheck
+
+      - name: Run Biome lint
+        run: npm run lint
 
       - name: Build the extension
         run: |

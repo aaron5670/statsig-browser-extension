@@ -1,8 +1,8 @@
-import React from 'react';
-
-export const HypothesisSection = ({hypothesis}: {hypothesis?: string}) => (
-  <>
-    <h3 className="text-lg font-bold mt-5">Hypothesis</h3>
-    <p>{hypothesis ? hypothesis : 'Hypothesis not set.'}</p>
-  </>
+export const HypothesisSection = ({ hypothesis }: { hypothesis?: string }) => (
+  <section className="grid gap-1">
+    <h3 className="text-sm font-semibold">Hypothesis</h3>
+    <p className="max-w-[70ch] whitespace-pre-wrap text-sm leading-relaxed text-default-700 wrap-anywhere">
+      {hypothesis?.trim() || "No hypothesis has been set."}
+    </p>
+  </section>
 );

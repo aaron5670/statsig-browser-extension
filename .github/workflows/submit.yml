@@ -8,15 +8,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Use Node.js 18.x
+
+      - name: Use Node.js 24.x
         uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 24.x
           cache: "npm"
 
       - name: Install dependencies with npm
-        run: npm i
+        run: npm ci
 
       - name: Build and zip extension artifact
         run: |

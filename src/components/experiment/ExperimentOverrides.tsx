@@ -1,81 +1,74 @@
-import type { Dispatch, SetStateAction } from "react";
-
-import { Button } from "@nextui-org/react";
 import { useLocalStorage } from "@uidotdev/usehooks";
-import { NoOverridesSection } from "~components/experiment/NoOverridesSection";
-import { getCurrentStorageValue, updateStorageValue } from "~handlers/localStorageHandlers";
-import { useStore } from "~store/useStore";
-import React, { Fragment, useEffect } from "react";
-import { Tooltip } from "react-tooltip";
+import { keyListItems } from "~/helpers/keyListItems";
+import { useStore } from "~/store/useStore";
+import { OverrideButton, OverrideControls } from "./OverrideControls";
 
 export type Override = {
   environment?: string;
   groupID: string;
   ids: string[];
-}
+};
 
-interface Props {
-  overrides: Override[];
-}
-
-export const ExperimentOverrides = ({ overrides }: Props) => {
-  const { currentItemId, currentLocalStorageValue, setCurrentLocalStorageValue } = useStore((state) => state);
-  const [localStorageValue]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-local-storage-key");
-  const [storageType]: [string, Dispatch<SetStateAction<string>>] = useLocalStorage("statsig-storage-type", "localStorage");
-  const [, setCurrentOverrides] = useLocalStorage("statsig-current-overrides");
-
-  useEffect(() => {
-    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-      const [storage] = await getCurrentStorageValue(tabs[0].id, localStorageValue, storageType as 'cookie' | 'localStorage');
-      if (storage?.result) {
-        setCurrentLocalStorageValue(storage.result);
-      }
-    });
-  }, []);
+export function ExperimentOverrides({ overrides }: { overrides: Override[] }) {
+  const experimentId = useStore((state) => state.currentItemId);
+  const [keyType] = useLocalStorage("statsig-type-api-key", "read-key");
 
   if (!overrides.length) {
-    return <NoOverridesSection experimentationId={currentItemId} />;
+    return (
+      <section className="grid justify-items-start gap-2">
+        <h3 className="text-sm font-semibold">Experiment overrides</h3>
+        <p className="text-sm text-default-600">
+          {keyType === "write-key"
+            ? "No overrides are configured. Create one under Manage experiment."
+            : "No overrides are configured. "}
+          {keyType === "read-key" && (
+            <a
+              className="font-medium text-primary underline underline-offset-2"
+              href={`https://console.statsig.com/experiments/${encodeURIComponent(experimentId)}/setup`}
+              rel="noopener noreferrer"
+              target="_blank">
+              Manage overrides in Statsig
+              <span className="sr-only"> (opens in a new tab)</span>
+            </a>
+          )}
+        </p>
+      </section>
+    );
   }
 
-  const saveToLocalStorage = (value: string) => {
-    // Store all overrides in local storage, so we can easily toggle between them later
-    setCurrentOverrides(overrides.map((override) => ({ name: override.ids[0] })));
-
-    // Save the selected override to storage
-    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-      setCurrentLocalStorageValue(value);
-      await updateStorageValue(tabs[0].id, localStorageValue, value, storageType as 'cookie' | 'localStorage');
-    });
-  };
+  const options = overrides.flatMap((override) => override.ids);
 
   return (
-    <div>
-      <h3 className="text-lg font-bold">Experiment overrides</h3>
-      <p className="text-sm text-gray-700">
-        Here you can view and inject an override to your local storage.
-      </p>
-      <div className="flex flex-wrap gap-2 mt-2">
-        {overrides.map((override) => (
-          <Fragment key={override.ids[0]}>
-            <Button
-              color={currentLocalStorageValue === override.ids[0] ? 'success' : 'default'}
-              data-tooltip-id={`tooltip-${override.ids[0]}`}
-              onPress={() => saveToLocalStorage(override.ids[0])}
-              size="sm"
-              variant="flat"
-            >
-              {override.ids[0]}
-            </Button>
-            <Tooltip
-              content={override.environment === null ? 'All environments' : override.environment}
-              id={`tooltip-${override.ids[0]}`}
-              opacity={1}
-              place="top"
-              variant="dark"
-            />
-          </Fragment>
-        ))}
-      </div>
-    </div>
+    <OverrideControls options={options} title="Experiment overrides">
+      {({ activeId, disabled, setOverride }) => (
+        <ul className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,7rem),1fr))] gap-x-3 gap-y-2">
+          {keyListItems(overrides, (override) => JSON.stringify(override)).map(
+            ({ item, key }) => (
+              <li className="grid min-w-0 grid-rows-[1fr_auto] gap-1" key={key}>
+                <p className="text-xs leading-4 wrap-anywhere">
+                  {item.groupID && (
+                    <span className="block font-medium">{item.groupID}</span>
+                  )}
+                  <span className="block text-foreground-600">
+                    {item.environment || "All environments"}
+                  </span>
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {[...new Set(item.ids)].map((id) => (
+                    <OverrideButton
+                      key={id}
+                      identity={id}
+                      active={activeId === id}
+                      disabled={disabled}
+                      onApply={() => setOverride(id, options)}
+                    />
+                  ))}
+                </div>
+              </li>
+            )
+          )}
+        </ul>
+      )}
+    </OverrideControls>
   );
-};
+}

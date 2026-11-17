@@ -1,62 +1,85 @@
-import type {Group} from "~types/statsig";
-
-import {Button, Input} from "@nextui-org/react";
-import {updateGroup} from "~handlers/updateGroup";
-import {useExperiment} from "~hooks/useExperiment";
-import {useStore} from "~store/useStore";
-import {produce} from "immer";
-import React, {useState} from "react";
+import { Button, Input } from "@heroui/react";
+import { updateGroup } from "~/handlers/updateGroup";
+import { useExperiment } from "~/hooks/useExperiment";
+import { useStore } from "~/store/useStore";
+import type { Group } from "~/types/statsig";
+import { type FormEvent, useState } from "react";
 import useSWRMutation from "swr/mutation";
 
-export const UpdateGroupSection = ({changeView, group}: {changeView: () => void, group: Group}) => {
-  const {currentItemId} = useStore((state) => state);
-  const {experiment} = useExperiment(currentItemId);
-  const groups = experiment?.groups || [];
+export const UpdateGroupSection = ({
+  group,
+  onBack
+}: {
+  group: Group;
+  onBack: () => void;
+}) => {
+  const currentItemId = useStore((state) => state.currentItemId);
+  const { experiment } = useExperiment(currentItemId);
   const [groupName, setGroupName] = useState(group.name);
+  const [error, setError] = useState("");
 
-  const {isMutating, trigger} = useSWRMutation(`/experiments/${currentItemId}`, updateGroup);
+  const { isMutating, trigger } = useSWRMutation(
+    `/experiments/${currentItemId}`,
+    updateGroup
+  );
+  const canSave = Boolean(
+    groupName.trim() &&
+      groupName.trim() !== group.name &&
+      experiment?.groups?.some(({ id }) => id === group.id)
+  );
 
-  const handleGroupUpdate = async () => {
-    const nextState = produce(groups, draft => {
-      draft.find((g) => g.id === group.id).name = groupName;
-    });
+  const rename = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!canSave || isMutating) return;
+    setError("");
 
-    await trigger({experimentId: currentItemId, groups: nextState}, {
-      optimisticData: () => ({nextState})
-    });
+    const groups = experiment.groups.map((item) =>
+      item.id === group.id ? { ...item, name: groupName.trim() } : item
+    );
 
-    changeView();
+    try {
+      const result = await trigger({ experimentId: currentItemId, groups });
+      if (!result.success) throw new Error(result.error);
+      onBack();
+    } catch {
+      setError(
+        "Couldn’t rename the group. Check your permissions and try again."
+      );
+    }
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <form onSubmit={rename} className="grid gap-4">
       <Input
-        label="Override ID"
-        onChange={(e) => setGroupName(e.target.value)}
-        placeholder="Enter a override ID"
-        type="text"
+        isRequired
+        label="Group name"
+        labelPlacement="outside"
+        onValueChange={setGroupName}
         value={groupName}
+        variant="bordered"
       />
-
-      <div className="flex justify-end gap-4">
+      {error && (
+        <p className="text-sm text-danger" role="alert">
+          {error}
+        </p>
+      )}
+      <div className="flex flex-wrap justify-end gap-2">
         <Button
-          color="danger"
-          onClick={changeView}
-          size="md"
-          style={{color: '#FFF'}}
-        >
-          Back
+          isDisabled={isMutating}
+          onPress={onBack}
+          radius="sm"
+          variant="bordered">
+          Cancel
         </Button>
         <Button
-          color="success"
+          color="primary"
+          isDisabled={!canSave}
           isLoading={isMutating}
-          onClick={handleGroupUpdate}
-          size="md"
-          style={{color: '#FFF'}}
-        >
-          Update group
+          radius="sm"
+          type="submit">
+          Save group name
         </Button>
       </div>
-    </div>
+    </form>
   );
 };

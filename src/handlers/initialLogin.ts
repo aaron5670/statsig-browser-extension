@@ -1,31 +1,22 @@
-import {api} from "~helpers/fetcher";
-import {mutate} from "swr";
+import { api } from "~/helpers/fetcher";
 
 interface Props {
   arg: string;
 }
 
-export const initialLogin = async (url: string, {arg}: Props) => {
-  const {data, status} = await api.get(url, {
-    headers: {
-      "STATSIG-API-KEY": arg,
-    }
+export const initialLogin = async (url: string, { arg }: Props) => {
+  const { status } = await api.get(url, {
+    headers: { "STATSIG-API-KEY": arg },
+    validateStatus: (status) =>
+      status === 200 || status === 401 || status === 403
   });
 
-  let error: string;
-  if (status === 401) {
-    error = "Invalid Statsig Console API Key, please try again with a valid key.";
-  } else if (status !== 200) {
-    error = "An unknown error occurred, please try again.";
-  }
-
-  if (status === 200 && data?.data) {
-    await mutate(url, data.data, false);
+  if (status === 200) {
+    return { success: true };
   }
 
   return {
-    data: data?.data,
-    error,
-    success: status === 200,
+    success: false,
+    error: "Statsig rejected this key. Check that it’s a valid Console API key."
   };
 };

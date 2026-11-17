@@ -1,99 +1,83 @@
-import {
-  Button,
-  Input, Link,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  useDisclosure
-} from "@nextui-org/react";
-import {useLocalStorage} from "@uidotdev/usehooks";
-import {initialLogin} from "~handlers/initialLogin";
-import {useStore} from "~store/useStore";
-import React, {useEffect, useState} from "react";
+import { Button, Input, Link } from "@heroui/react";
+import { useState } from "react";
 import useSWRMutation from "swr/mutation";
+import DetailDialog from "~/components/DetailDialog";
+import { ExternalLinkIcon } from "~/components/icons/ExternalLinkIcon";
+import { initialLogin } from "~/handlers/initialLogin";
 
-const LoginModal = () => {
-  const {isAuthModalOpen, setAuthModalOpen, setSettingsSheetOpen} = useStore((state) => state);
-  const [, setApiKey] = useLocalStorage("statsig-console-api-key", "");
-  const [value, setValue] = useState<string>("");
-  const [errorMessage, setErrorMessage] = useState<string>(null);
-
-  const {
-    data,
-    error,
-    isMutating,
-    trigger
-  } = useSWRMutation('/experiments', initialLogin);
-
-  useEffect(() => {
-    const handleLogin = async () => {
-      if (error) {
-        setErrorMessage(error.message);
-        return;
-      }
-
-      if (data?.error) {
-        setErrorMessage(data.error);
-        return;
-      }
-
-      if (data.success) {
-        setApiKey(value);
-      }
-
-      setAuthModalOpen(false);
-      setSettingsSheetOpen(true);
-    };
-
-    if (data || error) {
-      handleLogin();
-    }
-  }, [data, error]);
-
-  const {isOpen: isModalOpen, onOpenChange} = useDisclosure({
-    isOpen: isAuthModalOpen,
-    onClose() {
-      setAuthModalOpen(false);
-    }
-  });
+const LoginModal = ({ onConnect }: { onConnect: (key: string) => void }) => {
+  const [value, setValue] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const { isMutating, trigger } = useSWRMutation("/experiments", initialLogin);
 
   return (
-    <Modal
-      hideCloseButton
-      isDismissable={false}
-      isOpen={isModalOpen}
-      onOpenChange={onOpenChange}
-      placement="center"
-    >
-      <ModalContent>
-        <ModalHeader className="flex flex-col">Login to Statsig</ModalHeader>
-        <ModalBody>
-          <p>
-            Before you can use this extension, you need to login to your Statsig account. This can be done with
-            a <b>Read Only Statsig Console API Key</b>. This key can be created in the <b>Project Settings</b> under
-            the <Link href='https://console.statsig.com/api_keys' rel="noreferrer" style={{fontSize: 13}}
-                      target="_blank">Keys &
-            Environments</Link> tab.
-          </p>
-        </ModalBody>
-        <p className="text-danger text-center">{errorMessage}</p>
-        <ModalFooter>
-          <Input
-            autoFocus
-            label="Statsig Console API Key"
-            onChange={e => setValue(e.target.value)}
-            type="text"
-            value={value}
-            variant="flat"
-          />
-          <Button color="primary" isLoading={isMutating} onClick={() => trigger(value)} style={{height: 56}}>
-            Login
+    <DetailDialog
+      dismissable={false}
+      isOpen
+      onClose={() => {}}
+      size="compact"
+      title="Connect to Statsig"
+      description="Use a Statsig Console API key to load this project.">
+      <form
+        className="flex flex-col gap-4"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          const key = value.trim();
+          if (!key || isMutating) return;
+
+          setErrorMessage("");
+          try {
+            const result = await trigger(key);
+            if (result.success) onConnect(key);
+            else setErrorMessage(result.error);
+          } catch {
+            setErrorMessage(
+              "Couldn’t validate the key with Statsig. Try again."
+            );
+          }
+        }}>
+        <Input
+          autoFocus
+          autoComplete="off"
+          errorMessage={errorMessage}
+          isInvalid={!!errorMessage}
+          isRequired
+          label="Console API key"
+          labelPlacement="outside"
+          onValueChange={(next) => {
+            setValue(next);
+            setErrorMessage("");
+          }}
+          radius="sm"
+          type="password"
+          value={value}
+          variant="bordered"
+        />
+        <p className="text-sm leading-relaxed text-foreground-600">
+          A read-only key is enough to browse. Use a read/write key to manage
+          experiment overrides.
+        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Link
+            className="gap-1.5 underline underline-offset-2"
+            href="https://console.statsig.com/api_keys"
+            rel="noreferrer"
+            size="sm"
+            target="_blank">
+            Find your console keys
+            <ExternalLinkIcon />
+          </Link>
+          <Button
+            color="primary"
+            isDisabled={!value.trim()}
+            isLoading={isMutating}
+            radius="sm"
+            type="submit">
+            Connect
           </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        </div>
+      </form>
+    </DetailDialog>
   );
 };
 

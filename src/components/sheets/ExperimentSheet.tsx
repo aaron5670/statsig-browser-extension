@@ -1,16 +1,17 @@
-import { Button, ScrollShadow, Spinner } from "@nextui-org/react";
-import { HealthCheckSection } from "~components/HealthCheckSection";
-import { HypothesisSection } from "~components/HypothesisSection";
-import { ExperimentOverrides } from "~components/experiment/ExperimentOverrides";
-import { ExternalLinkIcon } from "~components/icons/ExternalLinkIcon";
-import { useExperiment } from "~hooks/useExperiment";
-import { useOverrides } from "~hooks/useOverrides";
-import { useStore } from "~store/useStore";
-import React from 'react';
-import { AiOutlineSetting } from "react-icons/ai";
-import { Sheet } from 'react-modal-sheet';
-import { Tooltip } from "react-tooltip";
-import TimeAgo from 'react-timeago';
+import { Button } from "@heroui/react";
+import { useLocalStorage } from "@uidotdev/usehooks";
+import DetailDialog from "~/components/DetailDialog";
+import { ExperimentDetails } from "~/components/experiment/ExperimentDetails";
+import { ExperimentMetrics } from "~/components/experiment/ExperimentMetrics";
+import { ExperimentOverrides } from "~/components/experiment/ExperimentOverrides";
+import { ExperimentTraffic } from "~/components/experiment/ExperimentTraffic";
+import { HealthCheckSection } from "~/components/HealthCheckSection";
+import { HypothesisSection } from "~/components/HypothesisSection";
+import { ResourceStatus } from "~/components/ResourceStatus";
+import { useExperiment } from "~/hooks/useExperiment";
+import { useOverrides } from "~/hooks/useOverrides";
+import { useStore } from "~/store/useStore";
+import { CopyDetailValue, DetailState, OpenStatsig } from "./DetailContent";
 
 const ExperimentSheet = () => {
   const {
@@ -19,119 +20,87 @@ const ExperimentSheet = () => {
     setItemSheetOpen,
     setManageExperimentModalOpen
   } = useStore((state) => state);
-  const { error, isLoading: isLoadingOverrides, overrides } = useOverrides(currentItemId);
-  const { experiment, isLoading: isLoadingExperiment } = useExperiment(currentItemId);
-
-  const handleCloseSheet = () => {
-    setItemSheetOpen(false);
-  };
-
-  const handleOpenExperimentSettings = () => {
-    setItemSheetOpen(false);
-    setManageExperimentModalOpen(true);
-  };
+  const [keyType] = useLocalStorage("statsig-type-api-key", "read-key");
+  const id = isItemSheetOpen ? currentItemId : undefined;
+  const experimentQuery = useExperiment(id);
+  const overridesQuery = useOverrides(id);
+  const { experiment } = experimentQuery;
 
   return (
-    <Sheet
+    <DetailDialog
       isOpen={isItemSheetOpen}
-      onClose={handleCloseSheet}
-      snapPoints={[300]}
-    >
-      <Sheet.Container>
-        <Sheet.Header className="px-4 py-2 border-b">
-          <div className="flex justify-between items-center">
-            <div className="flex-1 min-w-0">
-              {isLoadingExperiment ? (
-                <div className="h-6 bg-gray-200 rounded-lg animate-pulse w-48" />
-              ) : (
-                <>
-                  <h1
-                    className="text-lg font-bold text-gray-900 truncate cursor-pointer"
-                    data-tooltip-id="copy-key-tooltip"
-                    onClick={() => navigator.clipboard.writeText(currentItemId)}
-                  >
-                    {experiment?.name}
-                  </h1>
-                  <Tooltip
-                    content="Copy experiment key"
-                    id="copy-key-tooltip"
-                    opacity={1}
-                    place="top"
-                    variant="dark"
-                  />
-                </>
-              )}
-            </div>
-            <div className="flex items-center gap-1.5 ml-4 shrink-0">
-              <Button
-                as="a"
-                color="primary"
-                endContent={<ExternalLinkIcon color="white" />}
-                href={`https://console.statsig.com/experiments/${currentItemId}`}
-                size="sm"
-                target="_blank"
-                variant="solid"
-                className="h-8"
-              >
-                Statsig
-              </Button>
-              <Button
-                color="warning"
-                endContent={<AiOutlineSetting size={16} />}
-                onPress={handleOpenExperimentSettings}
-                size="sm"
-                variant="solid"
-                className="h-8"
-              >
-                Settings
-              </Button>
-            </div>
+      onClose={() => setItemSheetOpen(false)}
+      title={experiment?.name || currentItemId || "Experiment details"}
+      description={
+        experiment?.status && <ResourceStatus status={experiment.status} />
+      }
+      actions={
+        currentItemId && (
+          <OpenStatsig
+            path={`experiments/${encodeURIComponent(currentItemId)}`}
+          />
+        )
+      }
+      footer={
+        currentItemId && (
+          <div
+            key={currentItemId}
+            className="flex w-full flex-wrap items-center justify-between gap-2">
+            <CopyDetailValue label="Copy key" value={currentItemId} />
+            <Button
+              className="min-h-9"
+              onPress={() => setManageExperimentModalOpen(true)}
+              radius="sm"
+              size="sm"
+              variant="bordered">
+              {keyType === "write-key"
+                ? "Manage experiment"
+                : "Groups and overrides"}
+            </Button>
           </div>
-        </Sheet.Header>
-        <Sheet.Content>
-          <Sheet.Scroller className="flex flex-col justify-between" draggableAt="both">
-            {isLoadingOverrides || isLoadingExperiment ? (
-              <div className="flex justify-center py-12">
-                <Spinner size="lg" />
-              </div>
+        )
+      }>
+      <div key={currentItemId} className="grid min-w-0 gap-4">
+        <div className="grid items-start gap-4 sm:grid-cols-2 sm:gap-5">
+          <div className="min-w-0">
+            {overridesQuery.isLoading ? (
+              <DetailState loading="Loading experiment overrides…" />
+            ) : overridesQuery.error ? (
+              <DetailState
+                error={overridesQuery.error}
+                onRetry={overridesQuery.retry}
+              />
             ) : (
-              <>
-                {error && <p className="text-xs text-red-600 p-4 text-center">{error}</p>}
-                {!error && (
-                  <ScrollShadow className="w-full px-4 py-3">
-                    <div className="space-y-4">
-                      {overrides && <ExperimentOverrides overrides={overrides} />}
-
-                      <div className="bg-gray-50/50 rounded-lg p-3 border border-gray-100">
-                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Metadata</h3>
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                          <div>
-                            <span className="text-[10px] font-semibold text-gray-400 uppercase">Created</span>
-                            <div className="text-xs text-gray-700 font-medium">
-                              <TimeAgo date={new Date(experiment?.createdTime)} />
-                            </div>
-                          </div>
-                          <div>
-                            <span className="text-[10px] font-semibold text-gray-400 uppercase">Updated</span>
-                            <div className="text-xs text-gray-700 font-medium">
-                              <TimeAgo date={new Date(experiment?.lastModifiedTime)} />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <HealthCheckSection healthChecks={experiment?.healthChecks} />
-                      {experiment && <HypothesisSection hypothesis={experiment.hypothesis} />}
-                    </div>
-                  </ScrollShadow>
-                )}
-              </>
+              <ExperimentOverrides overrides={overridesQuery.overrides} />
             )}
-          </Sheet.Scroller>
-        </Sheet.Content>
-      </Sheet.Container>
-      <Sheet.Backdrop onTap={handleCloseSheet} />
-    </Sheet>
+          </div>
+          <div className="min-w-0 border-t border-divider pt-3 sm:border-s sm:border-t-0 sm:ps-5 sm:pt-0">
+            {experiment ? (
+              <ExperimentTraffic experiment={experiment} />
+            ) : experimentQuery.isLoading ? (
+              <DetailState loading="Loading experiment details…" />
+            ) : (
+              experimentQuery.error && (
+                <DetailState
+                  error={experimentQuery.error}
+                  onRetry={experimentQuery.retry}
+                />
+              )
+            )}
+          </div>
+        </div>
+        {experiment && (
+          <>
+            <div className="border-t border-divider">
+              <HealthCheckSection healthChecks={experiment.healthChecks} />
+              <ExperimentMetrics experiment={experiment} />
+              <ExperimentDetails experiment={experiment} />
+            </div>
+            <HypothesisSection hypothesis={experiment.hypothesis} />
+          </>
+        )}
+      </div>
+    </DetailDialog>
   );
 };
 

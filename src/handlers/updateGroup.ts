@@ -1,17 +1,21 @@
-import type {Group} from "~types/statsig";
+import type { Group } from "~/types/statsig";
 
-import {api} from "~helpers/fetcher";
-import {mutate} from "swr";
+import { api } from "~/helpers/fetcher";
+import { mutate } from "swr";
 
-export const updateGroup = async (url: string, {arg}: { arg: { experimentId: string, groups: Group[] } }) => {
-  const {experimentId, groups} = arg;
-  const {data, status} = await api.patch(url, {
+export const updateGroup = async (
+  url: string,
+  { arg }: { arg: { experimentId: string; groups: Group[] } }
+) => {
+  const { experimentId, groups } = arg;
+  const { data, status } = await api.patch(url, {
     groups
   });
 
   let error: string;
   if (status === 401) {
-    error = "Invalid Statsig Console API Key, please try again with a valid key.";
+    error =
+      "Invalid Statsig Console API Key, please try again with a valid key.";
   }
 
   if (status === 200) {

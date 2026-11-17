@@ -1,142 +1,113 @@
-import { Card, CardBody, CardHeader, Chip, Progress, Spinner } from "@nextui-org/react";
-import { useFeatureGateRules, type FeatureGateRule } from "~hooks/useFeatureGateRules";
-import React from "react";
+import { Chip, Progress } from "@heroui/react";
+import { DetailState } from "~/components/sheets/DetailContent";
+import { keyListItems } from "~/helpers/keyListItems";
+import { useFeatureGateRules } from "~/hooks/useFeatureGateRules";
 
-interface Props {
-  featureGateId: string;
+function conditionLabel(type: string) {
+  if (type === "user_id") return "User ID";
+  const words = type.replaceAll("_", " ");
+  return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
-const FeatureGateRules = ({ featureGateId }: Props) => {
-  const { rules, isLoading, error } = useFeatureGateRules(featureGateId);
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-4">
-        <Spinner size="sm" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-sm text-red-600 text-center py-4">
-        Failed to load rules
-      </div>
-    );
-  }
-
-  if (!rules || rules.length === 0) {
-    return (
-      <div className="text-sm text-gray-500 text-center py-4">
-        No rules configured for this feature gate
-      </div>
-    );
-  }
-
-  const getPassPercentageColor = (percentage: number) => {
-    if (percentage === 0) return "danger";
-    if (percentage === 100) return "success";
-    return "warning";
-  };
-
-  const getConditionLabel = (type: string) => {
-    switch (type) {
-      case "public":
-        return "Public";
-      case "user_id":
-        return "User ID";
-      case "custom":
-        return "Custom";
-      default:
-        return type.charAt(0).toUpperCase() + type.slice(1);
-    }
-  };
+export default function FeatureGateRules({
+  featureGateId
+}: {
+  featureGateId: string;
+}) {
+  const { rules, isLoading, error, retry } = useFeatureGateRules(featureGateId);
 
   return (
-    <div className="space-y-3">
-      <h3 className="text-md font-medium">Rules ({rules.length})</h3>
-      <div className="space-y-3">
-        {rules.map((rule: FeatureGateRule) => (
-          <Card key={rule.id} className="shadow-sm">
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-start w-full">
-                <div className="flex-1">
-                  <h4 className="text-sm font-semibold text-gray-900">{rule.name}</h4>
-                  <p className="text-xs text-gray-500 mt-1">Rule ID: {rule.id}</p>
-                </div>
-                <div className="flex flex-col items-end space-y-1">
-                  <Chip
-                    color={getPassPercentageColor(rule.passPercentage)}
-                    size="sm"
-                    variant="flat"
-                  >
-                    {rule.passPercentage}% Pass
-                  </Chip>
-                </div>
+    <section className="space-y-2">
+      <h3 className="text-sm font-semibold">
+        Rules{" "}
+        {!isLoading && !error && (
+          <span className="ms-1 font-normal tabular-nums text-default-600">
+            ({rules.length})
+          </span>
+        )}
+      </h3>
+      {isLoading ? (
+        <DetailState loading="Loading feature gate rules…" />
+      ) : error ? (
+        <DetailState error={error} onRetry={retry} />
+      ) : rules.length ? (
+        <ol className="divide-y divide-divider rounded-xl border border-divider">
+          {rules.map((rule) => (
+            <li key={rule.id} className="grid gap-2.5 px-4 py-3">
+              <div>
+                <h4 className="wrap-anywhere text-sm font-semibold">
+                  {rule.name}
+                </h4>
+                <p className="wrap-anywhere text-xs leading-relaxed text-default-600">
+                  Rule ID <span className="font-mono">{rule.id}</span>
+                </p>
               </div>
-            </CardHeader>
-            <CardBody className="pt-0">
-              <div className="space-y-3">
-                {/* Pass Percentage Progress Bar */}
-                <div>
-                  <div className="flex justify-between text-xs text-gray-600 mb-1">
-                    <span>Pass Rate</span>
-                    <span>{rule.passPercentage}%</span>
-                  </div>
-                  <Progress
-                    color={getPassPercentageColor(rule.passPercentage)}
-                    size="sm"
-                    value={rule.passPercentage}
-                    className="w-full"
-                  />
-                </div>
-
-                {/* Environments */}
-                {rule.environments && rule.environments.length > 0 && (
-                  <div>
-                    <p className="text-xs font-medium text-gray-700 mb-2">Environments</p>
-                    <div className="flex flex-wrap gap-1">
-                      {rule.environments.map((env) => (
+              <Progress
+                classNames={{
+                  indicator:
+                    rule.passPercentage === 100
+                      ? "bg-success-700"
+                      : "bg-primary",
+                  label: "text-xs font-medium text-default-600",
+                  value: "text-xs tabular-nums"
+                }}
+                color={rule.passPercentage === 100 ? "success" : "primary"}
+                disableAnimation
+                label="Pass rate"
+                showValueLabel
+                size="sm"
+                value={rule.passPercentage}
+              />
+              <dl className="grid gap-2 text-xs">
+                {!!rule.environments?.length && (
+                  <div className="space-y-1">
+                    <dt className="font-medium text-default-600">
+                      Environments
+                    </dt>
+                    <dd className="flex flex-wrap gap-1.5">
+                      {[...new Set(rule.environments)].map((environment) => (
                         <Chip
-                          key={env}
-                          color="primary"
+                          key={environment}
+                          classNames={{
+                            content: "whitespace-normal wrap-anywhere"
+                          }}
                           size="sm"
-                          variant="bordered"
-                          className="text-xs"
-                        >
-                          {env}
+                          variant="flat">
+                          {environment}
                         </Chip>
                       ))}
-                    </div>
+                    </dd>
                   </div>
                 )}
-
-                {/* Conditions */}
-                {rule.conditions && rule.conditions.length > 0 && (
-                  <div>
-                    <p className="text-xs font-medium text-gray-700 mb-2">Conditions</p>
-                    <div className="flex flex-wrap gap-1">
-                      {rule.conditions.map((condition, index) => (
+                {!!rule.conditions?.length && (
+                  <div className="space-y-1">
+                    <dt className="font-medium text-default-600">Conditions</dt>
+                    <dd className="flex flex-wrap gap-1.5">
+                      {keyListItems(rule.conditions, (condition) =>
+                        JSON.stringify(condition)
+                      ).map(({ item: condition, key }) => (
                         <Chip
-                          key={index}
-                          color="secondary"
+                          key={key}
+                          classNames={{
+                            content: "whitespace-normal wrap-anywhere"
+                          }}
                           size="sm"
-                          variant="flat"
-                          className="text-xs"
-                        >
-                          {getConditionLabel(condition.type)}
+                          variant="flat">
+                          {conditionLabel(condition.type)}
                         </Chip>
                       ))}
-                    </div>
+                    </dd>
                   </div>
                 )}
-              </div>
-            </CardBody>
-          </Card>
-        ))}
-      </div>
-    </div>
+              </dl>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p className="text-sm text-default-600">
+          No rules are configured for this feature gate.
+        </p>
+      )}
+    </section>
   );
-};
-
-export default FeatureGateRules; 
+}
