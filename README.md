@@ -1,80 +1,58 @@
-# Statsig Experimentation - Chrome & Firefox Extension
+# Statsig Features and Experimentation
 
-<img width="1920" height="1080" alt="Statsig Browser Extension" src="https://github.com/user-attachments/assets/1a7b82b2-6d48-4352-963b-5546390ef666" />
+Test a Statsig experiment variant on the page you’re working on. Use the browser toolbar to apply test overrides, inspect rollout settings, and see what changed in your project.
 
-The Statsig Experimentation Browser Extension is a powerful tool designed for managing and testing Statsig Experiments
-directly within your Chromium browser. With a user-friendly interface, it provides a seamless way to search, view, and
-handle your experiments without leaving your browser environment.
+[Install for Chrome](https://chromewebstore.google.com/detail/statsig-features-and-expe/doialjibpidkdpdneplcnmkbdojpagdd) · [Install for Firefox](https://addons.mozilla.org/en-US/firefox/addon/statsig-experimentation/)
 
-## Installation
+![The Statsig extension showing the Alder Supply experiment list with the checkout-express override active](docs/assets/statsig-extension-preview.webp)
 
-### Option 1: Web Store installation (recommended)
+## Quick start
 
--    [Chrome Web Store](https://chrome.google.com/webstore/detail/statsig-features-and-expe/doialjibpidkdpdneplcnmkbdojpagdd/).
--    [Firefox Addons Store](https://addons.mozilla.org/en-US/firefox/addon/statsig-experimentation/).
+1. Open the extension and connect with a **Console API key** from your project settings. [Statsig Console API setup](https://docs.statsig.com/console-api/introduction#authorization)
+2. To test an override, open your site and go to **Settings → Override storage** in the extension. Choose **Local storage** or **Cookie**, enter the key your site reads for its Statsig ID, and save.
+3. Open an experiment or feature gate and select a configured override ID. The extension writes the ID to your chosen storage and reloads the active tab. Use **Clear override** to remove the stored ID and reload again.
 
-### Option 2: Manual build and installation
+A **read-only** key lets you browse and apply existing override IDs. To create or delete experiment overrides or rename experiment groups, connect with a **read/write** key and select **Read and write** under **Settings → Console key type**.
 
-1. Clone this repository to your local machine.
-2. With Node.js 24, install the locked dependencies using `npm ci`.
-3. Build the extension with `npm run build`.
-4. In your Chrome browser, navigate to **chrome://extensions/**, enable **Developer Mode**, and click on **Load unpacked
-   **.
-5. Select the **build/chrome-mv3** folder generated in the build step.
-6. Enjoy! 🙂🧪
+## What you can inspect
 
-If your shell aliases `npm`, use `command npm ci` and `command npm run build` to invoke npm directly.
-
-### Search for experiments
-
-To use this extension, you'll need a Statsig Console API Key, which you can create in
-the [Statsig console](https://console.statsig.com/api_keys) under **Console API Keys**.
-
----
+- **Experiments** — allocation, group splits, parameters, hypotheses, health checks, and configured metrics.
+- **Feature Gates** — pass rates, targeting condition types, environments, and configured overrides.
+- **Dynamic Configs** — config details and default values you can copy as JSON.
+- **Audit Logs** — who changed what and when, with before-and-after rule snapshots where available.
+- **User details** — the Statsig SDK identity and custom properties on the active page, when available. Open it from the settings menu.
 
 ## Development
 
-To run the development server, execute the following command:
+Clone the repository and use Node.js 24. Run these commands from the repository root.
 
-```bash
+```sh
+npm ci
 npm run dev
 ```
 
-Open your browser and load the appropriate development build. For instance, if you're developing for the Chrome browser
-using manifest v3, use: `build/chrome-mv3-dev`.
+In Chrome, open `chrome://extensions`, enable **Developer mode**, and select **Load unpacked**. Choose `build/chrome-mv3-dev`.
 
-For detailed guidance, see the [WXT documentation](https://wxt.dev/guide/).
+To develop in Firefox, run `npm run dev -- --browser firefox`. Open `about:debugging#/runtime/this-firefox`, choose **Load Temporary Add-on**, and select `build/firefox-mv3-dev/manifest.json`. [Firefox temporary installation guide](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/)
 
-Run `npm run lint` and `npm run format` to lint and format the project with Biome.
+Run the checks used in CI before opening a pull request.
 
-## Making production build
-
-Run the following command to create a production bundle for your extension:
-
-```bash
-npm run build
+```sh
+npm run typecheck
+npm run lint
 ```
 
-This generates `build/chrome-mv3` and `build/chrome-mv3-prod.zip`. Run `npm run build -- --browser firefox` to build the Firefox MV3 package.
+### Production builds
 
-### Load the Extension for Chrome (Chromium)
+| Browser | Command | Package |
+| --- | --- | --- |
+| Chrome | `npm run build` | `build/chrome-mv3-prod.zip` |
+| Firefox | `npm run build -- --browser firefox` | `build/firefox-mv3-prod.zip` |
 
-While we plan to automate this process in the future, follow these steps to load your extension in Chrome:
+To test a production build locally, load `build/chrome-mv3` in Chrome or `build/firefox-mv3/manifest.json` in Firefox using the same browser steps above.
 
-1. Head over to `chrome://extensions` and enable **Developer Mode**.
-   ![Developer Mode](https://docs.plasmo.com/screenshots/developer_mode.png)
+## Support and contributions
 
-2. Click on **Load Unpacked** and navigate to your extension's `build/chrome-mv3-dev` (or `build/chrome-mv3`)
-   directory.
+Report bugs or suggest improvements in [GitHub Issues](https://github.com/aaron5670/statsig-browser-extension/issues). For bug reports, include your browser, extension version, and steps to reproduce.
 
-3. To view your popup, click on the puzzle piece icon on the Chrome toolbar, and select your extension.
-   ![Popup Example](https://docs.plasmo.com/screenshots/popup_example.png)
-
-   **Pro-tip:** Pin your extension to the Chrome toolbar for easy access by clicking the pin button.
-
-## Screenshots
-
-![image](https://github.com/aaron5670/statsig-browser-extension/assets/17295145/a6f89a77-562a-4313-bc1c-bd864cedb66e)
-![image](https://github.com/aaron5670/statsig-browser-extension/assets/17295145/ceb10db9-e5d8-49e4-9122-b41ce8c21f97)
-![image](https://github.com/aaron5670/statsig-browser-extension/assets/17295145/e772c8df-35e3-4659-b021-3c891f7c1360)
-![image](https://github.com/aaron5670/statsig-browser-extension/assets/17295145/266e82c0-dcbd-4072-82d5-2bc4cd478803)
+This project is developed independently of Statsig.

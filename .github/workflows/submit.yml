@@ -2,10 +2,17 @@ name: "Submit to Web Store"
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      status_only:
+        description: Verify Chrome Web Store access without uploading
+        type: boolean
+        default: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    concurrency: chrome-web-store
     steps:
       - uses: actions/checkout@v4
 
@@ -16,17 +23,37 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies with npm
+        if: inputs.status_only != true
         run: npm ci
 
       - name: Build and zip extension artifact
+        if: inputs.status_only != true
         run: |
           export NODE_OPTIONS="--max-old-space-size=4096 --trace-warnings"
           npm run build
         env:
           NODE_ENV: production
 
-      - name: Browser Platform Publish
+      - name: Submit to Chrome Web Store
+        run: node .github/scripts/publish-chrome.mjs ${{ inputs.status_only && '--status-only' || 'build/chrome-mv3-prod.zip' }}
+        env:
+          CHROME_PUBLISHER_ID: bf7fbd77-9882-41f0-b3d4-b652b9b1a70b
+          SUBMIT_KEYS: ${{ secrets.SUBMIT_KEYS }}
+
+      - name: Prepare submit keys for other stores
+        id: other-store-keys
+        if: github.event_name == 'release'
+        env:
+          SUBMIT_KEYS: ${{ secrets.SUBMIT_KEYS }}
+        run: |
+          keys=$(jq -ce 'del(.chrome)' <<< "$SUBMIT_KEYS")
+          echo "::add-mask::$keys"
+          echo "keys=$keys" >> "$GITHUB_OUTPUT"
+
+      - name: Submit to other browser stores
+        if: steps.other-store-keys.outputs.keys != '' && steps.other-store-keys.outputs.keys != '{}'
+        continue-on-error: true
         uses: PlasmoHQ/bpp@v3
         with:
-          keys: ${{ secrets.SUBMIT_KEYS }}
+          keys: ${{ steps.other-store-keys.outputs.keys }}
           artifact: build/chrome-mv3-prod.zip
