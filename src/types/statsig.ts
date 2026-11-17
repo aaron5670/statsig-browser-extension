@@ -8,6 +8,7 @@ export interface Experiment {
   healthChecks: HealthCheck[];
   hypothesis: string;
   id: string;
+  lastModifiedTime?: number;
   name: string;
   startTime: number;
   status: string;
@@ -46,7 +47,7 @@ export interface FeatureGate {
   tags: string[];
   isEnabled: boolean;
   status: string;
-  rules: any[];
+  rules: unknown[];
   checksPerHour: number;
   type: string;
   typeReason: string;
@@ -62,7 +63,7 @@ export interface FeatureGate {
     ownerType: string;
     ownerEmail: string;
   };
-  monitoringMetrics: any[];
+  monitoringMetrics: unknown[];
   version?: number;
 }
 
@@ -82,7 +83,7 @@ export interface GateOverride {
 export interface HealthCheck {
   description: string;
   name: string;
-  status: 'PASSED' | 'WAITING';
+  status: "PASSED" | "WAITING";
 }
 
 export interface Group {
@@ -108,10 +109,19 @@ export interface AuditLog {
   modifierEmail: string;
   changes?: {
     rules?: {
-      new: any[];
-      old: any[];
+      new: unknown[];
+      old: unknown[];
     };
   };
   tags: string[];
   targetAppIDs: string[];
+}
+
+export interface StatsigUser {
+  [key: string]: unknown;
+  name?: string;
+  userID?: string;
+  statsigEnvironment?: { tier?: string };
+  custom?: Record<string, unknown>;
+  privateAttributes?: Record<string, unknown>;
 }

@@ -1,45 +1,52 @@
-import {Button, Input, Select, SelectItem} from "@nextui-org/react";
-import {useLocalStorage} from "@uidotdev/usehooks";
-import OverridesTable from "~components/tables/OverridesTable";
-import {createOverride} from "~handlers/createOverride";
-import {useExperiment} from "~hooks/useExperiment";
-import {useStore} from "~store/useStore";
-import React, {useState} from "react";
+import { Button, Input, Select, SelectItem } from "@heroui/react";
+import { useLocalStorage } from "@uidotdev/usehooks";
+import OverridesTable from "~/components/tables/OverridesTable";
+import { createOverride } from "~/handlers/createOverride";
+import { useExperiment } from "~/hooks/useExperiment";
+import { useStore } from "~/store/useStore";
+import { useState } from "react";
 import useSWRMutation from "swr/mutation";
 
-type View = 'form' | 'table';
+type View = "form" | "table";
 
 export const OverridesSection = () => {
-  const [typeApiKey] = useLocalStorage("statsig-type-api-key", 'read-key');
-  const [view, setView] = useState<View>('table');
-  const {currentItemId} = useStore((state) => state);
-  const {experiment} = useExperiment(currentItemId);
+  const [typeApiKey] = useLocalStorage("statsig-type-api-key", "read-key");
+  const [view, setView] = useState<View>("table");
+  const { currentItemId } = useStore((state) => state);
+  const { experiment } = useExperiment(currentItemId);
   const groups = experiment?.groups || [];
 
-  const [selectedGroup, setSelectedGroup] = useState('');
-  const [overrideId, setOverrideId] = useState('');
+  const [selectedGroup, setSelectedGroup] = useState("");
+  const [overrideId, setOverrideId] = useState("");
 
-  const {isMutating, trigger} = useSWRMutation(`/experiments/${currentItemId}/overrides`, createOverride);
+  const { isMutating, trigger } = useSWRMutation(
+    `/experiments/${currentItemId}/overrides`,
+    createOverride
+  );
 
   const addOverride = async () => {
-    await trigger({experimentId: currentItemId, override: {groupID: selectedGroup, ids: [overrideId]}});
+    await trigger({
+      experimentId: currentItemId,
+      override: { groupID: selectedGroup, ids: [overrideId] }
+    });
 
-    setView('table');
+    setView("table");
   };
 
   return (
     <div className="flex flex-col justify-between gap-4">
-      {view === 'table' ? (
+      {view === "table" ? (
         <>
-          <OverridesTable/>
-          {typeApiKey === 'write-key' && (
+          <OverridesTable />
+          {typeApiKey === "write-key" && (
             <Button
               color="success"
               fullWidth
-              onClick={() => setView((state) => state === 'table' ? 'form' : 'table')}
+              onClick={() =>
+                setView((state) => (state === "table" ? "form" : "table"))
+              }
               size="md"
-              style={{color: '#FFF'}}
-            >
+              style={{ color: "#FFF" }}>
               Create override
             </Button>
           )}
@@ -50,12 +57,9 @@ export const OverridesSection = () => {
             className="w-full"
             label="Select a group"
             onChange={(event) => setSelectedGroup(event.target.value)}
-            placeholder="Select a group"
-          >
+            placeholder="Select a group">
             {groups.map((group) => (
-              <SelectItem key={group.name} value={group.name}>
-                {group.name}
-              </SelectItem>
+              <SelectItem key={group.name}>{group.name}</SelectItem>
             ))}
           </Select>
 
@@ -70,10 +74,9 @@ export const OverridesSection = () => {
           <div className="flex justify-end gap-4">
             <Button
               color="danger"
-              onClick={() => setView('table')}
+              onClick={() => setView("table")}
               size="md"
-              style={{color: '#FFF'}}
-            >
+              style={{ color: "#FFF" }}>
               Back
             </Button>
             <Button
@@ -81,8 +84,7 @@ export const OverridesSection = () => {
               isLoading={isMutating}
               onClick={addOverride}
               size="md"
-              style={{color: '#FFF'}}
-            >
+              style={{ color: "#FFF" }}>
               Add override
             </Button>
           </div>

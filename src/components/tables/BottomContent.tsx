@@ -1,5 +1,4 @@
-import {Pagination} from "@nextui-org/react";
-import React from "react";
+import { Pagination } from "@heroui/react";
 
 interface Props {
   page: number;
@@ -7,11 +6,11 @@ interface Props {
   total: number;
 }
 
-const BottomContent = ({page, setPage, total}: Props) => (
+const BottomContent = ({ page, setPage, total }: Props) => (
   <div className="flex w-full justify-center">
     <Pagination
       classNames={{
-        cursor: "bg-foreground text-background",
+        cursor: "bg-foreground text-background"
       }}
       color="default"
       onChange={setPage}

@@ -1,12 +1,15 @@
-import React from "react";
-
 interface Props {
   height?: number;
   size?: number;
   width?: number;
 }
 
-export const VerticalDotsIcon = ({height, size = 24, width, ...props}: Props) => (
+export const VerticalDotsIcon = ({
+  height,
+  size = 24,
+  width,
+  ...props
+}: Props) => (
   <svg
     aria-hidden="true"
     fill="none"
@@ -15,8 +18,7 @@ export const VerticalDotsIcon = ({height, size = 24, width, ...props}: Props) =>
     role="presentation"
     viewBox="0 0 24 24"
     width={size || width}
-    {...props}
-  >
+    {...props}>
     <path
       d="M12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 12c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"
       fill="currentColor"

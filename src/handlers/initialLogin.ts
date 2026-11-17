@@ -1,20 +1,21 @@
-import {api} from "~helpers/fetcher";
-import {mutate} from "swr";
+import { api } from "~/helpers/fetcher";
+import { mutate } from "swr";
 
 interface Props {
   arg: string;
 }
 
-export const initialLogin = async (url: string, {arg}: Props) => {
-  const {data, status} = await api.get(url, {
+export const initialLogin = async (url: string, { arg }: Props) => {
+  const { data, status } = await api.get(url, {
     headers: {
-      "STATSIG-API-KEY": arg,
+      "STATSIG-API-KEY": arg
     }
   });
 
   let error: string;
   if (status === 401) {
-    error = "Invalid Statsig Console API Key, please try again with a valid key.";
+    error =
+      "Invalid Statsig Console API Key, please try again with a valid key.";
   } else if (status !== 200) {
     error = "An unknown error occurred, please try again.";
   }
@@ -26,6 +27,6 @@ export const initialLogin = async (url: string, {arg}: Props) => {
   return {
     data: data?.data,
     error,
-    success: status === 200,
+    success: status === 200
   };
 };

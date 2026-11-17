@@ -1,19 +1,31 @@
-import { Button, Input, Radio, RadioGroup } from "@nextui-org/react";
+import { Button, Input, Radio, RadioGroup } from "@heroui/react";
 import { useLocalStorage } from "@uidotdev/usehooks";
-import { useStore } from "~store/useStore";
-import React, { useState } from 'react';
-import { Sheet } from 'react-modal-sheet';
+import { useStore } from "~/store/useStore";
+import type React from "react";
+import { useState } from "react";
+import { Sheet } from "react-modal-sheet";
 
 const SettingsSheet = () => {
-  const { isSettingsSheetOpen, setSettingsSheetOpen } = useStore((state) => state);
-  const [localStorageValue, setLocalStorageKey] = useLocalStorage("statsig-local-storage-key", '');
-  const [typeApiKey, setTypeApiKey] = useLocalStorage("statsig-type-api-key", 'read-key');
-  const [storageType, setStorageType] = useLocalStorage("statsig-storage-type", 'localStorage');
+  const { isSettingsSheetOpen, setSettingsSheetOpen } = useStore(
+    (state) => state
+  );
+  const [localStorageValue, setLocalStorageKey] = useLocalStorage(
+    "statsig-local-storage-key",
+    ""
+  );
+  const [typeApiKey, setTypeApiKey] = useLocalStorage(
+    "statsig-type-api-key",
+    "read-key"
+  );
+  const [storageType, setStorageType] = useLocalStorage(
+    "statsig-storage-type",
+    "localStorage"
+  );
   const [value, setValue] = useState(localStorageValue);
   const [invalid, setInvalid] = useState(false);
 
   const handleSave = () => {
-    if (value === '') {
+    if (value === "") {
       setInvalid(true);
       return;
     }
@@ -23,7 +35,7 @@ const SettingsSheet = () => {
   };
 
   const handleClose = () => {
-    if (localStorageValue === '') {
+    if (localStorageValue === "") {
       setInvalid(true);
       return;
     }
@@ -38,24 +50,25 @@ const SettingsSheet = () => {
 
   return (
     <Sheet
-      disableDrag={localStorageValue === ''}
+      disableDrag={localStorageValue === ""}
       isOpen={isSettingsSheetOpen}
-      onClose={handleClose}
-      snapPoints={[380]}
-    >
-      <Sheet.Container className="px-5 py-3">
+      onClose={handleClose}>
+      <Sheet.Container style={{ maxHeight: 380 }} className="px-5 py-3">
         <Sheet.Header className="border-b pb-2 mb-4">
           <h1 className="text-lg font-bold text-gray-900">Settings</h1>
           <p className="text-xs text-gray-500">
             Configure your storage key and identification method.
           </p>
         </Sheet.Header>
-        <Sheet.Content className="flex flex-col gap-3" disableDrag>
+        <Sheet.Content disableDrag scrollClassName="flex flex-col gap-3">
           <Input
-            description={`Example: '${storageType === 'localStorage' ? 'FEATURE_MANAGEMENT_USER_ID' : 'statsig_user_id'}'`}
-            errorMessage={invalid && `Enter a ${storageType === 'localStorage' ? 'local storage' : 'cookie'} key`}
+            description={`Example: '${storageType === "localStorage" ? "FEATURE_MANAGEMENT_USER_ID" : "statsig_user_id"}'`}
+            errorMessage={
+              invalid &&
+              `Enter a ${storageType === "localStorage" ? "local storage" : "cookie"} key`
+            }
             isInvalid={invalid}
-            label={`${storageType === 'localStorage' ? 'Local storage' : 'Cookie'} key`}
+            label={`${storageType === "localStorage" ? "Local storage" : "Cookie"} key`}
             onChange={handleInputChange}
             placeholder={`Enter key...`}
             size="sm"
@@ -77,10 +90,13 @@ const SettingsSheet = () => {
             value={storageType}
             classNames={{
               label: "text-xs font-bold text-gray-700"
-            }}
-          >
-            <Radio value="localStorage" classNames={{ label: "text-xs" }}>Local Storage</Radio>
-            <Radio value="cookie" classNames={{ label: "text-xs" }}>Cookie</Radio>
+            }}>
+            <Radio value="localStorage" classNames={{ label: "text-xs" }}>
+              Local Storage
+            </Radio>
+            <Radio value="cookie" classNames={{ label: "text-xs" }}>
+              Cookie
+            </Radio>
           </RadioGroup>
 
           <RadioGroup
@@ -91,15 +107,22 @@ const SettingsSheet = () => {
             value={typeApiKey}
             classNames={{
               label: "text-xs font-bold text-gray-700"
-            }}
-          >
-            <Radio value="read-key" classNames={{ label: "text-xs" }}>Read-only</Radio>
-            <Radio value="write-key" classNames={{ label: "text-xs" }}>Read/Write</Radio>
+            }}>
+            <Radio value="read-key" classNames={{ label: "text-xs" }}>
+              Read-only
+            </Radio>
+            <Radio value="write-key" classNames={{ label: "text-xs" }}>
+              Read/Write
+            </Radio>
           </RadioGroup>
 
           <div className="flex justify-end gap-2 mt-4">
-            {localStorageValue !== '' && (
-              <Button color="danger" onPress={handleClose} variant="light" size="sm">
+            {localStorageValue !== "" && (
+              <Button
+                color="danger"
+                onPress={handleClose}
+                variant="light"
+                size="sm">
                 Close
               </Button>
             )}
@@ -107,8 +130,7 @@ const SettingsSheet = () => {
               color="primary"
               onPress={handleSave}
               size="sm"
-              className="font-bold"
-            >
+              className="font-bold">
               Save Settings
             </Button>
           </div>

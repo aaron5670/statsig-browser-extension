@@ -1,10 +1,11 @@
-import React from "react";
-
 interface Props {
   strokeWidth?: number;
 }
 
-export const ChevronDownIcon = ({strokeWidth = 1.5, ...otherProps}: Props) => (
+export const ChevronDownIcon = ({
+  strokeWidth = 1.5,
+  ...otherProps
+}: Props) => (
   <svg
     aria-hidden="true"
     fill="none"
@@ -13,8 +14,7 @@ export const ChevronDownIcon = ({strokeWidth = 1.5, ...otherProps}: Props) => (
     role="presentation"
     viewBox="0 0 24 24"
     width="1em"
-    {...otherProps}
-  >
+    {...otherProps}>
     <path
       d="m19.92 8.95-6.52 6.52c-.77.77-2.03.77-2.8 0L4.08 8.95"
       stroke="currentColor"

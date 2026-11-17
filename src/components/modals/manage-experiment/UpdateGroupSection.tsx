@@ -1,29 +1,41 @@
-import type {Group} from "~types/statsig";
+import type { Group } from "~/types/statsig";
 
-import {Button, Input} from "@nextui-org/react";
-import {updateGroup} from "~handlers/updateGroup";
-import {useExperiment} from "~hooks/useExperiment";
-import {useStore} from "~store/useStore";
-import {produce} from "immer";
-import React, {useState} from "react";
+import { Button, Input } from "@heroui/react";
+import { updateGroup } from "~/handlers/updateGroup";
+import { useExperiment } from "~/hooks/useExperiment";
+import { useStore } from "~/store/useStore";
+import { produce } from "immer";
+import { useState } from "react";
 import useSWRMutation from "swr/mutation";
 
-export const UpdateGroupSection = ({changeView, group}: {changeView: () => void, group: Group}) => {
-  const {currentItemId} = useStore((state) => state);
-  const {experiment} = useExperiment(currentItemId);
+export const UpdateGroupSection = ({
+  changeView,
+  group
+}: {
+  changeView: () => void;
+  group: Group;
+}) => {
+  const { currentItemId } = useStore((state) => state);
+  const { experiment } = useExperiment(currentItemId);
   const groups = experiment?.groups || [];
   const [groupName, setGroupName] = useState(group.name);
 
-  const {isMutating, trigger} = useSWRMutation(`/experiments/${currentItemId}`, updateGroup);
+  const { isMutating, trigger } = useSWRMutation(
+    `/experiments/${currentItemId}`,
+    updateGroup
+  );
 
   const handleGroupUpdate = async () => {
-    const nextState = produce(groups, draft => {
+    const nextState = produce(groups, (draft) => {
       draft.find((g) => g.id === group.id).name = groupName;
     });
 
-    await trigger({experimentId: currentItemId, groups: nextState}, {
-      optimisticData: () => ({nextState})
-    });
+    await trigger(
+      { experimentId: currentItemId, groups: nextState },
+      {
+        optimisticData: () => ({ nextState })
+      }
+    );
 
     changeView();
   };
@@ -43,8 +55,7 @@ export const UpdateGroupSection = ({changeView, group}: {changeView: () => void,
           color="danger"
           onClick={changeView}
           size="md"
-          style={{color: '#FFF'}}
-        >
+          style={{ color: "#FFF" }}>
           Back
         </Button>
         <Button
@@ -52,8 +63,7 @@ export const UpdateGroupSection = ({changeView, group}: {changeView: () => void,
           isLoading={isMutating}
           onClick={handleGroupUpdate}
           size="md"
-          style={{color: '#FFF'}}
-        >
+          style={{ color: "#FFF" }}>
           Update group
         </Button>
       </div>

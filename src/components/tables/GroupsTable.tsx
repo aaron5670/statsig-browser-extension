@@ -1,4 +1,4 @@
-import type {Group} from "~types/statsig";
+import type { Group } from "~/types/statsig";
 
 import {
   Table,
@@ -8,28 +8,28 @@ import {
   TableHeader,
   TableRow,
   Tooltip
-} from "@nextui-org/react";
-import {EditIcon} from "@nextui-org/shared-icons";
-import {useLocalStorage} from "@uidotdev/usehooks";
-import {useExperiment} from "~hooks/useExperiment";
-import {useStore} from "~store/useStore";
-import React, {type Key, useCallback} from "react";
+} from "@heroui/react";
+import { useLocalStorage } from "@uidotdev/usehooks";
+import { useExperiment } from "~/hooks/useExperiment";
+import { useStore } from "~/store/useStore";
+import type { Key } from "react";
+import { FiEdit as EditIcon } from "react-icons/fi";
 
 interface Props {
   changeView: () => void;
   setCurrentGroup: (group?: Group) => void;
 }
 
-export default function GroupsTable({changeView, setCurrentGroup}: Props) {
-  const [typeApiKey] = useLocalStorage("statsig-type-api-key", 'read-key');
-  const {currentItemId} = useStore((state) => state);
-  const {experiment} = useExperiment(currentItemId);
-  const {groups} = experiment;
+export default function GroupsTable({ changeView, setCurrentGroup }: Props) {
+  const [typeApiKey] = useLocalStorage("statsig-type-api-key", "read-key");
+  const { currentItemId } = useStore((state) => state);
+  const { experiment } = useExperiment(currentItemId);
+  const { groups } = experiment;
 
   const columns = [
-    {name: "NAME", uid: "name"},
-    {name: "SIZE", uid: "size"},
-    ...(typeApiKey === 'read-key' ? [] : [{name: "ACTIONS", uid: "actions"}])
+    { name: "NAME", uid: "name" },
+    { name: "SIZE", uid: "size" },
+    ...(typeApiKey === "read-key" ? [] : [{ name: "ACTIONS", uid: "actions" }])
   ];
 
   const updateGroup = (group: Group) => {
@@ -37,39 +37,40 @@ export default function GroupsTable({changeView, setCurrentGroup}: Props) {
     changeView();
   };
 
-  const renderCell = useCallback((group: Group, columnKey: Key) => {
-    const cellValue = group[columnKey as keyof Group];
-
+  const renderCell = (group: Group, columnKey: Key) => {
     switch (columnKey) {
       case "actions":
         return (
           <div className="flex items-center">
             <Tooltip content="Edit group">
-              <div
+              <button
+                type="button"
+                aria-label="Edit group"
                 className="text-lg text-default-400 cursor-pointer active:opacity-50"
-                onClick={() => updateGroup(group)}
-              >
+                onClick={() => updateGroup(group)}>
                 <EditIcon />
-              </div>
+              </button>
             </Tooltip>
           </div>
         );
-      case 'size':
+      case "size":
         return (
           <p className="capitalize border-none gap-1 text-default-600">
-            {cellValue}%
+            {group.size}%
           </p>
         );
       default:
-        return cellValue;
+        return group.name;
     }
-  }, []);
+  };
 
   return (
-    <Table aria-label="Groups table" classNames={{th: ["w-full"]}}>
+    <Table aria-label="Groups table" classNames={{ th: ["w-full"] }}>
       <TableHeader columns={columns}>
         {(column) => (
-          <TableColumn align={column.uid === "actions" ? "center" : "start"} key={column.uid}>
+          <TableColumn
+            align={column.uid === "actions" ? "center" : "start"}
+            key={column.uid}>
             {column.name}
           </TableColumn>
         )}
@@ -77,7 +78,9 @@ export default function GroupsTable({changeView, setCurrentGroup}: Props) {
       <TableBody items={groups}>
         {(item) => (
           <TableRow key={item.id}>
-            {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
+            {(columnKey) => (
+              <TableCell>{renderCell(item, columnKey)}</TableCell>
+            )}
           </TableRow>
         )}
       </TableBody>

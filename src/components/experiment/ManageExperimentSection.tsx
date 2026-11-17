@@ -1,9 +1,10 @@
-import {Button} from "@nextui-org/react";
-import {useStore} from "~store/useStore";
-import React from "react";
+import { Button } from "@heroui/react";
+import { useStore } from "~/store/useStore";
 
 export const ManageExperimentSection = () => {
-  const {setItemSheetOpen, setManageExperimentModalOpen} = useStore((state) => state);
+  const { setItemSheetOpen, setManageExperimentModalOpen } = useStore(
+    (state) => state
+  );
 
   const handleModalOpen = () => {
     setItemSheetOpen(false);
@@ -11,10 +12,8 @@ export const ManageExperimentSection = () => {
   };
 
   return (
-    <>
-      <Button color="primary" onPress={handleModalOpen}>
-        Manage Experiment
-      </Button>
-    </>
+    <Button color="primary" onPress={handleModalOpen}>
+      Manage Experiment
+    </Button>
   );
 };

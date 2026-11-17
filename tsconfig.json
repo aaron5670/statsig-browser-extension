@@ -1,19 +1,9 @@
 {
-  "extends": "plasmo/templates/tsconfig.base",
-  "exclude": [
-    "node_modules"
-  ],
-  "include": [
-    ".plasmo/index.d.ts",
-    "./**/*.ts",
-    "./**/*.tsx"
-  ],
+  "extends": "./.wxt/tsconfig.json",
   "compilerOptions": {
-    "paths": {
-      "~*": [
-        "./src/*"
-      ]
-    },
-    "baseUrl": "."
+    "allowJs": true,
+    "strict": false,
+    "jsx": "react-jsx",
+    "types": ["chrome", "node", "vite/client"]
   }
 }

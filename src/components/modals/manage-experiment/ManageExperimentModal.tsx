@@ -2,19 +2,25 @@ import {
   Modal,
   ModalBody,
   ModalContent,
-  Tab, Tabs,
+  Tab,
+  Tabs,
   useDisclosure
-} from "@nextui-org/react";
-import {GroupsSection} from "~components/modals/manage-experiment/GroupsSection";
-import {OverridesSection} from "~components/modals/manage-experiment/OverridesSection";
-import {useStore} from "~store/useStore";
-import React, {useState} from "react";
+} from "@heroui/react";
+import { GroupsSection } from "~/components/modals/manage-experiment/GroupsSection";
+import { OverridesSection } from "~/components/modals/manage-experiment/OverridesSection";
+import { useStore } from "~/store/useStore";
+import { useState } from "react";
 
 const ManageExperimentModal = () => {
-  const {currentItemId, isManageExperimentModalOpen, setItemSheetOpen, setManageExperimentModalOpen} = useStore((state) => state);
+  const {
+    currentItemId,
+    isManageExperimentModalOpen,
+    setItemSheetOpen,
+    setManageExperimentModalOpen
+  } = useStore((state) => state);
   const [selected, setSelected] = useState("login");
 
-  const {isOpen, onOpenChange} = useDisclosure({
+  const { isOpen, onOpenChange } = useDisclosure({
     isOpen: isManageExperimentModalOpen,
     onClose() {
       handleCloseModal();
@@ -35,24 +41,22 @@ const ManageExperimentModal = () => {
       onOpenChange={onOpenChange}
       placement="center"
       scrollBehavior="inside"
-      size="lg"
-    >
+      size="lg">
       <ModalContent>
         <ModalBody className="p-3 gap-0">
           <Tabs
             aria-label="Experiment tabs"
             classNames={{
-              panel: "pb-0",
+              panel: "pb-0"
             }}
             fullWidth
             onSelectionChange={(value: string) => setSelected(value)}
-            selectedKey={selected}
-          >
+            selectedKey={selected}>
             <Tab key="groups" title="Groups">
-              <GroupsSection/>
+              <GroupsSection />
             </Tab>
             <Tab key="overrides" title="Overrides">
-              <OverridesSection/>
+              <OverridesSection />
             </Tab>
           </Tabs>
         </ModalBody>

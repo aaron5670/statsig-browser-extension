@@ -1,4 +1,4 @@
-import type { FeatureGate } from "~types/statsig";
+import type { FeatureGate } from "~/types/statsig";
 import type { ChangeEvent, Key } from "react";
 
 import {
@@ -16,53 +16,60 @@ import {
   TableCell,
   TableColumn,
   TableHeader,
-  TableRow,
-} from "@nextui-org/react";
+  TableRow
+} from "@heroui/react";
 import { useLocalStorage } from "@uidotdev/usehooks";
-import { ExternalLinkIcon } from "~components/icons/ExternalLinkIcon";
-import BottomContent from "~components/tables/BottomContent";
-import TopContent from "~components/tables/TopContent";
-import { useFeatureGates } from "~hooks/useFeatureGates";
-import { useStore } from "~store/useStore";
+import { ExternalLinkIcon } from "~/components/icons/ExternalLinkIcon";
+import BottomContent from "~/components/tables/BottomContent";
+import TopContent from "~/components/tables/TopContent";
+import { useFeatureGates } from "~/hooks/useFeatureGates";
+import { useStore } from "~/store/useStore";
 import Fuse from "fuse.js";
-import React, { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { featureGateColumns } from "./data";
 import { VerticalDotsIcon } from "./icons/VerticalDotsIcon";
 
 export default function FeatureGates() {
   const { featureGates, isLoading } = useFeatureGates();
-  const [visibleColumns, setVisibleColumns] = useLocalStorage("feature-gate-table-visible-columns", ["name", "tags", "status", "actions"]);
-  const [rowsPerPage, setRowsPerPage] = useLocalStorage("feature-gate-table-rows-per-page", 5);
+  const [visibleColumns, setVisibleColumns] = useLocalStorage(
+    "feature-gate-table-visible-columns",
+    ["name", "tags", "status", "actions"]
+  );
+  const [rowsPerPage, setRowsPerPage] = useLocalStorage(
+    "feature-gate-table-rows-per-page",
+    5
+  );
   const { setCurrentItemId, setItemSheetOpen } = useStore((state) => state);
   const [filterValue, setFilterValue] = useState("");
   const [statusFilter, setStatusFilter] = useState<Selection>("all");
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
     column: "status",
-    direction: "ascending",
+    direction: "ascending"
   });
   const [page, setPage] = useState(1);
-  const hasSearchFilter = Boolean(filterValue);
 
   const headerColumns = useMemo(() => {
-    return featureGateColumns.filter((column) => Array.from(visibleColumns).includes(column.uid));
+    return featureGateColumns.filter((column) =>
+      Array.from(visibleColumns).includes(column.uid)
+    );
   }, [visibleColumns]);
 
   const filteredItems = useMemo(() => {
     const fuse = new Fuse(featureGates, {
-      keys: ['name', 'id'],
+      keys: ["name", "id"],
       findAllMatches: true,
       location: 10,
-      distance: 600,
+      distance: 600
     });
 
-    if (hasSearchFilter) {
+    if (filterValue) {
       const searchResults = fuse.search(filterValue);
       return searchResults.map((result) => result.item);
     }
 
     return featureGates;
-  }, [featureGates.length, filterValue, statusFilter]);
+  }, [featureGates, filterValue]);
 
   const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
@@ -78,40 +85,44 @@ export default function FeatureGates() {
     setItemSheetOpen(true);
   };
 
-  const renderCell = useCallback((featureGate: FeatureGate, columnKey: Key) => {
+  const renderCell = (featureGate: FeatureGate, columnKey: Key) => {
     const cellValue = featureGate[columnKey as keyof FeatureGate];
 
     switch (columnKey) {
       case "name":
         return (
-          <p onClick={() => setCurrentFeatureGate(featureGate.id)}>{featureGate.name}</p>
+          <button
+            type="button"
+            onClick={() => setCurrentFeatureGate(featureGate.id)}>
+            {featureGate.name}
+          </button>
         );
       case "status":
         return (
           <Chip
+            as="button"
+            type="button"
             className="capitalize border-none gap-1 text-default-600"
             color={featureGate.status === "In Progress" ? "success" : "warning"}
             onClick={() => setCurrentFeatureGate(featureGate.id)}
             size="sm"
-            variant="dot"
-          >
+            variant="dot">
             {featureGate.status}
           </Chip>
         );
       case "tags":
         return (
           <div className="flex flex-wrap gap-1">
-            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-            {/* @ts-ignore*/}
-            {cellValue.map((tag: string) => (
+            {featureGate.tags.map((tag) => (
               <Chip
+                as="button"
+                type="button"
                 className="capitalize"
                 color="warning"
                 key={tag}
                 onClick={() => setCurrentFeatureGate(featureGate.id)}
                 size="sm"
-                variant="dot"
-              >
+                variant="dot">
                 {tag}
               </Chip>
             ))}
@@ -120,33 +131,39 @@ export default function FeatureGates() {
       case "isEnabled":
         return (
           <Chip
+            as="button"
+            type="button"
             className="capitalize border-none gap-1 text-default-600"
             color={featureGate.isEnabled ? "success" : "danger"}
             onClick={() => setCurrentFeatureGate(featureGate.id)}
             size="sm"
-            variant="dot"
-          >
+            variant="dot">
             {featureGate.isEnabled ? "Enabled" : "Disabled"}
           </Chip>
         );
       case "actions":
         return (
           <div className="relative flex justify-end items-center gap-2">
-            <Dropdown backdrop="opaque" className="bg-background border-1 border-default-200">
+            <Dropdown
+              backdrop="opaque"
+              className="bg-background border-1 border-default-200">
               <DropdownTrigger>
                 <Button isIconOnly radius="full" size="sm" variant="light">
                   <VerticalDotsIcon height={20} width={20} />
                 </Button>
               </DropdownTrigger>
               <DropdownMenu>
-                <DropdownItem key="view" onClick={() => setCurrentFeatureGate(featureGate.id)}>View</DropdownItem>
+                <DropdownItem
+                  key="view"
+                  onClick={() => setCurrentFeatureGate(featureGate.id)}>
+                  View
+                </DropdownItem>
                 <DropdownItem
                   key="open"
-                  as={'a'}
+                  as={"a"}
                   endContent={<ExternalLinkIcon />}
                   href={`https://console.statsig.com/gates/${featureGate.id}`}
-                  target="_blank"
-                >
+                  target="_blank">
                   Open on Statsig
                 </DropdownItem>
               </DropdownMenu>
@@ -155,17 +172,22 @@ export default function FeatureGates() {
         );
       default:
         return (
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          <p onClick={() => setCurrentFeatureGate(featureGate.id)}>{cellValue}</p>
+          <button
+            type="button"
+            onClick={() => setCurrentFeatureGate(featureGate.id)}>
+            {String(cellValue ?? "")}
+          </button>
         );
     }
-  }, []);
+  };
 
-  const onRowsPerPageChange = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
-    setRowsPerPage(Number(e.target.value));
-    setPage(1);
-  }, []);
+  const onRowsPerPageChange = useCallback(
+    (e: ChangeEvent<HTMLSelectElement>) => {
+      setRowsPerPage(Number(e.target.value));
+      setPage(1);
+    },
+    [setRowsPerPage]
+  );
 
   const onSearchChange = useCallback((value?: string) => {
     if (value) {
@@ -179,18 +201,16 @@ export default function FeatureGates() {
   return (
     <Table
       aria-label="Table with all Statsig Feature Gates"
-      bottomContent={<BottomContent
-        page={page}
-        setPage={setPage}
-        total={pages}
-      />}
+      bottomContent={
+        <BottomContent page={page} setPage={setPage} total={pages} />
+      }
       bottomContentPlacement="outside"
       classNames={{
         base: ["base-class"],
         emptyWrapper: ["empty-wrapper-class"],
         th: ["bg-transparent", "text-default-500"],
         tr: ["hover:bg-default-50", "cursor-pointer"],
-        wrapper: ["max-h-[382px]", "max-w-3xl", "min-h-[242px]"],
+        wrapper: ["max-h-[382px]", "max-w-3xl", "min-h-[242px]"]
       }}
       fullWidth
       isCompact
@@ -199,44 +219,46 @@ export default function FeatureGates() {
       removeWrapper
       selectionMode="none"
       sortDescriptor={sortDescriptor}
-      topContent={<TopContent
-        filterValue={filterValue}
-        hasSearchFilter={hasSearchFilter}
-        onRowsPerPageChange={onRowsPerPageChange}
-        onSearchChange={onSearchChange}
-        rowsPerPage={rowsPerPage}
-        setFilterValue={setFilterValue}
-        setStatusFilter={setStatusFilter}
-        setVisibleColumns={setVisibleColumns}
-        statusFilter={statusFilter}
-        total={featureGates.length}
-        type="featureGates"
-        visibleColumns={visibleColumns}
-      />}
-      topContentPlacement="outside"
-    >
+      topContent={
+        <TopContent
+          filterValue={filterValue}
+          onRowsPerPageChange={onRowsPerPageChange}
+          onSearchChange={onSearchChange}
+          rowsPerPage={rowsPerPage}
+          setFilterValue={setFilterValue}
+          setStatusFilter={setStatusFilter}
+          setVisibleColumns={setVisibleColumns}
+          statusFilter={statusFilter}
+          total={featureGates.length}
+          type="featureGates"
+          visibleColumns={visibleColumns}
+        />
+      }
+      topContentPlacement="outside">
       <TableHeader columns={headerColumns}>
         {(column) => (
           <TableColumn
             align={column.uid === "actions" ? "center" : "start"}
             allowsSorting={column.sortable}
-            key={column.uid}
-          >
+            key={column.uid}>
             {column.name}
           </TableColumn>
         )}
       </TableHeader>
       <TableBody
-        emptyContent={isLoading ? <Spinner className="h-full" /> : "No feature gates found"}
+        emptyContent={
+          isLoading ? <Spinner className="h-full" /> : "No feature gates found"
+        }
         isLoading={!isLoading}
-        items={items}
-      >
+        items={items}>
         {(item: FeatureGate) => (
           <TableRow key={item.id}>
-            {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
+            {(columnKey) => (
+              <TableCell>{renderCell(item, columnKey)}</TableCell>
+            )}
           </TableRow>
         )}
       </TableBody>
     </Table>
   );
-} 
+}

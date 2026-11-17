@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 interface FieldState {
   currentItemId?: string;
@@ -36,12 +36,19 @@ export const useStore = create<FieldState>((set) => ({
   isAuditLogDetailSheetOpen: false,
   setAuthModalOpen: (isAuthModalOpen) => set(() => ({ isAuthModalOpen })),
   setCurrentItemId: (currentItemId) => set(() => ({ currentItemId })),
-  setCurrentLocalStorageValue: (currentLocalStorageValue) => set(() => ({ currentLocalStorageValue })),
-  setCurrentAuditLogId: (currentAuditLogId) => set(() => ({ currentAuditLogId })),
+  setCurrentLocalStorageValue: (currentLocalStorageValue) =>
+    set(() => ({ currentLocalStorageValue })),
+  setCurrentAuditLogId: (currentAuditLogId) =>
+    set(() => ({ currentAuditLogId })),
   setItemSheetOpen: (isItemSheetOpen) => set(() => ({ isItemSheetOpen })),
-  setManageExperimentModalOpen: (isManageExperimentModalOpen) => set(() => ({ isManageExperimentModalOpen })),
-  setSettingsSheetOpen: (isSettingsModalOpen) => set(() => ({ isSettingsSheetOpen: isSettingsModalOpen })),
-  setUserDetailsSheetOpen: (isUserDetailsSheetOpen) => set(() => ({ isUserDetailsSheetOpen })),
-  setAuditLogSheetOpen: (isAuditLogSheetOpen) => set(() => ({ isAuditLogSheetOpen })),
-  setAuditLogDetailSheetOpen: (isAuditLogDetailSheetOpen) => set(() => ({ isAuditLogDetailSheetOpen })),
+  setManageExperimentModalOpen: (isManageExperimentModalOpen) =>
+    set(() => ({ isManageExperimentModalOpen })),
+  setSettingsSheetOpen: (isSettingsModalOpen) =>
+    set(() => ({ isSettingsSheetOpen: isSettingsModalOpen })),
+  setUserDetailsSheetOpen: (isUserDetailsSheetOpen) =>
+    set(() => ({ isUserDetailsSheetOpen })),
+  setAuditLogSheetOpen: (isAuditLogSheetOpen) =>
+    set(() => ({ isAuditLogSheetOpen })),
+  setAuditLogDetailSheetOpen: (isAuditLogDetailSheetOpen) =>
+    set(() => ({ isAuditLogDetailSheetOpen }))
 }));

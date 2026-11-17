@@ -1,4 +1,7 @@
-export const setLocalStorageValue = (localStorageKey: string, localStorageValue: string): void => {
+export const setLocalStorageValue = (
+  localStorageKey: string,
+  localStorageValue: string
+): void => {
   localStorage.setItem(localStorageKey, localStorageValue);
   document.location.reload();
 };
@@ -13,26 +16,31 @@ export const getLocalStorageValue = (localStorageKey: string): string => {
 };
 
 // Cookie handling functions
-export const setCookieValue = (cookieKey: string, cookieValue: string): void => {
+export const setCookieValue = (
+  cookieKey: string,
+  cookieValue: string
+): void => {
   // Set cookie with path=/ to make it accessible across the entire domain
   // Set max-age to 1 year (31536000 seconds)
+  // biome-ignore lint/suspicious/noDocumentCookie: Cookie overrides must work on HTTP pages without the Cookie Store API.
   document.cookie = `${cookieKey}=${cookieValue}; path=/; max-age=31536000`;
   document.location.reload();
 };
 
 export const deleteCookieValue = (cookieKey: string): void => {
   // Delete cookie by setting max-age to 0
+  // biome-ignore lint/suspicious/noDocumentCookie: Cookie overrides must work on HTTP pages without the Cookie Store API.
   document.cookie = `${cookieKey}=; path=/; max-age=0`;
   document.location.reload();
 };
 
 export const getCookieValue = (cookieKey: string): string => {
-  const cookies = document.cookie.split(';');
+  const cookies = document.cookie.split(";");
   for (const cookie of cookies) {
-    const [key, value] = cookie.trim().split('=');
+    const [key, value] = cookie.trim().split("=");
     if (key === cookieKey) {
-      return value || '';
+      return value || "";
     }
   }
-  return '';
+  return "";
 };

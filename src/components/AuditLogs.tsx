@@ -1,19 +1,20 @@
-import React, { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback } from "react";
 import {
   Button,
   Chip,
   Dropdown,
   DropdownTrigger,
   DropdownMenu,
-  DropdownItem,
-} from "@nextui-org/react";
-import { useStore } from "~store/useStore";
-import { ExternalLinkIcon } from "~components/icons/ExternalLinkIcon";
-import { VerticalDotsIcon } from "~components/icons/VerticalDotsIcon";
-import { SearchIcon } from "~components/icons/SearchIcon";
-import { useAuditLogs } from "~hooks/useAuditLogs";
-import Fuse from 'fuse.js';
-import TimeAgo from 'react-timeago';
+  DropdownItem
+} from "@heroui/react";
+import { useStore } from "~/store/useStore";
+import { ExternalLinkIcon } from "~/components/icons/ExternalLinkIcon";
+import { VerticalDotsIcon } from "~/components/icons/VerticalDotsIcon";
+import { SearchIcon } from "~/components/icons/SearchIcon";
+import { keyListItems } from "~/helpers/keyListItems";
+import { useAuditLogs } from "~/hooks/useAuditLogs";
+import Fuse from "fuse.js";
+import TimeAgo from "react-timeago";
 
 export default function AuditLogs() {
   const [filterValue, setFilterValue] = useState("");
@@ -29,7 +30,7 @@ export default function AuditLogs() {
   const {
     setCurrentAuditLogId,
     setAuditLogDetailSheetOpen,
-    setAuditLogSheetOpen,
+    setAuditLogSheetOpen
   } = useStore((state) => state);
 
   const setCurrentAuditLog = (auditLogId: string) => {
@@ -38,54 +39,67 @@ export default function AuditLogs() {
     setAuditLogDetailSheetOpen(true);
   };
 
-  const getActionTypeColor = (actionType: string): "success" | "primary" | "warning" | "secondary" | "danger" | "default" => {
+  const getActionTypeColor = (
+    actionType: string
+  ): "success" | "primary" | "warning" | "secondary" | "danger" | "default" => {
     const action = actionType.toLowerCase();
 
     // Handle exact matches first
     switch (action) {
-      case 'experiment_start':
-        return 'success';
-      case 'experiment_edit':
-      case 'experiment_update':
-        return 'primary';
-      case 'experiment_restart':
-        return 'warning';
-      case 'experiment_overrides_edit':
-        return 'secondary';
-      case 'experiment_abandon':
-        return 'danger';
-      case 'config_conditions_update':
-        return 'primary';
-      case 'config_add_tag':
-        return 'success';
-      case 'config_state_toggle':
-        return 'danger';
-      case 'experiment_decision_make':
-        return 'warning';
-      case 'update_experiment_enabled_non_prod_environments':
-        return 'secondary';
-      case 'create':
-        return 'success';
-      case 'delete':
-      case 'archive':
-        return 'danger';
-      case 'update':
-      case 'edit':
-        return 'primary';
+      case "experiment_start":
+        return "success";
+      case "experiment_edit":
+      case "experiment_update":
+        return "primary";
+      case "experiment_restart":
+        return "warning";
+      case "experiment_overrides_edit":
+        return "secondary";
+      case "experiment_abandon":
+        return "danger";
+      case "config_conditions_update":
+        return "primary";
+      case "config_add_tag":
+        return "success";
+      case "config_state_toggle":
+        return "danger";
+      case "experiment_decision_make":
+        return "warning";
+      case "update_experiment_enabled_non_prod_environments":
+        return "secondary";
+      case "create":
+        return "success";
+      case "delete":
+      case "archive":
+        return "danger";
+      case "update":
+      case "edit":
+        return "primary";
       default:
         // Handle partial matches for flexibility
-        if (action.includes('start') || action.includes('create')) {
-          return 'success';
-        } else if (action.includes('delete') || action.includes('archive') || action.includes('toggle')) {
-          return 'danger';
-        } else if (action.includes('restart') || action.includes('warning')) {
-          return 'warning';
-        } else if (action.includes('override') || action.includes('environment')) {
-          return 'secondary';
-        } else if (action.includes('edit') || action.includes('update') || action.includes('condition')) {
-          return 'primary';
+        if (action.includes("start") || action.includes("create")) {
+          return "success";
+        } else if (
+          action.includes("delete") ||
+          action.includes("archive") ||
+          action.includes("toggle")
+        ) {
+          return "danger";
+        } else if (action.includes("restart") || action.includes("warning")) {
+          return "warning";
+        } else if (
+          action.includes("override") ||
+          action.includes("environment")
+        ) {
+          return "secondary";
+        } else if (
+          action.includes("edit") ||
+          action.includes("update") ||
+          action.includes("condition")
+        ) {
+          return "primary";
         }
-        return 'default';
+        return "default";
     }
   };
 
@@ -93,23 +107,38 @@ export default function AuditLogs() {
     return actionType.charAt(0).toUpperCase() + actionType.slice(1);
   };
 
-  const getTagColor = (tag: string): "success" | "primary" | "warning" | "secondary" | "danger" | "default" => {
+  const getTagColor = (
+    tag: string
+  ): "success" | "primary" | "warning" | "secondary" | "danger" | "default" => {
     const tagLower = tag.toLowerCase();
 
     // Assign colors based on tag content/meaning
-    if (tagLower.includes('nexus') || tagLower.includes('platform')) {
-      return 'warning';
-    } else if (tagLower.includes('prod') || tagLower.includes('production')) {
-      return 'danger';
-    } else if (tagLower.includes('test') || tagLower.includes('dev') || tagLower.includes('staging')) {
-      return 'secondary';
-    } else if (tagLower.includes('beta') || tagLower.includes('alpha') || tagLower.includes('preview')) {
-      return 'primary';
-    } else if (tagLower.includes('feature') || tagLower.includes('experiment')) {
-      return 'success';
+    if (tagLower.includes("nexus") || tagLower.includes("platform")) {
+      return "warning";
+    } else if (tagLower.includes("prod") || tagLower.includes("production")) {
+      return "danger";
+    } else if (
+      tagLower.includes("test") ||
+      tagLower.includes("dev") ||
+      tagLower.includes("staging")
+    ) {
+      return "secondary";
+    } else if (
+      tagLower.includes("beta") ||
+      tagLower.includes("alpha") ||
+      tagLower.includes("preview")
+    ) {
+      return "primary";
+    } else if (
+      tagLower.includes("feature") ||
+      tagLower.includes("experiment")
+    ) {
+      return "success";
     } else {
       // Create a deterministic color based on tag content for consistency
-      const colors: Array<"success" | "primary" | "warning" | "secondary" | "danger" | "default"> = ['default', 'primary', 'secondary', 'success', 'warning'];
+      const colors: Array<
+        "success" | "primary" | "warning" | "secondary" | "danger" | "default"
+      > = ["default", "primary", "secondary", "success", "warning"];
       const colorIndex = tag.length % colors.length;
       return colors[colorIndex];
     }
@@ -119,12 +148,12 @@ export default function AuditLogs() {
     try {
       // Try different date formats to handle the date parsing
       const dateTime = new Date(`${date} ${time}`);
-      if (!isNaN(dateTime.getTime())) {
+      if (!Number.isNaN(dateTime.getTime())) {
         return dateTime;
       }
       // Try ISO format
       const isoDateTime = new Date(`${date}T${time}`);
-      if (!isNaN(isoDateTime.getTime())) {
+      if (!Number.isNaN(isoDateTime.getTime())) {
         return isoDateTime;
       }
       // Fallback to current date if parsing fails
@@ -136,14 +165,21 @@ export default function AuditLogs() {
 
   const fuse = useMemo(() => {
     return new Fuse(auditLogs, {
-      keys: ['name', 'actionType', 'changeLog', 'updatedBy', 'modifierEmail', 'tags'],
-      threshold: 0.3,
+      keys: [
+        "name",
+        "actionType",
+        "changeLog",
+        "updatedBy",
+        "modifierEmail",
+        "tags"
+      ],
+      threshold: 0.3
     });
   }, [auditLogs]);
 
   const filteredItems = useMemo(() => {
     if (!filterValue) return auditLogs;
-    return fuse.search(filterValue).map(result => result.item);
+    return fuse.search(filterValue).map((result) => result.item);
   }, [auditLogs, filterValue, fuse]);
 
   const onSearchChange = useCallback((value?: string) => {
@@ -162,19 +198,17 @@ export default function AuditLogs() {
               variant="flat"
               onPress={refresh}
               isLoading={isLoading}
-              className="h-8"
-            >
+              className="h-8">
               Refresh
             </Button>
           </div>
           <Button
-            as={'a'}
+            as={"a"}
             className="bg-foreground text-background h-8"
-            endContent={<ExternalLinkIcon color={'white'} />}
+            endContent={<ExternalLinkIcon color={"white"} />}
             href={"https://console.statsig.com/"}
             size="sm"
-            target="_blank"
-          >
+            target="_blank">
             Open Statsig
           </Button>
         </div>
@@ -197,7 +231,9 @@ export default function AuditLogs() {
           <div className="flex flex-col items-center justify-center py-8 text-gray-500">
             <p className="text-sm">No audit logs found</p>
             {filterValue && (
-              <p className="text-[10px] mt-1">Try adjusting your search terms</p>
+              <p className="text-[10px] mt-1">
+                Try adjusting your search terms
+              </p>
             )}
           </div>
         ) : (
@@ -205,9 +241,7 @@ export default function AuditLogs() {
             {filteredItems.map((auditLog) => (
               <div
                 key={auditLog.id}
-                className="px-4 py-3 hover:bg-gray-50/80 cursor-pointer transition-colors"
-                onClick={() => setCurrentAuditLog(auditLog.id)}
-              >
+                className="relative px-4 py-3 hover:bg-gray-50/80 transition-colors">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     {/* Action and Name */}
@@ -216,12 +250,16 @@ export default function AuditLogs() {
                         color={getActionTypeColor(auditLog.actionType)}
                         size="sm"
                         variant="flat"
-                        className="h-5 text-[10px] font-medium"
-                      >
+                        className="h-5 text-[10px] font-medium">
                         {getActionTypeLabel(auditLog.actionType)}
                       </Chip>
                       <h3 className="text-sm font-bold text-gray-900 truncate flex-1">
-                        {auditLog.name}
+                        <button
+                          type="button"
+                          className="block max-w-full truncate text-left cursor-pointer before:absolute before:inset-0"
+                          onClick={() => setCurrentAuditLog(auditLog.id)}>
+                          {auditLog.name}
+                        </button>
                       </h3>
                     </div>
 
@@ -234,38 +272,48 @@ export default function AuditLogs() {
 
                     {/* User and Date */}
                     <div className="flex items-center gap-1.5 text-[10px] text-gray-400 mb-1.5 font-medium">
-                      <span className="text-gray-500">By {auditLog.updatedBy}</span>
-                      {auditLog.modifierEmail && auditLog.modifierEmail !== auditLog.updatedBy && (
-                        <>
-                          <span>•</span>
-                          <span className="truncate max-w-[100px]">{auditLog.modifierEmail}</span>
-                        </>
-                      )}
+                      <span className="text-gray-500">
+                        By {auditLog.updatedBy}
+                      </span>
+                      {auditLog.modifierEmail &&
+                        auditLog.modifierEmail !== auditLog.updatedBy && (
+                          <>
+                            <span>•</span>
+                            <span className="truncate max-w-[100px]">
+                              {auditLog.modifierEmail}
+                            </span>
+                          </>
+                        )}
                       <span>•</span>
-                      <TimeAgo date={getDateFromAuditLog(auditLog.date, auditLog.time)} />
+                      <TimeAgo
+                        date={getDateFromAuditLog(auditLog.date, auditLog.time)}
+                      />
                     </div>
 
                     {/* Tags */}
                     {auditLog.tags && auditLog.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1">
-                        {auditLog.tags.map((tag: string, index: number) => (
-                          <Chip
-                            key={`${tag}-${index}`}
-                            color={getTagColor(tag)}
-                            size="sm"
-                            variant="dot"
-                            className="h-5 text-[10px]"
-                          >
-                            {tag}
-                          </Chip>
-                        ))}
+                        {keyListItems(auditLog.tags, (tag) => tag).map(
+                          ({ item: tag, key }) => (
+                            <Chip
+                              key={key}
+                              color={getTagColor(tag)}
+                              size="sm"
+                              variant="dot"
+                              className="h-5 text-[10px]">
+                              {tag}
+                            </Chip>
+                          )
+                        )}
                       </div>
                     )}
                   </div>
 
                   {/* Actions Menu */}
-                  <div className="flex-shrink-0">
-                    <Dropdown backdrop="opaque" className="bg-background border-1 border-default-200">
+                  <div className="relative shrink-0">
+                    <Dropdown
+                      backdrop="opaque"
+                      className="bg-background border-1 border-default-200">
                       <DropdownTrigger>
                         <Button
                           isIconOnly
@@ -273,8 +321,7 @@ export default function AuditLogs() {
                           size="sm"
                           variant="light"
                           className="h-7 w-7 min-w-0"
-                          onClick={(e) => e.stopPropagation()}
-                        >
+                          aria-label="Audit log actions">
                           <VerticalDotsIcon height={14} width={14} />
                         </Button>
                       </DropdownTrigger>
@@ -282,22 +329,16 @@ export default function AuditLogs() {
                         <DropdownItem
                           key="view"
                           textValue="View Details"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setCurrentAuditLog(auditLog.id);
-                          }}
-                        >
+                          onPress={() => setCurrentAuditLog(auditLog.id)}>
                           View Details
                         </DropdownItem>
                         <DropdownItem
                           key="open"
-                          as={'a'}
+                          as={"a"}
                           textValue="Open on Statsig"
                           endContent={<ExternalLinkIcon />}
                           href={`https://console.statsig.com`}
-                          target="_blank"
-                          onClick={(e) => e.stopPropagation()}
-                        >
+                          target="_blank">
                           Open on Statsig
                         </DropdownItem>
                       </DropdownMenu>
@@ -319,9 +360,8 @@ export default function AuditLogs() {
               isLoading={isLoadingMore}
               disabled={isLoadingMore}
               size="sm"
-              className="h-8"
-            >
-              {isLoadingMore ? 'Loading...' : 'Load More'}
+              className="h-8">
+              {isLoadingMore ? "Loading..." : "Load More"}
             </Button>
           </div>
         )}
@@ -335,4 +375,4 @@ export default function AuditLogs() {
       </div>
     </div>
   );
-} 
+}

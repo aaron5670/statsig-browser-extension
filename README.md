@@ -2,7 +2,6 @@
 
 <img width="1920" height="1080" alt="Statsig Browser Extension" src="https://github.com/user-attachments/assets/1a7b82b2-6d48-4352-963b-5546390ef666" />
 
-
 The Statsig Experimentation Browser Extension is a powerful tool designed for managing and testing Statsig Experiments
 directly within your Chromium browser. With a user-friendly interface, it provides a seamless way to search, view, and
 handle your experiments without leaving your browser environment.
@@ -17,12 +16,14 @@ handle your experiments without leaving your browser environment.
 ### Option 2: Manual build and installation
 
 1. Clone this repository to your local machine.
-2. Install the dependencies using `pnpm install`.
-3. Build the extension with `pnpm build`.
+2. With Node.js 24, install the locked dependencies using `npm ci`.
+3. Build the extension with `npm run build`.
 4. In your Chrome browser, navigate to **chrome://extensions/**, enable **Developer Mode**, and click on **Load unpacked
    **.
-5. Upload the **chrome-mv3-prod** folder generated in the build step.
+5. Select the **build/chrome-mv3** folder generated in the build step.
 6. Enjoy! 🙂🧪
+
+If your shell aliases `npm`, use `command npm ci` and `command npm run build` to invoke npm directly.
 
 ### Search for experiments
 
@@ -36,27 +37,25 @@ the [Statsig console](https://console.statsig.com/api_keys) under **Console API 
 To run the development server, execute the following command:
 
 ```bash
-pnpm dev
-# or
 npm run dev
 ```
 
 Open your browser and load the appropriate development build. For instance, if you're developing for the Chrome browser
 using manifest v3, use: `build/chrome-mv3-dev`.
 
-For detailed guidance, refer to our [Documentation](https://docs.plasmo.com/).
+For detailed guidance, see the [WXT documentation](https://wxt.dev/guide/).
+
+Run `npm run lint` and `npm run format` to lint and format the project with Biome.
 
 ## Making production build
 
 Run the following command to create a production bundle for your extension:
 
 ```bash
-pnpm build
-# or
 npm run build
 ```
 
-This will generate a production-ready bundle that can be zipped and published to the stores.
+This generates `build/chrome-mv3` and `build/chrome-mv3-prod.zip`. Run `npm run build -- --browser firefox` to build the Firefox MV3 package.
 
 ### Load the Extension for Chrome (Chromium)
 
@@ -65,7 +64,7 @@ While we plan to automate this process in the future, follow these steps to load
 1. Head over to `chrome://extensions` and enable **Developer Mode**.
    ![Developer Mode](https://docs.plasmo.com/screenshots/developer_mode.png)
 
-2. Click on **Load Unpacked** and navigate to your extension's `build/chrome-mv3-dev` (or `build/chrome-mv3-prod`)
+2. Click on **Load Unpacked** and navigate to your extension's `build/chrome-mv3-dev` (or `build/chrome-mv3`)
    directory.
 
 3. To view your popup, click on the puzzle piece icon on the Chrome toolbar, and select your extension.

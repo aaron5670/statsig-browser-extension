@@ -11,7 +11,9 @@ export interface FeatureGateRule {
   environments: string[];
 }
 
-export const useFeatureGateRules = (featureGateId: string): {
+export const useFeatureGateRules = (
+  featureGateId: string
+): {
   rules: FeatureGateRule[];
   error: null | string;
   isLoading: boolean;
@@ -25,6 +27,6 @@ export const useFeatureGateRules = (featureGateId: string): {
   return {
     rules,
     error,
-    isLoading,
+    isLoading
   };
-}; 
+};

@@ -1,58 +1,50 @@
 import {
   Button,
-  Input, Link,
+  Input,
+  Link,
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalHeader,
   useDisclosure
-} from "@nextui-org/react";
-import {useLocalStorage} from "@uidotdev/usehooks";
-import {initialLogin} from "~handlers/initialLogin";
-import {useStore} from "~store/useStore";
-import React, {useEffect, useState} from "react";
+} from "@heroui/react";
+import { useLocalStorage } from "@uidotdev/usehooks";
+import { initialLogin } from "~/handlers/initialLogin";
+import { useStore } from "~/store/useStore";
+import { useState } from "react";
 import useSWRMutation from "swr/mutation";
 
 const LoginModal = () => {
-  const {isAuthModalOpen, setAuthModalOpen, setSettingsSheetOpen} = useStore((state) => state);
+  const { isAuthModalOpen, setAuthModalOpen, setSettingsSheetOpen } = useStore(
+    (state) => state
+  );
   const [, setApiKey] = useLocalStorage("statsig-console-api-key", "");
   const [value, setValue] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>(null);
 
-  const {
-    data,
-    error,
-    isMutating,
-    trigger
-  } = useSWRMutation('/experiments', initialLogin);
+  const { isMutating, trigger } = useSWRMutation("/experiments", initialLogin);
 
-  useEffect(() => {
-    const handleLogin = async () => {
-      if (error) {
-        setErrorMessage(error.message);
+  const handleLogin = async () => {
+    setErrorMessage(null);
+    try {
+      const result = await trigger(value);
+      if (result.error) {
+        setErrorMessage(result.error);
         return;
       }
 
-      if (data?.error) {
-        setErrorMessage(data.error);
-        return;
-      }
-
-      if (data.success) {
+      if (result.success) {
         setApiKey(value);
+        setAuthModalOpen(false);
+        setSettingsSheetOpen(true);
       }
-
-      setAuthModalOpen(false);
-      setSettingsSheetOpen(true);
-    };
-
-    if (data || error) {
-      handleLogin();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Login failed.");
     }
-  }, [data, error]);
+  };
 
-  const {isOpen: isModalOpen, onOpenChange} = useDisclosure({
+  const { isOpen: isModalOpen, onOpenChange } = useDisclosure({
     isOpen: isAuthModalOpen,
     onClose() {
       setAuthModalOpen(false);
@@ -65,17 +57,23 @@ const LoginModal = () => {
       isDismissable={false}
       isOpen={isModalOpen}
       onOpenChange={onOpenChange}
-      placement="center"
-    >
+      placement="center">
       <ModalContent>
         <ModalHeader className="flex flex-col">Login to Statsig</ModalHeader>
         <ModalBody>
           <p>
-            Before you can use this extension, you need to login to your Statsig account. This can be done with
-            a <b>Read Only Statsig Console API Key</b>. This key can be created in the <b>Project Settings</b> under
-            the <Link href='https://console.statsig.com/api_keys' rel="noreferrer" style={{fontSize: 13}}
-                      target="_blank">Keys &
-            Environments</Link> tab.
+            Before you can use this extension, you need to login to your Statsig
+            account. This can be done with a{" "}
+            <b>Read Only Statsig Console API Key</b>. This key can be created in
+            the <b>Project Settings</b> under the{" "}
+            <Link
+              href="https://console.statsig.com/api_keys"
+              rel="noreferrer"
+              style={{ fontSize: 13 }}
+              target="_blank">
+              Keys & Environments
+            </Link>{" "}
+            tab.
           </p>
         </ModalBody>
         <p className="text-danger text-center">{errorMessage}</p>
@@ -83,12 +81,16 @@ const LoginModal = () => {
           <Input
             autoFocus
             label="Statsig Console API Key"
-            onChange={e => setValue(e.target.value)}
+            onChange={(e) => setValue(e.target.value)}
             type="text"
             value={value}
             variant="flat"
           />
-          <Button color="primary" isLoading={isMutating} onClick={() => trigger(value)} style={{height: 56}}>
+          <Button
+            color="primary"
+            isLoading={isMutating}
+            onPress={handleLogin}
+            style={{ height: 56 }}>
             Login
           </Button>
         </ModalFooter>

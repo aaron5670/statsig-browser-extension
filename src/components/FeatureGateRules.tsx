@@ -1,6 +1,16 @@
-import { Card, CardBody, CardHeader, Chip, Progress, Spinner } from "@nextui-org/react";
-import { useFeatureGateRules, type FeatureGateRule } from "~hooks/useFeatureGateRules";
-import React from "react";
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  Chip,
+  Progress,
+  Spinner
+} from "@heroui/react";
+import { keyListItems } from "~/helpers/keyListItems";
+import {
+  useFeatureGateRules,
+  type FeatureGateRule
+} from "~/hooks/useFeatureGateRules";
 
 interface Props {
   featureGateId: string;
@@ -61,15 +71,18 @@ const FeatureGateRules = ({ featureGateId }: Props) => {
             <CardHeader className="pb-2">
               <div className="flex justify-between items-start w-full">
                 <div className="flex-1">
-                  <h4 className="text-sm font-semibold text-gray-900">{rule.name}</h4>
-                  <p className="text-xs text-gray-500 mt-1">Rule ID: {rule.id}</p>
+                  <h4 className="text-sm font-semibold text-gray-900">
+                    {rule.name}
+                  </h4>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Rule ID: {rule.id}
+                  </p>
                 </div>
                 <div className="flex flex-col items-end space-y-1">
                   <Chip
                     color={getPassPercentageColor(rule.passPercentage)}
                     size="sm"
-                    variant="flat"
-                  >
+                    variant="flat">
                     {rule.passPercentage}% Pass
                   </Chip>
                 </div>
@@ -94,7 +107,9 @@ const FeatureGateRules = ({ featureGateId }: Props) => {
                 {/* Environments */}
                 {rule.environments && rule.environments.length > 0 && (
                   <div>
-                    <p className="text-xs font-medium text-gray-700 mb-2">Environments</p>
+                    <p className="text-xs font-medium text-gray-700 mb-2">
+                      Environments
+                    </p>
                     <div className="flex flex-wrap gap-1">
                       {rule.environments.map((env) => (
                         <Chip
@@ -102,8 +117,7 @@ const FeatureGateRules = ({ featureGateId }: Props) => {
                           color="primary"
                           size="sm"
                           variant="bordered"
-                          className="text-xs"
-                        >
+                          className="text-xs">
                           {env}
                         </Chip>
                       ))}
@@ -114,16 +128,19 @@ const FeatureGateRules = ({ featureGateId }: Props) => {
                 {/* Conditions */}
                 {rule.conditions && rule.conditions.length > 0 && (
                   <div>
-                    <p className="text-xs font-medium text-gray-700 mb-2">Conditions</p>
+                    <p className="text-xs font-medium text-gray-700 mb-2">
+                      Conditions
+                    </p>
                     <div className="flex flex-wrap gap-1">
-                      {rule.conditions.map((condition, index) => (
+                      {keyListItems(rule.conditions, (condition) =>
+                        JSON.stringify(condition)
+                      ).map(({ item: condition, key }) => (
                         <Chip
-                          key={index}
+                          key={key}
                           color="secondary"
                           size="sm"
                           variant="flat"
-                          className="text-xs"
-                        >
+                          className="text-xs">
                           {getConditionLabel(condition.type)}
                         </Chip>
                       ))}
@@ -139,4 +156,4 @@ const FeatureGateRules = ({ featureGateId }: Props) => {
   );
 };
 
-export default FeatureGateRules; 
+export default FeatureGateRules;
